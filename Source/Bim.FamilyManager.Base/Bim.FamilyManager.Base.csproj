@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Platforms>x64</Platforms>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Scotec.Queues" Version="1.0.9-dev.15" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.17" />
+		<PackageReference Include="YamlDotNet" Version="16.3.0" />
+		<PackageReference Include="OpenMcdf" Version="3.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Resources\Images\*.png" />
+		<Resource Include="Resources\Images\*.png" />
+	</ItemGroup>
+
+</Project>

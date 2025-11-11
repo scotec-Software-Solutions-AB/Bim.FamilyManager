@@ -1,0 +1,73 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35004.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bim.FamilyManager", "Bim.FamilyManager\Bim.FamilyManager.csproj", "{8776DFC7-F6F8-490C-9C0F-EA0D272093B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bim.FamilyManager.Abstractions", "Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj", "{2EA642F0-17C7-43B7-BC56-FBD6BA84F2B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Ui.Standard", "Bim.FamilyManager.Ui.Standard\Bim.FamilyManager.Ui.Standard.csproj", "{86D1FD88-91E5-475D-9E02-3FF344D6D61E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Ui.Modern", "Bim.FamilyManager.Ui.Modern\Bim.FamilyManager.Ui.Modern.csproj", "{B4483FA7-50A7-4396-B87B-203BB05DDD07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Ui", "Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj", "{26892145-876A-458B-A17B-D24CFC200CD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Source.Directory", "Bim.FamilyManager.Source.Directory\Bim.FamilyManager.Source.Directory.csproj", "{024D21B7-55A1-48C0-9BE9-3CF2DACCBD1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Base", "Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj", "{54A39AD8-F49B-498E-98AD-4603F55D519D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bim.FamilyManager.Source.AzureStorage", "Bim.FamilyManager.Source.AzureStorage\Bim.FamilyManager.Source.AzureStorage.csproj", "{A62C3751-212B-42D1-8DFB-4B0B00245795}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scotec.Identity.AzureActiveDirectory", "..\..\scotec_ssc\Source\Scotec.Ssc\Scotec.Identity.AzureActiveDirectory\Scotec.Identity.AzureActiveDirectory.csproj", "{841DCBF8-F083-D295-3148-B7EB15776AC9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8776DFC7-F6F8-490C-9C0F-EA0D272093B9}.Debug|x64.ActiveCfg = Debug|x64
+		{8776DFC7-F6F8-490C-9C0F-EA0D272093B9}.Debug|x64.Build.0 = Debug|x64
+		{8776DFC7-F6F8-490C-9C0F-EA0D272093B9}.Release|x64.ActiveCfg = Release|x64
+		{8776DFC7-F6F8-490C-9C0F-EA0D272093B9}.Release|x64.Build.0 = Release|x64
+		{2EA642F0-17C7-43B7-BC56-FBD6BA84F2B9}.Debug|x64.ActiveCfg = Debug|x64
+		{2EA642F0-17C7-43B7-BC56-FBD6BA84F2B9}.Debug|x64.Build.0 = Debug|x64
+		{2EA642F0-17C7-43B7-BC56-FBD6BA84F2B9}.Release|x64.ActiveCfg = Release|x64
+		{2EA642F0-17C7-43B7-BC56-FBD6BA84F2B9}.Release|x64.Build.0 = Release|x64
+		{86D1FD88-91E5-475D-9E02-3FF344D6D61E}.Debug|x64.ActiveCfg = Debug|x64
+		{86D1FD88-91E5-475D-9E02-3FF344D6D61E}.Debug|x64.Build.0 = Debug|x64
+		{86D1FD88-91E5-475D-9E02-3FF344D6D61E}.Release|x64.ActiveCfg = Release|x64
+		{86D1FD88-91E5-475D-9E02-3FF344D6D61E}.Release|x64.Build.0 = Release|x64
+		{B4483FA7-50A7-4396-B87B-203BB05DDD07}.Debug|x64.ActiveCfg = Debug|x64
+		{B4483FA7-50A7-4396-B87B-203BB05DDD07}.Debug|x64.Build.0 = Debug|x64
+		{B4483FA7-50A7-4396-B87B-203BB05DDD07}.Release|x64.ActiveCfg = Release|x64
+		{B4483FA7-50A7-4396-B87B-203BB05DDD07}.Release|x64.Build.0 = Release|x64
+		{26892145-876A-458B-A17B-D24CFC200CD2}.Debug|x64.ActiveCfg = Debug|x64
+		{26892145-876A-458B-A17B-D24CFC200CD2}.Debug|x64.Build.0 = Debug|x64
+		{26892145-876A-458B-A17B-D24CFC200CD2}.Release|x64.ActiveCfg = Release|x64
+		{26892145-876A-458B-A17B-D24CFC200CD2}.Release|x64.Build.0 = Release|x64
+		{024D21B7-55A1-48C0-9BE9-3CF2DACCBD1D}.Debug|x64.ActiveCfg = Debug|x64
+		{024D21B7-55A1-48C0-9BE9-3CF2DACCBD1D}.Debug|x64.Build.0 = Debug|x64
+		{024D21B7-55A1-48C0-9BE9-3CF2DACCBD1D}.Release|x64.ActiveCfg = Release|x64
+		{024D21B7-55A1-48C0-9BE9-3CF2DACCBD1D}.Release|x64.Build.0 = Release|x64
+		{54A39AD8-F49B-498E-98AD-4603F55D519D}.Debug|x64.ActiveCfg = Debug|x64
+		{54A39AD8-F49B-498E-98AD-4603F55D519D}.Debug|x64.Build.0 = Debug|x64
+		{54A39AD8-F49B-498E-98AD-4603F55D519D}.Release|x64.ActiveCfg = Release|x64
+		{54A39AD8-F49B-498E-98AD-4603F55D519D}.Release|x64.Build.0 = Release|x64
+		{A62C3751-212B-42D1-8DFB-4B0B00245795}.Debug|x64.ActiveCfg = Debug|x64
+		{A62C3751-212B-42D1-8DFB-4B0B00245795}.Debug|x64.Build.0 = Debug|x64
+		{A62C3751-212B-42D1-8DFB-4B0B00245795}.Release|x64.ActiveCfg = Release|x64
+		{A62C3751-212B-42D1-8DFB-4B0B00245795}.Release|x64.Build.0 = Release|x64
+		{841DCBF8-F083-D295-3148-B7EB15776AC9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{841DCBF8-F083-D295-3148-B7EB15776AC9}.Debug|x64.Build.0 = Debug|Any CPU
+		{841DCBF8-F083-D295-3148-B7EB15776AC9}.Release|x64.ActiveCfg = Release|Any CPU
+		{841DCBF8-F083-D295-3148-B7EB15776AC9}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91D7D4BC-38CC-4E2D-8C57-B72A8AA1D236}
+	EndGlobalSection
+EndGlobal

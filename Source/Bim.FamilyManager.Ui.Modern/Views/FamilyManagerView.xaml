@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="Bim.FamilyManager.Ui.Modern.Views.FamilyManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
+             xmlns:viewModels="clr-namespace:Bim.FamilyManager.Ui.Modern.ViewModels"
+             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Modern.Resources"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="400"
+             d:DataContext="{d:DesignInstance viewModels:FamilyManagerViewModel, IsDesignTimeCreatable=false}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary
+                    Source="pack://application:,,,/Bim.FamilyManager.Ui;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource SecondaryBackgroundBrush}">
+        <Grid Margin="5,0,5,5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderThickness="0,0,0,0" BorderBrush="#72000000">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <controls:MaterialIconButton Padding="2" Height="32" HorizontalAlignment="Center"
+                                                     HorizontalContentAlignment="Center" Foreground="#668bc2"
+                                                     BorderThickness="1,0,0,0" Kind="{StaticResource IconHome}"
+                                                     ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Home}"
+                                                     Command="{Binding Path=GoHomeCommand}" BorderBrush="#FFABADB3" />
+
+
+                        <controls:MaterialIconButton
+                            ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Back}"
+                            Height="32" Kind="{StaticResource IconStepBackward}" Padding="2" Margin="0"
+                            Foreground="#66c28b" BorderBrush="#FFABADB3"
+                            BorderThickness="1,0,0,0"
+                            Command="{Binding Path=GoBackCommand}">
+                            <wpf:MaterialIcon />
+                        </controls:MaterialIconButton>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" x:Name="Border" BorderThickness="1,0,1,0" BorderBrush="#FFABADB3"
+                            SnapsToDevicePixels="True">
+                        <Grid HorizontalAlignment="Center" MaxWidth="{Binding ElementName=Border}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.ToolTip>
+                                <ToolTip>
+                                    <TextBlock TextWrapping="Wrap" MaxWidth="400" Height="Auto">
+                                        <Run Text="{Binding Breadcrumb1, Mode=OneWay}" />
+                                        <Run Text="{Binding Breadcrumb2, Mode=OneWay}" />
+                                    </TextBlock>
+                                </ToolTip>
+                            </Grid.ToolTip>
+                            <TextBlock Grid.Column="0" Text="{Binding Breadcrumb1, FallbackValue='#Breadcrumb'}"
+                                       Style="{StaticResource HeaderStyle}" FontSize="14" TextTrimming="WordEllipsis"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding Breadcrumb2, FallbackValue=' / Breadcrumb'}"
+                                       Style="{StaticResource HeaderStyle}" FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <controls:MaterialIconButton Padding="2" Height="32" Foreground="#b066c2"
+                                                     BorderThickness="0,0,1,0" Kind="{StaticResource IconReload}"
+                                                     ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Refresh}"
+                                                     Command="{Binding Path=ReloadCommand}" BorderBrush="#FFABADB3" />
+
+                        <controls:MaterialIconButton Padding="2" Height="32" Foreground="#c26666"
+                                                     BorderThickness="0,0,1,0" Kind="{StaticResource IconSettings}"
+                                                     ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}"
+                                                     Click="OnSettingsButtonClick" BorderBrush="#FFABADB3" />
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="White"
+                    BorderThickness="1,1,1,1"
+                    BorderBrush="#FFABADB3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ContentControl Grid.Row="0" Content="{Binding SelectedFamilySource.Panel}"
+                                    ContentTemplateSelector="{Binding DataTemplateSelector}" />
+
+                    <Border Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush}"/>
+                    <ScrollViewer Grid.Row="2" x:Name="ScrollViewer" VerticalScrollBarVisibility="Visible"
+                                  HorizontalScrollBarVisibility="Hidden">
+                        <!-- Use ItemsControl with StackPanel as ItemsPanel -->
+                        <Grid>
+                            <ItemsControl MaxWidth="{Binding ViewportWidth, ElementName=ScrollViewer}"
+                                          ItemsSource="{Binding Items}" HorizontalAlignment="Stretch">
+                                <ItemsControl.ItemTemplate>
+                                    <ItemContainerTemplate>
+                                        <!-- Use a ContentControl around the ContentPresenter since Contentpresenter does not have double click event. -->
+                                        <ContentControl MouseDoubleClick="OnMouseDoubleClick">
+                                            <ContentPresenter DataContext="{Binding}"
+                                                              ContentTemplateSelector="{Binding DataTemplateSelector}" />
+                                        </ContentControl>
+                                    </ItemContainerTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+
+</UserControl>

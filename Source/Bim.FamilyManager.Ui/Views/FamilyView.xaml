@@ -1,0 +1,144 @@
+﻿<UserControl x:Class="Bim.FamilyManager.Ui.Views.FamilyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:material="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:viewModels="clr-namespace:Bim.FamilyManager.Abstractions.ViewModels;assembly=Bim.FamilyManager.Abstractions"
+             xmlns:converter="clr-namespace:Scotec.Wpf.Converter;assembly=Scotec.Wpf.Controls"
+             xmlns:converters="clr-namespace:Bim.FamilyManager.Ui.Views.Converters"
+             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Resources"
+             xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls"
+             d:DataContext="{d:DesignInstance viewModels:IFamilyViewModel, IsDesignTimeCreatable=false}"
+             mc:Ignorable="d">
+
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary
+                    Source="pack://application:,,,/Bim.FamilyManager.Ui;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converter:BooleanToVisibilityConverter x:Key="TrueToVisibleConverterKey" FalseVisibility="Collapsed"
+                                                    TrueVisibility="Visible" />
+            <converter:BooleanToVisibilityConverter x:Key="FalseToVisibleConverterKey" FalseVisibility="Visible"
+                                                    TrueVisibility="Collapsed" />
+            <converters:RectConverter x:Key="RectConverter" />
+
+            <Style TargetType="material:MaterialIcon">
+                <Setter Property="ToolTipService.BetweenShowDelay" Value="0" />
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
+                <Setter Property="Background" Value="White" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <Grid ClipToBounds="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Margin="10" ToolTip="{Binding Path=Name}" BorderThickness="1" BorderBrush="DarkGray"
+                CornerRadius="4" x:Name="Border1" Padding="1" Background="{StaticResource PrimaryBackgroundBrush}">
+            <Border.Clip>
+                <RectangleGeometry RadiusX="4" RadiusY="4">
+                    <RectangleGeometry.Rect>
+                        <MultiBinding Converter="{StaticResource RectConverter}">
+                            <Binding ElementName="Border1" Path="ActualWidth" />
+                            <Binding ElementName="Border1" Path="ActualHeight" />
+                        </MultiBinding>
+                    </RectangleGeometry.Rect>
+                </RectangleGeometry>
+            </Border.Clip>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Name="DisplayArea" Cursor="Hand" Background="White">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0" Source="{Binding Preview}"
+                           Height="{Binding ContentHeight, FallbackValue=48}"
+                           Width="{Binding ContentHeight, FallbackValue=48}"
+                           Visibility="{Binding ShowPreviewImage, Converter={StaticResource TrueToVisibleConverterKey}}"
+                           Margin="3" />
+                    <Border Grid.Column="1" Height="{Binding ContentHeight, FallbackValue=48}" BorderThickness="0"
+                            Margin="3">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding ProductVersion, FallbackValue='----'}" 
+                                       HorizontalAlignment="Right" FontSize="8" VerticalAlignment="Top"
+                                       Margin="0" Padding="0" LineHeight="8"/>
+                            <TextBlock Grid.Row="1" Text="{Binding Path=Name, FallbackValue='#Family'}"
+                                       Height="Auto" Width="120"
+                                       Visibility="{Binding ShowItemName, Converter={StaticResource TrueToVisibleConverterKey}}"
+                                       TextTrimming="CharacterEllipsis" HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <material:MaterialIcon Kind="{StaticResource IconCheckbox}" Foreground="{StaticResource ButtonCheckedBrush}"
+                                               Margin="2,0,0,0"
+                                               ToolTip="{x:Static resources:StringResources.Family_Icon_Imported}"
+                                               Visibility="{Binding IsLoadedInDocument, Converter={StaticResource TrueToVisibleConverterKey}}" />
+                        <material:MaterialIcon Kind="{StaticResource IconCheckboxBlank}" Foreground="{StaticResource ButtonUncheckedBrush}"
+                                               ToolTip="{x:Static resources:StringResources.Family_Icon_NotImported}"
+                                               Visibility="{Binding IsLoadedInDocument, Converter={StaticResource FalseToVisibleConverterKey}}" />
+                        <material:MaterialIcon Kind="{StaticResource IconListBulleted}" Foreground="{StaticResource ButtonListBrush}" Margin="2,0,0,0">
+                            <material:MaterialIcon.ToolTip>
+                                <ToolTip Padding="0">
+                                    <StackPanel Orientation="Vertical"
+                                                Background="{StaticResource SecondaryBackgroundBrush}">
+                                        <TextBlock Style="{StaticResource HeaderStyle}"
+                                                   Text="{Binding Path=Name}"
+                                                   Margin="3" />
+                                        <Border BorderThickness="0,0,0,1"
+                                                BorderBrush="{StaticResource PrimaryBrush}" />
+                                        <ListBox BorderThickness="0"
+                                                 ItemsSource="{Binding Symbols}"
+                                                 DisplayMemberPath="Name"
+                                                 Background="{StaticResource PrimaryBackgroundBrush}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </material:MaterialIcon.ToolTip>
+                        </material:MaterialIcon>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <controls:MaterialIconButton Kind="{StaticResource IconDownload}" 
+                                                     ToolTip="{x:Static resources:StringResources.Family_Button_Load}"
+                                                     Padding="0"
+                                                     Command="{Binding LoadFamilyCommand}" Foreground="{StaticResource ButtonLoadBrush}" />
+                        <controls:MaterialIconButton Kind="{StaticResource IconEdit}"
+                                                     ToolTip="{x:Static resources:StringResources.Family_Button_Edit}"
+                                                     Padding="0"
+                                                     Command="{Binding EditFamilyCommand}" Foreground="{StaticResource ButtonEditBrush}" />
+                        <controls:MaterialIconButton Kind="{StaticResource IconDelete}"
+                                                     ToolTip="{x:Static resources:StringResources.Family_Button_Remove}"
+                                                     Padding="0"
+                                                     Command="{Binding RemoveFamilyCommand}" Foreground="{StaticResource ButtonRemoveBrush}" />
+                    </StackPanel>
+
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+
+
+
+</UserControl>

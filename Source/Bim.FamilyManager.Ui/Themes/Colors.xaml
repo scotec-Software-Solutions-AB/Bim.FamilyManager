@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:icons="clr-namespace:Material.Icons;assembly=Material.Icons">
+
+    <!-- Define Colors -->
+    <Color x:Key="PrimaryColor">#FF668BC2</Color>
+    <Color x:Key="SecondaryColor">#FFA3B9DA</Color>
+    <Color x:Key="BackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ForegroundColor">#FF404040</Color>
+    <Color x:Key="InvertedForegroundColor">#FFFFFFFF</Color>
+    <Color x:Key="PrimaryBackgroundColor">#FFFAFAFA</Color>
+    <Color x:Key="SecondaryBackgroundColor">#FFF3F3F3</Color>
+    <Color x:Key="BorderColor">LightGray</Color>
+    <Color x:Key="SelectedBorderColor">Gray</Color>
+
+    <!-- Define SolidColorBrushes -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
+    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}" />
+    <SolidColorBrush x:Key="InvertedForegroundBrush" Color="{StaticResource InvertedForegroundColor}" />
+    <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="{StaticResource PrimaryBackgroundColor}" />
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="SelectedBorderBrush" Color="{StaticResource SelectedBorderColor}" />
+
+    <Color x:Key="ButtonRed">#c26666</Color>
+    <Color x:Key="ButtonYellow">#b0c266</Color>
+    <Color x:Key="ButtonGreen">#66c28b</Color>
+    <Color x:Key="ButtonBlue">#668bc2</Color>
+    <Color x:Key="ButtonPurple">#b066c2</Color>
+
+    <SolidColorBrush x:Key="ButtonOkBrush" Color="{StaticResource ButtonBlue}" />
+    <SolidColorBrush x:Key="ButtonSaveBrush" Color="{StaticResource ButtonBlue}" />
+
+    <SolidColorBrush x:Key="ButtonCancelBrush" Color="{StaticResource ButtonRed}" />
+    <SolidColorBrush x:Key="ButtonCloseBrush" Color="{StaticResource ButtonRed}" />
+    <SolidColorBrush x:Key="ButtonDeleteBrush" Color="{StaticResource ButtonRed}" />
+
+    <SolidColorBrush x:Key="ButtonAddBrush" Color="{StaticResource ButtonBlue}" />
+    <SolidColorBrush x:Key="ButtonEditBrush" Color="{StaticResource ButtonGreen}" />
+    <SolidColorBrush x:Key="ButtonRemoveBrush" Color="{StaticResource ButtonRed}" />
+    <SolidColorBrush x:Key="ButtonApplyBrush" Color="{StaticResource ButtonGreen}" />
+    <SolidColorBrush x:Key="ButtonLoadBrush" Color="{StaticResource ButtonBlue}" />
+    <SolidColorBrush x:Key="ButtonCheckedBrush" Color="{StaticResource ButtonGreen}" />
+    <SolidColorBrush x:Key="ButtonUncheckedBrush" Color="{StaticResource ButtonRed}" />
+    <SolidColorBrush x:Key="ButtonListBrush" Color="{StaticResource ButtonPurple}" />
+    <SolidColorBrush x:Key="ButtonFolderBrush" Color="{StaticResource ButtonYellow}" />
+
+</ResourceDictionary>
