@@ -50,7 +50,7 @@ dotnet build
    ```
    or
   ```
-   C:\Users\Olaf\AppData\Roaming\Autodesk\Revit\Addins\2025\
+   C:\Users\YourUser\AppData\Roaming\Autodesk\Revit\Addins\2025\
    ```  
 
 **4. Launch Revit**  
@@ -66,7 +66,7 @@ Access BIM Family Manager from the Add-Ins tab and set up your sources and prefe
 - `Bim.FamilyManager`  
 Main logic and entry point for the add-in.
 
-- `Bim.FamilyManager.Abstractions` 
+- `Bim.FamilyManager.Abstractions`  
 Shared interfaces and abstractions.
 
 - `Bim.FamilyManager.Base`  
@@ -81,10 +81,10 @@ Classic WPF user interface.
 - `Bim.FamilyManager.Ui.Modern`  
 Modern WPF user interface with updated layouts.
 
-- `Bim.FamilyManager.Source.Directory` 
+- `Bim.FamilyManager.Source.Directory`  
 Integration for local/network directory management.
 
-- `Bim.FamilyManager.Source.AzureStorage` 
+- `Bim.FamilyManager.Source.AzureStorage`  
 Integration for Azure Storage management.
 
 ## Screenshots
