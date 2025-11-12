@@ -15,7 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="Assets\Images\logo_scotec.png">
+		<Content Include="Assets\Images\logo.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="DefaultFamilySources.json">

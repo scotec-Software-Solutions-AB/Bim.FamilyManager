@@ -14,7 +14,7 @@ Connect to local folders or cloud storage (Azure Storage) to access and synchron
 Offers both standard and modern user interfaces, with customizable themes and layouts.
 
 - **Drag & Drop:**  
-Easily add or move families using intuitive drag-and-drop functionality.
+Easily add families using intuitive drag-and-drop functionality.
 
 - **Settings Management:**  
 Configure display, layout, and source settings to fit your workflow.
@@ -33,7 +33,7 @@ Designed for easy integration of additional storage providers or UI customizatio
 
 **1. Clone the repository**
 ```
-git clone https://github.com/your-org/family-manager.git
+git clone https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager.git
 cd family-manager
 ```
 
@@ -48,6 +48,10 @@ dotnet build
    ```
    C:\ProgramData\Autodesk\Revit\Addins\2025\
    ```
+   or
+  ```
+   C:\Users\Olaf\AppData\Roaming\Autodesk\Revit\Addins\2025\
+   ```  
 
 **4. Start Revit**  
    Launch Autodesk Revit. The BIM Family Manager add-in will be available in the "scotec" tab.
