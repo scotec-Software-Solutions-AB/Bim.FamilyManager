@@ -11,7 +11,7 @@ Organize, browse, and manage your Revit family files seamlessly within the Revit
 Connect to local folders or cloud storage (Azure Storage) to access and synchronize family libraries.
 
 - **Modern UI:**  
-Offers both standard and modern user interfaces, with customizable themes and layouts.
+Offers a modern user interface, with customizable themes and layouts.
 
 - **Drag & Drop:**  
 Easily add families using intuitive drag-and-drop functionality.
@@ -106,12 +106,12 @@ We welcome and appreciate your contributions to BIM Family Manager! By contribut
 ### Why Contribute?
 
 - **Make a Difference:** Your improvements and ideas can help thousands of Revit users streamline their workflows.
-- **Learn and Grow:** Collaborate with other developers, learn new skills, and gain experience working on a modern .NET 8 project.
+- **Learn and Grow:** Collaborate with other developers, learn new skills, and gain experience working on a modern Revir add-in project.
 - **Shape the Future:** Influence the direction of BIM Family Manager by suggesting features or enhancements that matter to you.
 
 ### How You Can Help
 
-- **Report Issues:** Found a bug or have a suggestion? [Open an issue](https://github.com/your-org/family-manager/issues) to let us know.
+- **Report Issues:** Found a bug or have a suggestion? [Open an issue](https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/issues) to let us know.
 - **Submit Pull Requests:** Fix bugs, add new features, or improve documentation. All contributions are reviewed and discussed.
 - **Improve Documentation:** Help make our guides, examples, and explanations clearer for everyone.
 - **Test and Review:** Try out new features, test on different Revit versions, and provide feedback.
@@ -119,7 +119,7 @@ We welcome and appreciate your contributions to BIM Family Manager! By contribut
 
 ### Get Started
 
-1. Fork the repository and create your branch from `main`.
+1. Fork the repository and create your branch from `develop`.
 2. Make your changes with clear, descriptive commit messages.
 3. Ensure your code follows the existing style and passes all builds.
 4. Submit a pull request and describe your changes.
@@ -130,6 +130,6 @@ We’re excited to collaborate with you! Whether you’re a seasoned developer o
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-*BIM Family Manager is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Autodesk, Inc. Revit is a registered trademark of Autodesk, Inc.*
+*Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc., and/or its subsidiaries and/or affiliates in the USA and/or other countries. BIM Family Manager is an independent open-source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk, Inc. or any of its subsidiaries.*
   
     
