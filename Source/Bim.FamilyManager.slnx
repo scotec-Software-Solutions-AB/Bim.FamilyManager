@@ -1,0 +1,30 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="../../scotec_ssc/Source/Scotec.Ssc/Scotec.Identity.AzureActiveDirectory/Scotec.Identity.AzureActiveDirectory.csproj" />
+  <Project Path="Bim.FamilyManager.Abstractions/Bim.FamilyManager.Abstractions.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Base/Bim.FamilyManager.Base.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Source.AzureStorage/Bim.FamilyManager.Source.AzureStorage.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Source.Directory/Bim.FamilyManager.Source.Directory.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui.Modern/Bim.FamilyManager.Ui.Modern.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui.Standard/Bim.FamilyManager.Ui.Standard.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui/Bim.FamilyManager.Ui.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager/Bim.FamilyManager.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
