@@ -1,12 +1,11 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
-using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.NativeInterop;
-using Scotec.Identity.AzureActiveDirectory;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
+using Microsoft.Extensions.Logging;
+using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
@@ -14,11 +13,16 @@ namespace Bim.FamilyManager.Source.AzureStorage.Logic;
 
 public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 {
+    public delegate void AzureStorageSourceEventHandler(AzureStorageSource sender);
+
     public delegate AzureStorageSource Factory(AzureStorageSourceOptions options);
 
     private static readonly Stream PreviewStream;
+    private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
+    private readonly IAadAuthService _authService;
+
     private readonly ILogger<AzureStorageSource> _logger;
-    private IAadAuthService _authService;
+
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
@@ -30,8 +34,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         PreviewStream = LoadResourceAsStream(packUri);
     }
-    
-    public AzureStorageSource(AzureStorageSourceOptions options, IFamilyManager familyManager, IRevitFamily.Factory familyFactory, IAadAuthService authService, ILogger<AzureStorageSource> logger)
+
+    public AzureStorageSource(AzureStorageSourceOptions options, IFamilyManager familyManager, IRevitFamily.Factory familyFactory, IAadAuthService authService,
+                              ILogger<AzureStorageSource> logger)
         : base(options, familyManager, familyFactory)
     {
         _authService = authService;
@@ -40,14 +45,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         _ = ConnectToAzureStorageSilentAsync(CancellationToken.None);
     }
 
-    public delegate void AzureStorageSourceEventHandler(AzureStorageSource sender);
-    public event AzureStorageSourceEventHandler? Connected;
-    public event AzureStorageSourceEventHandler? Disconnected;
-    
-    
-    public override IEnumerable<IFolder> Folders => _folders ??= GetFolders(Options.RootPath);
+    public override IEnumerable<IFolder> Folders => _folders ??= GetFolders(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/");
 
-    public override Stream? Preview
+    public override Stream Preview
     {
         get
         {
@@ -56,12 +56,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
     }
 
-    protected override void OnReload()
-    {
-        _folders = null;
-    }
-
     public AzureStorageSourceOptions SourceOptions => Options;
+    public event AzureStorageSourceEventHandler? Connected;
+    public event AzureStorageSourceEventHandler? Disconnected;
 
     public async Task ConnectToAzureStorageAsync(CancellationToken cancellationToken)
     {
@@ -93,6 +90,28 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
     }
 
+    public void CopyBlob(string sourceBlobName, string destinationBlobName)
+    {
+        if (_blobContainerClient is null)
+        {
+            throw new InvalidOperationException("BlobContainerClient is not initialized.");
+        }
+
+        var sourceBlob = _blobContainerClient.GetBlobClient(sourceBlobName);
+        var destinationBlob = _blobContainerClient.GetBlobClient(destinationBlobName);
+
+        // Get the URI of the source blob
+        var sourceUri = sourceBlob.Uri;
+
+        // Start the copy operation
+        destinationBlob.StartCopyFromUri(sourceUri);
+    }
+
+    protected override void OnReload()
+    {
+        _folders = null;
+    }
+
     private AadAuthOptions CreateAuthOptions()
     {
         var cacheFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -104,10 +123,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             TenantId = Options.TenantId,
             Scopes = ["https://storage.azure.com/.default"],
             TokenCache = new TokenCache(cacheFile)
-            //ClientId = "d79c205d-6637-499c-a224-a90e6195eab9",
-            //TenantId = "55ea1dea-56b6-4d91-be87-e452e768a583",
-            //Scopes = ["https://storage.azure.com/.default"],
-            //TokenCache = new TokenCache(cacheFile)
         };
         return authOptions;
     }
@@ -117,7 +132,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         try
         {
             var authOptions = CreateAuthOptions();
-            if(!_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session) || !_session.IsSignedIn)
+            if (!_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session) || !_session.IsSignedIn)
             {
                 _session = await _authService.SignInSilentAsync(authOptions, cancellationToken);
             }
@@ -175,23 +190,24 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
 
         var families = new List<IRevitFamily>();
-        foreach (var blobItem in _blobContainerClient.GetBlobs(prefix: prefix))
+        var blobs = _blobContainerClient.GetBlobs(prefix: prefix)
+                                        .Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+
+        foreach (var blobItem in blobs)
         {
-            if (blobItem.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
+            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {
-                var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
-                if (FamilyManager.TryGetRevitFamily(familyName, out var family))
-                {
-                    families.Add(family);
-                }
-                else
-                {
-                    families.Add(CreateRevitFamily(
-                        familyName,
-                        CreateFamilyInfo(blobItem.Name),
-                        (revitFamily, stream) => SaveFamily(revitFamily, stream, blobItem.Name)
-                    ));
-                }
+                families.Add(family);
+            }
+            else
+            {
+                families.Add(CreateRevitFamily(
+                    familyName,
+                    CreateFamilyInfo(blobItem.Name),
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobItem.Name)
+                ));
             }
         }
 
@@ -200,6 +216,11 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
     private RevitFamilyInfo CreateFamilyInfo(string blobName)
     {
+        if (_blobContainerClient is null)
+        {
+            throw new InvalidOperationException("BlobContainerClient is not initialized.");
+        }
+
         // RevitFamilyInfo attempts to retrieve additional information from the "BIM.FamilyManager" storage, if it is present within the family file.
         var familyInfo = CreateFamilyInfo(LoadFileStream);
         return familyInfo;
@@ -216,10 +237,43 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
     private void SaveFamily(IRevitFamily family, Stream stream, string blobName)
     {
+        if (_blobContainerClient is null)
+        {
+            throw new InvalidOperationException("BlobContainerClient is not initialized.");
+        }
+
+        CreateBackup(blobName);
+
         var blobClient = _blobContainerClient.GetBlobClient(blobName);
         stream.Position = 0;
         blobClient.Upload(stream, true);
         family.ApplyUpdate(CreateFamilyInfo(blobName));
+    }
+
+    private void CreateBackup(string blobName)
+    {
+        if (_blobContainerClient is null)
+        {
+            throw new InvalidOperationException("BlobContainerClient is not initialized.");
+        }
+
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(blobName);
+        var extension = Path.GetExtension(blobName);
+
+        var prefix = blobName.Substring(0, blobName.Length - extension.Length + 1);
+        // Regex to match backup files with the format: MyFile.0001.rfa
+        var pattern = $@"^{Regex.Escape(fileNameWithoutExtension)}\.\d{{4}}{Regex.Escape(extension)}$";
+
+        var backupBlobs = _blobContainerClient.GetBlobs(prefix: prefix)
+                                              .Where(b => Regex.IsMatch(Path.GetFileName(b.Name), pattern, RegexOptions.IgnoreCase))
+                                              .Select(b => int.Parse(Path.GetFileName(b.Name)
+                                                                         .Substring(fileNameWithoutExtension.Length + 1, 4)))
+                                              .OrderByDescending(n => n);
+
+        // Determine the next backup number
+        var nextBackupNumber = backupBlobs.FirstOrDefault() + 1;
+        var backupBlobName = blobName.Insert(blobName.LastIndexOf(".", StringComparison.InvariantCultureIgnoreCase), $".{nextBackupNumber:D4}");
+        CopyBlob(blobName, backupBlobName);
     }
 
     /// <summary>
