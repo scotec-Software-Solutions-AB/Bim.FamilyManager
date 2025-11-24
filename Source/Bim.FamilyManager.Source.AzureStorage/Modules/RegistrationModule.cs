@@ -72,10 +72,6 @@ public class RegistrationModule : Module
                .SingleInstance();
 
         builder.RegisterType<AzureStorageSourcePanelViewModel>()
-               .As<IFamilySourcePanelViewModel>()
-
-               .InstancePerDependency();
-        builder.RegisterType<AzureStorageSourcePanelViewModel>()
                .Keyed<IFamilySourcePanelViewModel>(AzureStorageSource)
                .InstancePerDependency();
         builder.RegisterType<ViewModelDescriptor<AzureStorageSourcePanelViewModel, AzureStorageSourcePanelView>>()

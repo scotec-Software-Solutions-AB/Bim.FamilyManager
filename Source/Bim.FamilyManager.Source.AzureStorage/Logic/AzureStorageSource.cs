@@ -5,6 +5,8 @@ using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Client;
+using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
@@ -26,6 +28,79 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
+
+    private IAadAuthSession? Session
+    {
+        get => _session;
+        set
+        {
+            if (_session != value)
+            {
+                if (_session is not null)
+                {
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedOut);
+                    Disconnect();
+                }
+
+                _session = value;
+
+                if (_session is not null)
+                {
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedOut);
+                    if (_session.IsSignedIn)
+                    {
+                        Connect();
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
+    {
+        try
+        {
+            Disconnect();
+        }
+        catch (Exception)
+        {
+            //TODO: Logging
+        }
+    }
+
+    private void Disconnect()
+    {
+        _blobContainerClient = null;
+        _folders = null;
+        Disconnected?.Invoke(this);
+        Reload();
+    }
+
+    private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
+    {
+        try
+        {
+            Connect();
+        }
+        catch (Exception)
+        {
+            //TODO: Logging
+        }
+    }
+
+    private void Connect()
+    {
+        if (Session is null)
+        {
+            throw new InvalidOperationException("Session must not be null.");
+        }
+
+        _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
+        Connected?.Invoke(this);
+        Reload();
+    }
 
     static AzureStorageSource()
     {
@@ -64,29 +139,20 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     {
         try
         {
-            var authOptions = CreateAuthOptions();
-
-            if (!_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session) || !_session.IsSignedIn)
+            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out var session) && session.IsSignedIn)
             {
-                _session = await _authService.SignInSilentAsync(authOptions, cancellationToken);
-            }
-
-            if (_session is not null && _session.IsSignedIn)
-            {
-                _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), _session.GetTokenCredential());
-                Connected?.Invoke(this);
+                Session = session;
             }
             else
             {
-                _blobContainerClient = null;
-                Disconnected?.Invoke(this);
+                var authOptions = CreateAuthOptions();
+                Session = await _authService.RegisterAppAsync(authOptions, true, cancellationToken);
             }
         }
         catch (Exception e)
         {
+            Session = null;
             RaiseError(e);
-            _session = null;
-            _blobContainerClient = null;
         }
     }
 
@@ -131,23 +197,20 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     {
         try
         {
-            var authOptions = CreateAuthOptions();
-            if (!_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session) || !_session.IsSignedIn)
+            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out var session) && session.IsSignedIn)
             {
-                _session = await _authService.SignInSilentAsync(authOptions, cancellationToken);
+                Session = session;
             }
-
-            if (_session is not null && _session.IsSignedIn)
+            else
             {
-                _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), _session.GetTokenCredential());
-                Connected?.Invoke(this);
+                var authOptions = CreateAuthOptions();
+                Session = await _authService.SignInSilentAsync(authOptions, cancellationToken);
             }
         }
         catch (Exception e)
         {
+            Session = null;
             RaiseError(e);
-            _session = null;
-            _blobContainerClient = null;
         }
     }
 
@@ -250,6 +313,18 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         family.ApplyUpdate(CreateFamilyInfo(blobName));
     }
 
+    /// <summary>
+    /// Creates a backup of the specified blob by generating a new versioned backup file name
+    /// and copying the blob to the new backup location.
+    /// </summary>
+    /// <param name="blobName">The name of the blob to back up.</param>
+    /// <exception cref="System.InvalidOperationException">
+    /// Thrown if the <see cref="_blobContainerClient"/> is not initialized.
+    /// </exception>
+    /// <remarks>
+    /// The backup file name is generated by appending a version number in the format ".0001", ".0002", etc.,
+    /// to the original blob name. Existing backup files are identified using a regex pattern.
+    /// </remarks>
     private void CreateBackup(string blobName)
     {
         if (_blobContainerClient is null)

@@ -136,7 +136,7 @@ public class RegistrationModule : Module
         {
             var c = ctx.Resolve<IComponentContext>();
             return familySource => c.ResolveOptionalKeyed<IFamilySourcePanelViewModel>(familySource.Type,
-                new TypedParameter(typeof(IFamilySource), familySource));
+                new TypedParameter(familySource.GetType(), familySource));
         });
     }
 }

@@ -35,8 +35,16 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
         : base(layoutOptions)
     {
         _familySource = familySource;
+        _familySource.Reloaded += OnReloaded;
         Panel = panelFactory.Invoke(familySource);
         Preview = familySource.Preview is null ? null : GetPreviewImage(familySource.Preview);
+    }
+
+    protected virtual void OnReloaded(object? sender, EventArgs e)
+    {
+        _folders = null;
+        SelectedFolder = null;
+        OnPropertyChanged(nameof(Folders));
     }
 
     /// <summary>
@@ -57,7 +65,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
             if (_folders is null && IsSelected)
             {
                 _folders ??= _familySource.Folders
-                    .Select(folder => CreateFolderViewModel(folder))
+                    .Select(CreateFolderViewModel)
                     .OrderBy(folder => folder.Name)
                     .ToList();
 

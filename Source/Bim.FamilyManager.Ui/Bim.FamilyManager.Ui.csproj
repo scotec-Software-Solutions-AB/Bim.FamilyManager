@@ -18,7 +18,7 @@
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ScaleHQ.DotScreen" Version="1.0.0-rc.2" />
-    <PackageReference Include="Scotec.Revit.Wpf" Version="2025.1.1-dev.25" />
+    <PackageReference Include="Scotec.Revit.Wpf" Version="[2025.1.1,2026.0.0)" />
     <PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
     <PackageReference Include="Scotec.Wpf.Controls" Version="1.0.4-dev.1" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.17" />

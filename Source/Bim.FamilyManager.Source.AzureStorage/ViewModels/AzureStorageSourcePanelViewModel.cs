@@ -1,62 +1,66 @@
-﻿using System.Diagnostics;
-using System.Windows.Input;
-using Autodesk.Revit.ApplicationServices;
+﻿using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.UI;
-using CommunityToolkit.Mvvm.Input;
-using Scotec.Identity.AzureActiveDirectory;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Source.AzureStorage.Logic;
-using Scotec.Wpf.ViewModels;
+using Bim.FamilyManager.Source.AzureStorage.Options;
+using CommunityToolkit.Mvvm.Input;
+using Scotec.Identity.AzureActiveDirectory;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Bim.FamilyManager.Source.AzureStorage.ViewModels;
 
-public class AzureStorageSourcePanelViewModel : ViewModel, IFamilySourcePanelViewModel
+public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<AzureStorageSource>
 {
     private readonly IAadAuthService _authService;
-    private readonly AzureStorageSource _familySource;
     private readonly RelayCommand _signInCommand;
-    private IAadAuthSession? _session;
+    private readonly IAadAuthSession _session;
 
-    public AzureStorageSourcePanelViewModel(IFamilySource familySource, IAadAuthService authService)
+    public AzureStorageSourcePanelViewModel(AzureStorageSource familySource, IAadAuthService authService) : base(familySource)
     {
         _authService = authService;
-        _familySource = (AzureStorageSource)familySource;
-        _signInCommand = new RelayCommand(() => SignInAsync(false), () => true);
-        SignInAsync(true);
+        _signInCommand = new RelayCommand(SignInAsync, () => true);
+
+        _session = GetAadAuthSession(familySource.SourceOptions);
+
+
+        // Subscribe using WeakEventManager
+        WeakEventManager<IAadAuthSession, EventArgs>.AddHandler(
+            _session, nameof(_session.SignedIn), OnConnected);
+
+    }
+
+    private void OnConnected(object? sender, EventArgs e)
+    {
+    }
+
+    private IAadAuthSession GetAadAuthSession(AzureStorageSourceOptions familySourceSourceOptions)
+    {
+        var tenantId = familySourceSourceOptions.TenantId;
+        var clientId = familySourceSourceOptions.ClientId;
+
+        if (!_authService.TryGetSession(tenantId, clientId, out var session))
+        {
+            throw new InvalidOperationException("No valid authentication session found.");
+        }
+
+
+        return session;
     }
 
     public ICommand SignInCommand => _signInCommand;
 
     public string SignedInAs => _session?.Account?.Username ?? "not signed in";
 
-    private async void SignInAsync(bool silent)
+    private async void SignInAsync()
     {
         try
         {
-            var tenantId = _familySource.SourceOptions.TenantId;
-            var clientId = _familySource.SourceOptions.ClientId;
-            if (!_authService.TryGetSession(tenantId, clientId, out _session) || !_session.IsSignedIn || !silent)
-            {
-                var options = new AadAuthOptions
-                {
-                    TenantId = tenantId,
-                    ClientId = clientId,
-                    Scopes = ["https://storage.azure.com/.default"]
-                };
-
-                var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
-                
-                _session = await (silent ? _authService.SignInSilentAsync(options, cts.Token) : _authService.SignInAsync(options,
-                    builder => builder.WithParentActivityOrWindow(windowHandle),
-                    cts.Token));
-
-                if (!silent)
-                {
-                    _familySource.Reload();
-                }
-            }
+            var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
+            var result = await _session.SignInAsync(builder => builder.WithParentActivityOrWindow(windowHandle), cts.Token);
 
             OnPropertyChanged(nameof(SignedInAs));
         }
