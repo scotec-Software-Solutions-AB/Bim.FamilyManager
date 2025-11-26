@@ -10,7 +10,7 @@
     <Color x:Key="InvertedForegroundColor">#FFFFFFFF</Color>
     <Color x:Key="PrimaryBackgroundColor">#FFFAFAFA</Color>
     <Color x:Key="SecondaryBackgroundColor">#FFF3F3F3</Color>
-    <Color x:Key="BorderColor">LightGray</Color>
+    <Color x:Key="BorderColor">#FFABADB3</Color>
     <Color x:Key="SelectedBorderColor">Gray</Color>
 
     <!-- Define SolidColorBrushes -->

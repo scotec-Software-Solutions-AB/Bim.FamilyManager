@@ -24,16 +24,21 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
-            <controls1:MaterialIconButton Kind="{StaticResource IconAccount}"
-                                          Width="20" Height="20" Padding="0" Margin="0" 
-                                          HorizontalContentAlignment="Center"
-                                          HorizontalAlignment="Left"
-                                          Command="{Binding SignInCommand}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_SignedInAs}"  Margin="5,0,5,0"/>
-                <TextBlock Text="{Binding SignedInAs}" Margin="5,0,0,0"/>
+        <Border Background="{StaticResource SecondaryBackgroundBrush}"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{StaticResource BorderBrush}">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <controls1:MaterialIconButton Kind="{StaticResource IconAccount}"
+                                              Width="20" Height="20" Padding="0" Margin="0" 
+                                              HorizontalContentAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              Command="{Binding SignInCommand}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_SignedInAs}"  Margin="5,0,5,0"/>
+                    <TextBlock Text="{Binding SignedInAs}" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
+
+        </Border>
     </Grid>
 </UserControl>

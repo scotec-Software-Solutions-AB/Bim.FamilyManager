@@ -58,7 +58,7 @@
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
-                <Setter Property="BorderBrush" Value="DarkGray" />
+                <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource InvertedForegroundBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
@@ -116,7 +116,7 @@
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
-                <Setter Property="BorderBrush" Value="DarkGray" />
+                <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource InvertedForegroundBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">

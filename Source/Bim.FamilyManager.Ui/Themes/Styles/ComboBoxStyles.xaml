@@ -32,6 +32,8 @@
     </Style>
     <Style TargetType="ComboBox" x:Key="FamilyManagerComboBoxStyle">
         <Setter Property="Height" Value="21" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource FamilyManagerComboBoxItemStyle}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -43,8 +45,8 @@
                         </Grid.ColumnDefinitions>
                         <Border x:Name="Border"
                                 Background="{StaticResource PrimaryBackgroundBrush}"
-                                BorderBrush="{StaticResource SelectedBorderBrush}"
-                                BorderThickness="1"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
                                 MinHeight="21">
                             <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
                                               ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -56,7 +58,7 @@
                         <ToggleButton x:Name="ToggleButton"
                                       Grid.Column="1"
                                       Background="{StaticResource SecondaryBrush}"
-                                      BorderBrush="DarkGray"
+                                      BorderBrush="{StaticResource SelectedBorderBrush}"
                                       BorderThickness="1"
                                       Focusable="False"
                                       ClickMode="Press"
