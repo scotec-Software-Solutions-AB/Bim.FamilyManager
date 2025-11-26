@@ -5,7 +5,6 @@ using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
@@ -28,79 +27,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
-
-    private IAadAuthSession? Session
-    {
-        get => _session;
-        set
-        {
-            if (_session != value)
-            {
-                if (_session is not null)
-                {
-                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
-                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
-                    Disconnect();
-                }
-
-                _session = value;
-
-                if (_session is not null)
-                {
-                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
-                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
-                    if (_session.IsSignedIn)
-                    {
-                        Connect();
-                    }
-                }
-            }
-        }
-    }
-
-    private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
-    {
-        try
-        {
-            Disconnect();
-        }
-        catch (Exception)
-        {
-            //TODO: Logging
-        }
-    }
-
-    private void Disconnect()
-    {
-        _blobContainerClient = null;
-        _folders = null;
-        Disconnected?.Invoke(this);
-        Reload();
-    }
-
-    private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
-    {
-        try
-        {
-            Connect();
-        }
-        catch (Exception)
-        {
-            //TODO: Logging
-        }
-    }
-
-    private void Connect()
-    {
-        if (Session is null)
-        {
-            throw new InvalidOperationException("Session must not be null.");
-        }
-
-        _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
-        Connected?.Invoke(this);
-        Reload();
-    }
 
     static AzureStorageSource()
     {
@@ -132,6 +58,36 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     public AzureStorageSourceOptions SourceOptions => Options;
+
+    private IAadAuthSession? Session
+    {
+        get => _session;
+        set
+        {
+            if (_session != value)
+            {
+                if (_session is not null)
+                {
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
+                    Disconnect();
+                }
+
+                _session = value;
+
+                if (_session is not null)
+                {
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
+                    if (_session.IsSignedIn)
+                    {
+                        Connect();
+                    }
+                }
+            }
+        }
+    }
+
     public event AzureStorageSourceEventHandler? Connected;
     public event AzureStorageSourceEventHandler? Disconnected;
 
@@ -181,6 +137,50 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     protected override void OnReload()
     {
         _folders = null;
+    }
+
+    private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
+    {
+        try
+        {
+            Disconnect();
+        }
+        catch (Exception)
+        {
+            //TODO: Logging
+        }
+    }
+
+    private void Disconnect()
+    {
+        _blobContainerClient = null;
+        _folders = null;
+        Disconnected?.Invoke(this);
+        Reload();
+    }
+
+    private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
+    {
+        try
+        {
+            Connect();
+        }
+        catch (Exception)
+        {
+            //TODO: Logging
+        }
+    }
+
+    private void Connect()
+    {
+        if (Session is null)
+        {
+            throw new InvalidOperationException("Session must not be null.");
+        }
+
+        _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
+        Connected?.Invoke(this);
+        Reload();
     }
 
     private AadAuthOptions CreateAuthOptions()
@@ -324,16 +324,16 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
-    /// Creates a backup of the specified blob by generating a new versioned backup file name
-    /// and copying the blob to the new backup location.
+    ///     Creates a backup of the specified blob by generating a new versioned backup file name
+    ///     and copying the blob to the new backup location.
     /// </summary>
     /// <param name="blobName">The name of the blob to back up.</param>
     /// <exception cref="System.InvalidOperationException">
-    /// Thrown if the <see cref="_blobContainerClient"/> is not initialized.
+    ///     Thrown if the <see cref="_blobContainerClient" /> is not initialized.
     /// </exception>
     /// <remarks>
-    /// The backup file name is generated by appending a version number in the format ".0001", ".0002", etc.,
-    /// to the original blob name. Existing backup files are identified using a regex pattern.
+    ///     The backup file name is generated by appending a version number in the format ".0001", ".0002", etc.,
+    ///     to the original blob name. Existing backup files are identified using a regex pattern.
     /// </remarks>
     private void CreateBackup(string blobName)
     {
