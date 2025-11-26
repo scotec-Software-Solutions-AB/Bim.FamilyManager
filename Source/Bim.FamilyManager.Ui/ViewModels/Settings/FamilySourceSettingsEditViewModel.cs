@@ -1,9 +1,11 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Scotec.Extensions.Linq;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
 
@@ -55,7 +57,31 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     public IFamilySourceSettingsViewModel? SelectedFamilySource
     {
         get => _selectedFamilySource;
-        set => SetProperty(ref _selectedFamilySource, value);
+        set
+        {
+            if (_selectedFamilySource is not null)
+            {
+                _selectedFamilySource.Modified -= SelectedFamilySourceOnModified;
+
+            }
+            SetProperty(ref _selectedFamilySource, value);
+
+            if (_selectedFamilySource is not null)
+            {
+                _selectedFamilySource.Modified += SelectedFamilySourceOnModified;
+            }
+
+            void SelectedFamilySourceOnModified(object? sender, EventArgs e)
+            {
+                NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    private void NotifyCanExecuteChanged()
+    {
+        _applyCommand.NotifyCanExecuteChanged();
+        _cancelCommand.NotifyCanExecuteChanged();
     }
 
     public ICommand ApplyCommand => _applyCommand;

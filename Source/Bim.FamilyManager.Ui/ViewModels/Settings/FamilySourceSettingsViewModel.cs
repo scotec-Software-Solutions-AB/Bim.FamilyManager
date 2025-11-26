@@ -23,6 +23,7 @@ public abstract class FamilySourceSettingsViewModel<TOptions> : ViewModel, IFami
     private bool _isEditable;
     private bool _isModified;
     private string _name;
+    private bool _isResetting;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilySourceSettingsViewModel{TOptions}" /> class.
@@ -59,6 +60,8 @@ public abstract class FamilySourceSettingsViewModel<TOptions> : ViewModel, IFami
     ///     and <see cref="IFamilySourceOptions.IsEditable" />.
     /// </remarks>
     protected TOptions Options { get; }
+
+    public event EventHandler? Modified;
 
     /// <summary>
     ///     Gets or sets the name of the family source.
@@ -143,8 +146,13 @@ public abstract class FamilySourceSettingsViewModel<TOptions> : ViewModel, IFami
         get => _isModified;
         set
         {
+            if(_isResetting)
+            {
+                return;
+            }
             SetProperty(ref _isModified, value);
             OnIsModified();
+            Modified?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -174,7 +182,10 @@ public abstract class FamilySourceSettingsViewModel<TOptions> : ViewModel, IFami
     /// </remarks>
     public void Reset()
     {
+        _isResetting = true;
         OnReset();
+        _isResetting = false;
+        IsModified = true;
     }
 
     public void Apply()

@@ -14,6 +14,8 @@ namespace Bim.FamilyManager.Abstractions.ViewModels.Settings;
 /// </remarks>
 public interface IFamilySourceSettingsViewModel : IViewModel
 {
+    event EventHandler Modified;
+    
     /// <summary>
     ///     A factory delegate for creating instances of <see cref="IFamilySourceSettingsViewModel" />.
     /// </summary>
