@@ -26,7 +26,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
-	  <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1-dev.10" />
+	  <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1-dev.11" />
 	  <!--<PackageReference Include="Scotec.Identity.AzureActiveDirectory" Version="1.0.9-dev.10" />-->
 	</ItemGroup>
 
