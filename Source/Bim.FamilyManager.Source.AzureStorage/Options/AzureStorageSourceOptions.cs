@@ -11,12 +11,12 @@ public class AzureStorageSourceOptions : FamilySourceOptions
     /// <summary>
     ///     Gets or sets the Azure Storage client ID.
     /// </summary>
-    public string ClientId { get; set; } = string.Empty;
+    public Guid? ClientId { get; set; }
 
     /// <summary>
     ///     Gets or sets the Azure Storage tenant ID.
     /// </summary>
-    public string TenantId { get; set; } = string.Empty;
+    public Guid? TenantId { get; set; }
 
     ///<summary>
     ///     Gets or sets the Azure Storage endpoint URL.

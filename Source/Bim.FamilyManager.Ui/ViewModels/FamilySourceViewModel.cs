@@ -1,8 +1,10 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Media;
 using Microsoft.Extensions.Options;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Scotec.Events.WeakEvents;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
 
@@ -35,12 +37,13 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
         : base(layoutOptions)
     {
         _familySource = familySource;
-        _familySource.Reloaded += OnReloaded;
+
+        StaticWeakEventManager.AddWeakHandler(_familySource, nameof(IFamilySource.Reloaded), OnReloaded);
         Panel = panelFactory.Invoke(familySource);
         Preview = familySource.Preview is null ? null : GetPreviewImage(familySource.Preview);
     }
 
-    protected virtual void OnReloaded(object? sender, EventArgs e)
+    protected virtual void OnReloaded(IFamilySource? sender, EventArgs e)
     {
         _folders = null;
         SelectedFolder = null;

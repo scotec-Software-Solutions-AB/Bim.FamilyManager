@@ -38,8 +38,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             {
                 if (_session is not null)
                 {
-                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedIn);
-                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedOut);
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
                     Disconnect();
                 }
 
@@ -47,8 +47,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
                 if (_session is not null)
                 {
-                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedIn);
-                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.IsSignedIn), OnSessionSignedOut);
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
+                    StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
                     if (_session.IsSignedIn)
                     {
                         Connect();
@@ -139,7 +139,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     {
         try
         {
-            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out var session) && session.IsSignedIn)
+            if (Options.TenantId is null || Options.ClientId is null)
+            {
+                throw new ArgumentException("Tenant ID and client ID must not be null");
+            }
+
+            if (_authService.TryGetSession(Options.TenantId.Value, Options.ClientId.Value, out var session) && session.IsSignedIn)
             {
                 Session = session;
             }
@@ -197,7 +202,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     {
         try
         {
-            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out var session) && session.IsSignedIn)
+            if (Options.TenantId is null || Options.ClientId is null)
+            {
+                throw new ArgumentException("Tenant ID and client ID must not be null");
+            }
+
+            if (_authService.TryGetSession(Options.TenantId.Value, Options.ClientId.Value, out var session) && session.IsSignedIn)
             {
                 Session = session;
             }

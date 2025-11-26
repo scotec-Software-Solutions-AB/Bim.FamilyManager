@@ -1,13 +1,11 @@
-﻿using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.UI;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Identity.Client;
-using Scotec.Identity.AzureActiveDirectory;
-using Bim.FamilyManager.Source.AzureStorage.Options;
-using Bim.FamilyManager.Ui.ViewModels.Settings;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
+using Bim.FamilyManager.Source.AzureStorage.Options;
+using Bim.FamilyManager.Ui.ViewModels.Settings;
+using CommunityToolkit.Mvvm.Input;
+using Scotec.Events.WeakEvents;
+using Scotec.Identity.AzureActiveDirectory;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
 namespace Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings;
@@ -37,13 +35,16 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
         _authService = authService;
         _rootPath = options.RootPath;
         _containerName = options.ContainerName;
-        _clientId = options.ClientId;
-        _tenantId = options.TenantId;
+        _clientId = options.ClientId?.ToString("D") ?? string.Empty;
+        _tenantId = options.TenantId?.ToString("D") ?? string.Empty;
         _endpoint = options.Endpoint;
 
         _signInCommand = new RelayCommand(SignIn, () => CanSignIn);
 
-        TrySilentSignInAsync();
+        if (CanSignIn)
+        {
+            TrySilentSignInAsync();
+        }
     }
 
     public ICommand SignInCommand => _signInCommand;
@@ -51,7 +52,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     public bool CanSignIn => CanApply();
 
     //TODO Add string to resources.
-    public string SignedInAs => _session?.Account?.Username ?? "Not signed in.";
+    public string SignedInAs => Session?.Account?.Username ?? "Not signed in.";
 
     /// <summary>
     ///     Gets the source identifier for the Azure Storage based family source.
@@ -123,6 +124,34 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
 
     public override string TypeName => "Azure Storage";
 
+    private IAadAuthSession? Session
+    {
+        get => _session;
+        set
+        {
+            if (_session == value)
+            {
+                return;
+            }
+
+            if (_session is not null)
+            {
+                StaticWeakEventManager.RemoveWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedIn), OnSignedIn);
+                StaticWeakEventManager.RemoveWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedOut), OnSignedOut);
+            }
+
+            _session = value;
+
+            if (_session is not null)
+            {
+                StaticWeakEventManager.AddWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedIn), OnSignedIn);
+                StaticWeakEventManager.AddWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedOut), OnSignedOut);
+            }
+
+            OnPropertyChanged(nameof(SignedInAs));
+        }
+    }
+
     /// <summary>
     ///     Determines whether the settings for the Azure Storage based family source can be applied.
     /// </summary>
@@ -138,32 +167,49 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     /// </remarks>
     public override bool CanApply()
     {
+        
         return base.CanApply() && !string.IsNullOrWhiteSpace(RootPath)
                                && !string.IsNullOrWhiteSpace(ContainerName)
-                               && !string.IsNullOrWhiteSpace(ClientId)
-                               && !string.IsNullOrWhiteSpace(TenantId)
+                               && !string.IsNullOrWhiteSpace(ClientId) && Guid.TryParse(ClientId, out _)
+                               && !string.IsNullOrWhiteSpace(TenantId) && Guid.TryParse(TenantId, out _)
                                && !string.IsNullOrWhiteSpace(EndPoint);
     }
 
     /// <summary>
-    ///     Applies the current settings of the Azure Storage based family source.
+    /// Applies the current settings for the Azure Storage-based family source.
     /// </summary>
     /// <remarks>
-    ///     This method overrides
-    ///     <see cref="FamilySourceSettingsViewModel{TOptions}.OnApply" />
-    ///     to update the <see cref="Options.Path" /> property with the value of the <see cref="RootPath" /> property.
+    /// This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.OnApply" /> to update the
+    /// <see cref="AzureStorageSourceOptions" /> properties, such as <see cref="AzureStorageSourceOptions.RootPath" />,
+    /// <see cref="AzureStorageSourceOptions.ContainerName" />, <see cref="AzureStorageSourceOptions.ClientId" />,
+    /// <see cref="AzureStorageSourceOptions.TenantId" />, and <see cref="AzureStorageSourceOptions.Endpoint" />.
+    /// Additionally, it attempts a silent sign-in operation.
     /// </remarks>
     /// <exception cref="NotImplementedException">
-    ///     Thrown if the base implementation is not properly overridden.
+    /// Thrown if the base implementation is not properly overridden.
     /// </exception>
     protected override void OnApply()
     {
         base.OnApply();
         Options.RootPath = RootPath;
         Options.ContainerName = ContainerName;
-        Options.ClientId = ClientId;
-        Options.TenantId = TenantId;
+        Options.ClientId = Guid.Parse(ClientId);
+        Options.TenantId = Guid.Parse(TenantId);
         Options.Endpoint = EndPoint;
+
+        TrySilentSignInAsync();
+    }
+
+    protected override void OnIsModified()
+    {
+        base.OnIsModified();
+        Session = null;
+        NotifyCanExecuteChanged();
+    }
+
+    private void NotifyCanExecuteChanged()
+    {
+        _signInCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -180,8 +226,8 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
         EndPoint = Options.Endpoint;
         RootPath = Options.RootPath;
         ContainerName = Options.ContainerName;
-        ClientId = Options.ClientId;
-        TenantId = Options.TenantId;
+        ClientId = Options.ClientId?.ToString("D") ?? string.Empty;
+        TenantId = Options.TenantId?.ToString("D") ?? string.Empty;
     }
 
     private async void TrySilentSignInAsync()
@@ -191,22 +237,37 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
             var cacheFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "BIM.FamilyManager", $"msal_cache_{Options.ClientId}.bin");
 
-            var authOptions = new AadAuthOptions
+            var clientId = Guid.Parse(_clientId);
+            var tenantId = Guid.Parse(_tenantId);
+            if (_authService.TryGetSession(tenantId, clientId, out var session) && !session.IsSignedIn)
             {
-                ClientId = Options.ClientId,
-                TenantId = Options.TenantId,
-                Scopes = ["https://storage.azure.com/.default"],
-                TokenCache = new TokenCache(cacheFile)
-            };
-
-            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session) && !_session.IsSignedIn)
-            {
-                _session = await _authService.SignInSilentAsync(authOptions, CancellationToken.None);
+                var authOptions = new AadAuthOptions
+                {
+                    ClientId =clientId,
+                    TenantId = tenantId,
+                    Scopes = ["https://storage.azure.com/.default"],
+                    TokenCache = new TokenCache(cacheFile)
+                };
+                session = await _authService.SignInSilentAsync(authOptions, CancellationToken.None);
             }
+
+            Session = session;
         }
         catch (Exception)
         {
+            Session = null;
+            OnPropertyChanged(nameof(SignedInAs));
         }
+    }
+
+    private void OnSignedOut(IAadAuthSession arg1, EventArgs arg2)
+    {
+        OnPropertyChanged(nameof(SignedInAs));
+    }
+
+    private void OnSignedIn(IAadAuthSession arg1, EventArgs arg2)
+    {
+        OnPropertyChanged(nameof(SignedInAs));
     }
 
     private async void SignIn()
@@ -218,25 +279,26 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
 
             var authOptions = new AadAuthOptions
             {
-                ClientId = Options.ClientId,
-                TenantId = Options.TenantId,
+                ClientId = Guid.Parse(_clientId),
+                TenantId = Guid.Parse(_tenantId),
                 Scopes = ["https://storage.azure.com/.default"],
                 TokenCache = new TokenCache(cacheFile)
             };
-            if (_authService.TryGetSession(Options.TenantId, Options.ClientId, out _session))
-            {
-                var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
-                _session = await _authService.SignInAsync(authOptions,
-                    builder => builder.WithParentActivityOrWindow(windowHandle),
-                    cts.Token);
-            }
+
+            var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
+            var session = await _authService.SignInAsync(authOptions,
+                builder => builder.WithParentActivityOrWindow(windowHandle),
+                cts.Token);
+
+            Session = session;
         }
         //catch (MsalUiRequiredException)
         //{
         //}
         catch (Exception e)
         {
+            Session = null;
         }
     }
 }

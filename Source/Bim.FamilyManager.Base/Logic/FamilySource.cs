@@ -144,15 +144,6 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     ///     is completed. Subscribers can use this event to perform any actions required after the family
     ///     source has been refreshed.
     /// </remarks>
-    /// <example>
-    ///     To subscribe to the <see cref="Reloaded" /> event:
-    ///     <code>
-    /// familySource.Reloaded += (sender, args) =>
-    /// {
-    ///     Console.WriteLine("Family source has been reloaded.");
-    /// };
-    /// </code>
-    /// </example>
     public event EventHandler<EventArgs>? Reloaded;
 
     public string Type => Options.Type;

@@ -9,6 +9,7 @@ using Scotec.Identity.AzureActiveDirectory;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using Scotec.Events.WeakEvents;
 
 namespace Bim.FamilyManager.Source.AzureStorage.ViewModels;
 
@@ -24,28 +25,33 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
         _signInCommand = new RelayCommand(SignInAsync, () => true);
 
         _session = GetAadAuthSession(familySource.SourceOptions);
-
-
+        
         // Subscribe using WeakEventManager
-        WeakEventManager<IAadAuthSession, EventArgs>.AddHandler(
-            _session, nameof(_session.SignedIn), OnConnected);
-
+        StaticWeakEventManager.AddWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedIn), OnSignedIn);
+        StaticWeakEventManager.AddWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedOut), OnSignedOut);
     }
 
-    private void OnConnected(object? sender, EventArgs e)
+    private void OnSignedOut(IAadAuthSession session, EventArgs args)
     {
+        OnPropertyChanged(nameof(SignedInAs));
     }
 
-    private IAadAuthSession GetAadAuthSession(AzureStorageSourceOptions familySourceSourceOptions)
+    private void OnSignedIn(IAadAuthSession session, EventArgs args)
     {
-        var tenantId = familySourceSourceOptions.TenantId;
-        var clientId = familySourceSourceOptions.ClientId;
+        OnPropertyChanged(nameof(SignedInAs));
+    }
+    
+    private IAadAuthSession GetAadAuthSession(AzureStorageSourceOptions options)
+    {
+        if (options.TenantId is null || options.ClientId is null)
+        {
+            throw new ArgumentException("Tenant ID and client ID must not be null");
+        }
 
-        if (!_authService.TryGetSession(tenantId, clientId, out var session))
+        if (!_authService.TryGetSession(options.TenantId.Value, options.ClientId.Value, out var session))
         {
             throw new InvalidOperationException("No valid authentication session found.");
         }
-
 
         return session;
     }

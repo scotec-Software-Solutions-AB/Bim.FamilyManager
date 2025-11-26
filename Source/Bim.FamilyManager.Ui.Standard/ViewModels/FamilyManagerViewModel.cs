@@ -1,16 +1,18 @@
-﻿using System.IO;
-using System.Reflection;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Options;
-using Scotec.Extensions.Linq;
+﻿using System.ComponentModel;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Ui.Views.Settings;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
+using Scotec.Events.WeakEvents;
+using Scotec.Extensions.Linq;
 using Scotec.Wpf.ViewModels;
+using System.IO;
+using System.Reflection;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Bim.FamilyManager.Ui.Standard.ViewModels;
 
@@ -69,7 +71,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         _familyFactory = familyFactory;
 
         _logo = options.Value.Logo;
-        _familyManager.Reloaded += OnReloaded;
+        StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded);
         _reloadCommand = new RelayCommand(() => { _familyManager.Reload(); });
     }
 
@@ -235,16 +237,16 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
             {
                 _familySources = _familyManager.FamilySources.Select(source => (IFamilySourceViewModel)_sourceFactory(source)).ToList();
 
-                _familySources.ForAll(g => g.PropertyChanged += (sender, args) =>
+                _familySources.ForAll(g => StaticWeakEventManager.AddWeakHandler<IFamilySourceViewModel, PropertyChangedEventArgs>(g, nameof(g.PropertyChanged), (source, args) =>
                 {
-                    if (sender is IFamilySourceViewModel source && args.PropertyName == nameof(IFamilySourceViewModel.IsSelected))
+                    if (args.PropertyName == nameof(IFamilySourceViewModel.IsSelected))
                     {
                         if (source.IsSelected)
                         {
                             SelectedFamilySource = source;
                         }
                     }
-                });
+                }));
 
                 var selectedSource = _familySources.FirstOrDefault(g => g.IsSelected) ?? _familySources.FirstOrDefault();
                 if (selectedSource is not null)
@@ -283,7 +285,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     ///     This method resets the <see cref="SelectedFamilySource" /> and <see cref="FamilySources" /> properties to null,
     ///     ensuring that the view model reflects the updated state of the family manager after a reload.
     /// </remarks>
-    private void OnReloaded(object? sender, EventArgs e)
+    private void OnReloaded(IFamilyManager? sender, EventArgs e)
     {
         SelectedFamilySource = null;
 

@@ -141,7 +141,15 @@ public abstract class FamilySourceSettingsViewModel<TOptions> : ViewModel, IFami
     public bool IsModified
     {
         get => _isModified;
-        set => SetProperty(ref _isModified, value);
+        set
+        {
+            SetProperty(ref _isModified, value);
+            OnIsModified();
+        }
+    }
+
+    protected virtual void OnIsModified()
+    {
     }
 
     /// <summary>

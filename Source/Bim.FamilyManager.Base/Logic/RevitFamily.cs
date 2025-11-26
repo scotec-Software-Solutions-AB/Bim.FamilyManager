@@ -200,17 +200,6 @@ public sealed class RevitFamily : IRevitFamily
     ///     indicating that the <see cref="RevitFamily" /> is ready for use. Subscribers can use this
     ///     event to perform actions that depend on the initialization of the family.
     /// </remarks>
-    /// <example>
-    ///     To subscribe to the <c>Initialized</c> event:
-    ///     <code>
-    /// var revitFamily = new RevitFamily("FamilyName", familyInfo, saveAction, logger);
-    /// revitFamily.Initialized += (sender, args) =>
-    /// {
-    ///     Console.WriteLine("Revit family has been initialized.");
-    /// };
-    /// revitFamily.Initialize();
-    /// </code>
-    /// </example>
     public event EventHandler? Initialized;
 
     /// <summary>

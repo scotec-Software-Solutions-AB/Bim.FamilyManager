@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Scotec.Extensions.Linq;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels.Settings;
@@ -43,7 +44,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
 
         SelectedFamilySource = FamilySources.First();
 
-        FamilySources.ForAll(fs => fs.PropertyChanged += (sender, args) => { _applyCommand?.NotifyCanExecuteChanged(); });
+        FamilySources.ForAll(fs => StaticWeakEventManager.AddWeakHandler(fs, nameof(fs.PropertyChanged), (sender, args) => { _applyCommand?.NotifyCanExecuteChanged(); }));
 
         _applyCommand = new RelayCommand(Apply, CanApply);
         _cancelCommand = new RelayCommand(Cancel, () => true);

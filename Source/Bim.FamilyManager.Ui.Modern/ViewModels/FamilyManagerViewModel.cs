@@ -11,6 +11,7 @@ using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Ui.Views.Settings;
+using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.Modern.ViewModels;
@@ -75,7 +76,8 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         _familyFactory = familyFactory;
 
         _logo = options.Value.Logo;
-        _familyManager.Reloaded += OnReloaded;
+        StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded );
+
 
         _reloadCommand = new RelayCommand(() => { _familyManager.Reload(); });
         _goHomeCommand = new RelayCommand(GoHome, CanGoHome);
@@ -468,7 +470,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     ///     This method resets the <see cref="SelectedFamilySource" /> and <see cref="FamilySources" /> properties to null,
     ///     ensuring that the view model reflects the updated state of the family manager after a reload.
     /// </remarks>
-    private void OnReloaded(object? sender, EventArgs e)
+    private void OnReloaded(IFamilyManager? sender, EventArgs e)
     {
         ClearHistory();
         SelectedItem = null;
