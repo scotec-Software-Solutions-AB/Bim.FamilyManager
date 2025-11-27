@@ -3,11 +3,11 @@
 namespace Bim.FamilyManager.Abstractions;
 
 /// <summary>
-///     Represents a folder in the Revit Family Manager hierarchy.
+///     Defines the contract for a folder in the Bim.FamilyManager hierarchy.
 /// </summary>
 /// <remarks>
-///     A folder can contain subfolders and Revit families. It provides access to its name, path,
-///     and collections of subfolders and families.
+///     Provides access to the folder's name, path, subfolders, families, and preview image. Folders are used to organize
+///     Revit families in a hierarchical structure.
 /// </remarks>
 public interface IFolder
 {
@@ -15,43 +15,44 @@ public interface IFolder
     ///     Gets the name of the folder.
     /// </summary>
     /// <value>
-    ///     A <see cref="string" /> representing the name of the folder.
+    ///     A <see cref="string" /> representing the folder name.
     /// </value>
     /// <remarks>
-    ///     The name typically corresponds to the directory name of the folder in the file system.
+    ///     Typically corresponds to the directory name in the file system.
     /// </remarks>
     string Name { get; }
 
     /// <summary>
-    ///     Gets the collection of subfolders contained within the current folder.
+    ///     Gets the collection of subfolders contained within this folder.
     /// </summary>
     /// <value>
-    ///     A list of <see cref="IFolder" /> instances representing the subfolders of the current folder.
+    ///     An <see cref="IEnumerable{IFolder}" /> representing the subfolders.
     /// </value>
     /// <remarks>
-    ///     This property provides access to the hierarchical structure of folders in the Revit Family Manager.
-    ///     Each subfolder can contain additional subfolders and families, enabling navigation through the folder hierarchy.
+    ///     Provides access to the hierarchical structure of folders. Each subfolder can contain additional subfolders and
+    ///     families.
     /// </remarks>
     IEnumerable<IFolder> Subfolders { get; }
 
     /// <summary>
-    ///     Gets the collection of Revit families contained within the folder.
+    ///     Gets the collection of Revit families contained within this folder.
     /// </summary>
     /// <value>
-    ///     A list of <see cref="IRevitFamily" /> objects representing the Revit families in the folder.
+    ///     An <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families in the folder.
     /// </value>
     /// <remarks>
-    ///     This property provides access to all Revit families directly stored in the folder.
-    ///     Each family includes metadata, file information, preview image, and associated symbols.
+    ///     Provides access to all Revit families directly stored in the folder, including their metadata and symbols.
     /// </remarks>
     IEnumerable<IRevitFamily> Families { get; }
 
     /// <summary>
-    ///     Gets a stream representing the preview image of the folder.
+    ///     Gets a stream containing the preview image of the folder.
     /// </summary>
+    /// <value>
+    ///     A <see cref="Stream" /> representing the preview image, or <c>null</c> if no preview is available.
+    /// </value>
     /// <remarks>
     ///     The preview image provides a visual representation of the folder's content.
-    ///     This property may return <see langword="null" /> if no preview is available.
     /// </remarks>
     Stream? Preview { get; }
 }

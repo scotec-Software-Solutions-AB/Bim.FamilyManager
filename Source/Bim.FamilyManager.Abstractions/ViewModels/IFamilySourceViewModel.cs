@@ -1,12 +1,12 @@
 ﻿namespace Bim.FamilyManager.Abstractions.ViewModels;
 
 /// <summary>
-///     Represents the view model for a family source in the Revit Family Manager.
+///     Defines the view model contract for a family source in Bim.FamilyManager.
 /// </summary>
 /// <remarks>
-///     This interface defines properties and behaviors specific to managing and interacting with a family source,
-///     including its associated folders and the currently selected folder. It extends the base functionality
-///     provided by <see cref="IFamilyManagerItemViewModel" />.
+///     Provides properties and behaviors for managing and interacting with a family source, including access to its
+///     folders, the currently selected folder, and an associated panel view model.
+///     Extends <see cref="IFamilyManagerItemViewModel" /> to include common item properties.
 /// </remarks>
 public interface IFamilySourceViewModel : IFamilyManagerItemViewModel
 {
@@ -14,28 +14,35 @@ public interface IFamilySourceViewModel : IFamilyManagerItemViewModel
     ///     Gets the collection of folder view models associated with the family source.
     /// </summary>
     /// <value>
-    ///     A list of <see cref="IFolderViewModel" /> instances representing the folders
-    ///     contained within the family source. Returns <c>null</c> if no folders are available.
+    ///     A list of <see cref="IFolderViewModel" /> instances representing the folders contained within the family source, or
+    ///     <c>null</c> if no folders are available.
     /// </value>
     /// <remarks>
-    ///     This property provides access to the hierarchical structure of folders associated
-    ///     with the family source, enabling navigation and management of families within
-    ///     the Revit Family Manager.
+    ///     Provides access to the hierarchical structure of folders for navigation and management of families.
     /// </remarks>
-    public IList<IFolderViewModel>? Folders { get; }
+    IList<IFolderViewModel>? Folders { get; }
 
     /// <summary>
-    ///     Gets or sets the currently selected folder within the family source.
+    ///     Gets the currently selected folder within the family source.
     /// </summary>
     /// <value>
     ///     An instance of <see cref="IFolderViewModel" /> representing the selected folder, or <c>null</c> if no folder is
     ///     selected.
     /// </value>
     /// <remarks>
-    ///     This property allows interaction with the folder currently selected in the family source.
-    ///     It is commonly used for filtering or displaying content specific to the selected folder.
+    ///     Used for interaction and filtering of content specific to the selected folder.
     /// </remarks>
-    public IFolderViewModel? SelectedFolder { get; }
-    
-    public IFamilySourcePanelViewModel? Panel { get; }
+    IFolderViewModel? SelectedFolder { get; }
+
+    /// <summary>
+    ///     Gets the panel view model associated with the family source.
+    /// </summary>
+    /// <value>
+    ///     An instance of <see cref="IFamilySourcePanelViewModel" /> representing the panel for the family source, or
+    ///     <c>null</c> if not available.
+    /// </value>
+    /// <remarks>
+    ///     Provides source-specific content, controls, or configuration for display in the UI.
+    /// </remarks>
+    IFamilySourcePanelViewModel? Panel { get; }
 }

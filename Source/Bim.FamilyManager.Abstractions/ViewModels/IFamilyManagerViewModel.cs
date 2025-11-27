@@ -5,11 +5,12 @@ using Scotec.Wpf.ViewModels;
 namespace Bim.FamilyManager.Abstractions.ViewModels;
 
 /// <summary>
-///     Represents the view model for managing families in the Revit Family Manager application.
+///     Defines the view model contract for managing families in Bim.FamilyManager.
 /// </summary>
 /// <remarks>
-///     This interface defines the contract for the Family Manager view model, which includes properties
-///     for accessing the application logo, reload command, and a collection of family sources.
+///     Provides properties for accessing the application logo, reload command, and the collection of available family
+///     sources.
+///     Used to coordinate the main Family Manager UI and its data.
 /// </remarks>
 public interface IFamilyManagerViewModel : IViewModel
 {
@@ -20,25 +21,27 @@ public interface IFamilyManagerViewModel : IViewModel
     ///     An <see cref="ImageSource" /> representing the logo, or <c>null</c> if no logo is available.
     /// </value>
     /// <remarks>
-    ///     The logo is typically used in the user interface to visually represent the add-in or feature.
+    ///     Used in the UI to visually represent the Family Manager or add-in.
     /// </remarks>
-    public ImageSource? Logo { get; }
+    ImageSource? Logo { get; }
 
     /// <summary>
-    ///     Gets the command that triggers the reload operation for the Family Manager.
+    ///     Gets the command that triggers a reload operation for the Family Manager.
     /// </summary>
     /// <remarks>
-    ///     This command is used to refresh or reload the data displayed in the Family Manager,
-    ///     ensuring that the latest information is retrieved and displayed to the user.
+    ///     Used to refresh or reload the data displayed in the Family Manager, ensuring the latest information is shown.
     /// </remarks>
-    public ICommand ReloadCommand { get; }
+    ICommand ReloadCommand { get; }
 
     /// <summary>
-    ///     Gets a collection of family sources available in the Family Manager.
+    ///     Gets the collection of family sources available in the Family Manager.
     /// </summary>
+    /// <value>
+    ///     An <see cref="IEnumerable{IFamilySourceViewModel}" /> representing the available family sources.
+    /// </value>
     /// <remarks>
-    ///     Each family source represents a group of families, which may include folders and a selected folder.
-    ///     This property is typically used to bind the collection of family sources to the UI for display and interaction.
+    ///     Each family source may include folders and a selected folder. This property is typically bound to the UI for
+    ///     display and interaction.
     /// </remarks>
-    public IEnumerable<IFamilySourceViewModel> FamilySources { get; }
+    IEnumerable<IFamilySourceViewModel> FamilySources { get; }
 }

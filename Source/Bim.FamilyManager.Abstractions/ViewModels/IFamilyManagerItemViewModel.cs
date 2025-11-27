@@ -4,78 +4,69 @@ using Scotec.Wpf.ViewModels;
 namespace Bim.FamilyManager.Abstractions.ViewModels;
 
 /// <summary>
-///     Represents the base interface for view models in the Revit Family Manager.
+///     Defines the base interface for view models representing items in Bim.FamilyManager.
 /// </summary>
 /// <remarks>
-///     This interface defines common properties and behaviors for items displayed in the Revit Family Manager,
-///     such as their name, preview image, and selection state. It serves as a foundation for more specific
-///     view model interfaces, such as family sources, folders, and families.
+///     Provides common properties for items displayed in the Family Manager, including name, preview image, content
+///     height, and selection state.
+///     Serves as a foundation for more specific item view models such as family sources, folders, and families.
 /// </remarks>
 public interface IFamilyManagerItemViewModel : IViewModel
 {
     /// <summary>
-    ///     Gets the name of the item represented by this view model.
+    ///     Gets the name of the item.
     /// </summary>
     /// <remarks>
-    ///     The <see cref="Name" /> property provides a human-readable identifier for the item,
-    ///     which is typically displayed in the user interface. It is used to distinguish
-    ///     between different items in the Revit Family Manager.
+    ///     Provides a human-readable identifier for the item, typically shown in the user interface.
     /// </remarks>
-    public string Name { get; }
+    string Name { get; }
 
     /// <summary>
     ///     Gets the preview image associated with the item.
     /// </summary>
     /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image of the item, or <c>null</c> if no preview is
-    ///     available.
+    ///     An <see cref="ImageSource" /> representing the item's preview image, or <c>null</c> if unavailable.
     /// </value>
     /// <remarks>
-    ///     The preview image is typically used to visually represent the item in the user interface.
-    ///     It can be displayed in various views, such as family sources, folders, or families.
+    ///     Used to visually represent the item in the UI.
     /// </remarks>
-    public ImageSource? Preview { get; }
+    ImageSource? Preview { get; }
 
     /// <summary>
-    ///     Gets the height of the text block associated with the item.
+    ///     Gets the height of the content block for the item.
     /// </summary>
     /// <remarks>
-    ///     This property determines the height of the content used in the UI to display item-related information.
-    ///     It is commonly used to ensure consistent sizing of UI elements such as images and text blocks.
+    ///     Determines the height of UI elements displaying item-related information.
     /// </remarks>
-    public int ContentHeight { get; }
+    int ContentHeight { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether the preview image should be displayed for the item.
+    ///     Gets a value indicating whether the preview image should be displayed.
     /// </summary>
     /// <value>
-    ///     <c>true</c> if the preview image should be displayed; otherwise, <c>false</c>.
+    ///     <c>true</c> if the preview image is visible; otherwise, <c>false</c>.
     /// </value>
     /// <remarks>
-    ///     This property is typically used in the UI to control the visibility of the preview image
-    ///     associated with the item. It is bound to the visibility of the image element in the view.
+    ///     Controls the visibility of the item's preview image in the UI.
     /// </remarks>
-    public bool ShowPreviewImage { get; }
+    bool ShowPreviewImage { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether the item's name should be displayed in the UI.
+    ///     Gets a value indicating whether the item's name should be displayed.
     /// </summary>
     /// <value>
     ///     <c>true</c> if the item's name is visible; otherwise, <c>false</c>.
     /// </value>
     /// <remarks>
-    ///     This property is typically used to control the visibility of the item's name in the user interface.
-    ///     It is bound to UI elements, such as <see cref="System.Windows.Controls.TextBlock" />,
-    ///     and can be toggled to show or hide the item's name dynamically.
+    ///     Controls the visibility of the item's name in the UI.
     /// </remarks>
-    public bool ShowItemName { get; }
+    bool ShowItemName { get; }
 
     /// <summary>
     ///     Gets or sets a value indicating whether the item is selected.
     /// </summary>
     /// <remarks>
-    ///     This property is used to track the selection state of an item within the Revit Family Manager.
-    ///     It is commonly utilized to highlight or perform actions on selected items.
+    ///     Tracks the selection state of the item within the Family Manager.
     /// </remarks>
-    public bool IsSelected { get; set; }
+    bool IsSelected { get; set; }
 }

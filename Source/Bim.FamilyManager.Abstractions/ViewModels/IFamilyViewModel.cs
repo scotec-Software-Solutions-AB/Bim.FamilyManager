@@ -1,12 +1,15 @@
-﻿using Autodesk.Revit.UI;
-using System.Windows.Input;
+﻿using System.Windows.Input;
+using Autodesk.Revit.UI;
 
 namespace Bim.FamilyManager.Abstractions.ViewModels;
 
 /// <summary>
-///     Represents a view model for managing Revit family items, providing properties and commands
-///     to interact with and manipulate Revit families within the application.
+///     Defines the view model contract for managing Revit family items in Bim.FamilyManager.
 /// </summary>
+/// <remarks>
+///     Provides properties and commands for interacting with and manipulating Revit families, including access to family
+///     metadata, symbols, and document state.
+/// </remarks>
 public interface IFamilyViewModel : IFamilyManagerItemViewModel
 {
     /// <summary>
@@ -15,62 +18,79 @@ public interface IFamilyViewModel : IFamilyManagerItemViewModel
     /// <value>
     ///     <c>true</c> if the Revit family is loaded in the active document; otherwise, <c>false</c>.
     /// </value>
-    public bool IsLoadedInDocument { get; }
+    bool IsLoadedInDocument { get; }
 
     /// <summary>
     ///     Gets the Revit family associated with this view model.
     /// </summary>
-    /// <remarks>
-    ///     The <see cref="IRevitFamily" /> provides access to metadata, file information, preview image,
-    ///     and associated symbols of the Revit family. This property allows interaction with the
-    ///     underlying Revit family data within the application.
-    /// </remarks>
-    public IRevitFamily Family { get; }
+    /// <value>
+    ///     An instance of <see cref="IRevitFamily" /> providing access to metadata, file information, preview image, and
+    ///     symbols.
+    /// </value>
+    IRevitFamily Family { get; }
 
     /// <summary>
-    ///     Gets the command used to initiate the editing of a Revit family.
+    ///     Gets the command used to initiate editing of a Revit family.
     /// </summary>
-    /// <remarks>
-    ///     This command is typically bound to a user interface element, such as a button,
-    ///     allowing users to open and modify the selected Revit family within the application.
-    /// </remarks>
-    public ICommand EditFamilyCommand { get; }
+    /// <value>
+    ///     An <see cref="ICommand" /> bound to UI elements for opening and modifying the selected Revit family.
+    /// </value>
+    ICommand EditFamilyCommand { get; }
 
     /// <summary>
     ///     Gets the command used to load a Revit family into the current document.
     /// </summary>
-    /// <remarks>
-    ///     This command is typically bound to a user interface element, such as a button,
-    ///     and is executed to load the associated Revit family into the active Revit document.
-    /// </remarks>
-    public ICommand LoadFamilyCommand { get; }
+    /// <value>
+    ///     An <see cref="ICommand" /> bound to UI elements for loading the associated Revit family into the active document.
+    /// </value>
+    ICommand LoadFamilyCommand { get; }
 
     /// <summary>
     ///     Gets the command used to remove a Revit family from the application.
     /// </summary>
-    /// <remarks>
-    ///     This command is typically bound to a UI element, such as a button, to allow users
-    ///     to remove a family from the current context. The implementation of the command
-    ///     should handle the necessary logic for removing the family, such as updating the
-    ///     view model and notifying the application of the change.
-    /// </remarks>
-    public ICommand RemoveFamilyCommand { get; }
+    /// <value>
+    ///     An <see cref="ICommand" /> bound to UI elements for removing the family from the current context.
+    /// </value>
+    ICommand RemoveFamilyCommand { get; }
 
     /// <summary>
     ///     Gets the collection of family symbols associated with the Revit family.
-    ///     Each symbol represents a specific variation or type within the family.
     /// </summary>
     /// <value>
-    ///     A list of <see cref="IFamilySymbolViewModel" /> instances, where each instance
-    ///     provides details about a specific family symbol.
+    ///     A list of <see cref="IFamilySymbolViewModel" /> instances, each representing a specific symbol or type within the
+    ///     family.
     /// </value>
-    public IList<IFamilySymbolViewModel> Symbols { get; }
+    IList<IFamilySymbolViewModel> Symbols { get; }
 
+    /// <summary>
+    ///     Gets the drop handler for drag-and-drop operations involving the family.
+    /// </summary>
+    /// <value>
+    ///     An <see cref="IControllableDropHandler" /> instance for managing drop interactions.
+    /// </value>
     IControllableDropHandler DropHandler { get; }
 
-    public string Product { get; }
-    
-    public string ProductVersion { get; }
-    
-    public DateTime Updated { get; }
+    /// <summary>
+    ///     Gets the product name associated with the Revit family.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="string" /> representing the product name.
+    /// </value>
+    string Product { get; }
+
+    /// <summary>
+    ///     Gets the product version associated with the Revit family.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="string" /> representing the product version.
+    /// </value>
+    string ProductVersion { get; }
+
+    /// <summary>
+    ///     Gets the date and time when the Revit family was last updated.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="DateTime" /> representing the last update timestamp.
+    /// </value>
+    DateTime Updated { get; }
 }

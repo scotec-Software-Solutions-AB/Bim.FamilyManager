@@ -3,44 +3,66 @@
 namespace Bim.FamilyManager.Abstractions;
 
 /// <summary>
-///     Represents a source of Revit families, providing access to its name, associated folders, and functionality
-///     for reloading and saving families.
+///     Defines the contract for a source of Revit families in Bim.FamilyManager.
 /// </summary>
+/// <remarks>
+///     Provides access to the source's name, associated folders, preview image, type, and events for error and reload
+///     notifications.
+///     Supports reloading the source to reflect changes and saving family data.
+/// </remarks>
 public interface IFamilySource
 {
     /// <summary>
     ///     Gets the name of the Revit family source.
     /// </summary>
     /// <remarks>
-    ///     The name uniquely identifies the source of Revit families and can be used for display
-    ///     or organizational purposes.
+    ///     Uniquely identifies the source and can be used for display or organizational purposes.
     /// </remarks>
     string Name { get; }
 
     /// <summary>
     ///     Gets the collection of folders associated with the Revit family source.
     /// </summary>
+    /// <value>
+    ///     An <see cref="IEnumerable{IFolder}" /> representing all top-level folders within the source.
+    /// </value>
     /// <remarks>
     ///     Each folder represents a hierarchical structure that can contain subfolders and Revit families.
-    ///     This property provides access to all top-level folders within the source.
     /// </remarks>
     IEnumerable<IFolder> Folders { get; }
 
-    public Stream? Preview { get; }
-
-    public event EventHandler<FamilySourceErrorEventArgs> Error;
+    /// <summary>
+    ///     Gets a stream containing the preview image of the family source.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="Stream" /> representing the preview image, or <c>null</c> if no preview is available.
+    /// </value>
+    Stream? Preview { get; }
 
     /// <summary>
-    ///     Reloads the family source, ensuring that any changes to the underlying data or structure
-    ///     are reflected in the current instance.
+    ///     Gets the type identifier of the family source.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="string" /> representing the type of the source (e.g., "Directory", "Database", "AzureStorage").
+    /// </value>
+    string Type { get; }
+
+    /// <summary>
+    ///     Occurs when an error is encountered in the family source.
+    /// </summary>
+    /// <value>
+    ///     An event providing <see cref="FamilySourceErrorEventArgs" /> with error details and the affected family source.
+    /// </value>
+    event EventHandler<FamilySourceErrorEventArgs> Error;
+
+    /// <summary>
+    ///     Reloads the family source, updating its state to reflect any changes to the underlying data or structure.
     /// </summary>
     /// <remarks>
-    ///     This method is typically used to refresh the state of the family source, such as after
-    ///     external modifications to the source data. Implementations may also trigger the
-    ///     <see cref="Reloaded" /> event to notify subscribers of the reload operation.
+    ///     Used to refresh the source after external modifications. May trigger the <see cref="Reloaded" /> event.
     /// </remarks>
     /// <exception cref="ObjectDisposedException">
-    ///     Thrown if the method is called on an instance that has already been disposed.
+    ///     Thrown if called on a disposed instance.
     /// </exception>
     void Reload();
 
@@ -48,25 +70,35 @@ public interface IFamilySource
     ///     Occurs when the family source has been reloaded.
     /// </summary>
     /// <remarks>
-    ///     This event is triggered after the <see cref="Reload" /> method is called, indicating that
-    ///     the state of the family source has been refreshed. Subscribers can use this event to
-    ///     perform actions in response to the reload operation, such as updating UI elements or
-    ///     reloading dependent data.
+    ///     Triggered after <see cref="Reload" /> is called, indicating the source has been refreshed.
+    ///     Subscribers can update UI or reload dependent data in response.
     /// </remarks>
-    public event EventHandler<EventArgs> Reloaded;
-    
-    public string Type { get; }
+    event EventHandler<EventArgs> Reloaded;
 }
 
+/// <summary>
+///     Provides error details for family source operations in Bim.FamilyManager.
+/// </summary>
 public class FamilySourceErrorEventArgs
 {
+    /// <summary>
+    ///     Initializes a new instance of <see cref="FamilySourceErrorEventArgs" />.
+    /// </summary>
+    /// <param name="hasError">Indicates whether an error occurred.</param>
+    /// <param name="familySource">The family source where the error occurred.</param>
     public FamilySourceErrorEventArgs(bool hasError, IFamilySource familySource)
     {
         HasError = hasError;
         FamilySource = familySource;
     }
 
+    /// <summary>
+    ///     Gets a value indicating whether an error occurred.
+    /// </summary>
     public bool HasError { get; }
-    
+
+    /// <summary>
+    ///     Gets the family source associated with the error.
+    /// </summary>
     public IFamilySource FamilySource { get; }
 }

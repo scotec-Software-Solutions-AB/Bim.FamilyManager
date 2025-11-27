@@ -1,57 +1,63 @@
 ﻿namespace Bim.FamilyManager.Abstractions.Options;
 
 /// <summary>
-///     Defines the contract for configuration options of a family source in the Revit Family Manager.
+///     Represents configuration options for a family source in the Revit Family Manager.
 /// </summary>
 /// <remarks>
-///     This interface is implemented by various classes to represent different types of family sources,
-///     such as directory-based or database-based sources. It provides common properties that are shared
-///     across all family source types.
+///     Implement this interface to define options for different family source types, such as directory-based or
+///     database-based sources.
+///     Common properties include identification, type, name, activation, and editability.
 /// </remarks>
 public interface IFamilySourceOptions
 {
+    /// <summary>
+    ///     Delegate for creating <see cref="IFamilySourceOptions" /> instances based on a key.
+    /// </summary>
+    /// <param name="key">A unique key identifying the family source configuration.</param>
+    /// <returns>An instance of <see cref="IFamilySourceOptions" />.</returns>
     public delegate IFamilySourceOptions Factory(string key);
 
-    Guid Id { get; }
-    
     /// <summary>
-    ///     Gets or sets the type of the family source.
+    ///     Gets the unique identifier for the family source configuration.
+    /// </summary>
+    Guid Id { get; }
+
+    /// <summary>
+    ///     Gets or sets the type identifier of the family source.
     /// </summary>
     /// <remarks>
-    ///     This property identifies the specific type of the family source, which can be used to determine
-    ///     the appropriate configuration or behavior for the source. The value is typically used in factory
-    ///     methods or dependency injection to resolve the corresponding family source implementation.
+    ///     Used to distinguish the implementation or configuration of the family source (e.g., "Directory", "Database").
+    ///     This value is typically used in factories or dependency injection to resolve the correct source.
     /// </remarks>
     string Type { get; set; }
 
     /// <summary>
-    ///     Gets or sets the name of the family source.
+    ///     Gets or sets the display name of the family source.
     /// </summary>
     /// <remarks>
-    ///     This property represents the display name or identifier for the family source.
-    ///     It is used to distinguish between different family sources in the Revit Family Manager.
+    ///     The name is shown in the UI and used to differentiate between sources.
     /// </remarks>
     string Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the family source is active.
+    ///     Gets or sets a value indicating whether the family source is currently active.
     /// </summary>
     /// <value>
-    ///     <c>true</c> if the family source is active; otherwise, <c>false</c>.
+    ///     <c>true</c> if the source is active and should be included in operations; otherwise, <c>false</c>.
     /// </value>
     /// <remarks>
-    ///     This property is used to determine whether the family source should be included
-    ///     in operations such as filtering or processing. Active sources are typically
-    ///     prioritized or displayed in the user interface.
+    ///     Inactive sources may be hidden or excluded from processing and UI lists.
     /// </remarks>
     bool IsActive { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the family source is editable.
+    ///     Gets or sets a value indicating whether the family source configuration is editable.
     /// </summary>
+    /// <value>
+    ///     <c>true</c> if the source can be modified; otherwise, <c>false</c>.
+    /// </value>
     /// <remarks>
-    ///     This property determines if the configuration of the family source can be modified.
-    ///     It is used to control the editability of the family source in the Revit Family Manager.
+    ///     Controls whether users can change the configuration of the source in the UI.
     /// </remarks>
     bool IsEditable { get; set; }
 }
