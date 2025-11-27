@@ -138,6 +138,23 @@ public sealed class RevitFamily : IRevitFamily
         _saveAction(this, stream);
     }
 
+    /// <summary>
+    /// Attempts to retrieve family information of the specified type by name.
+    /// </summary>
+    /// <typeparam name="TInfo">The type of the family information to retrieve. Must be a reference type.</typeparam>
+    /// <param name="name">The name of the family whose information is to be retrieved.</param>
+    /// <param name="info">
+    /// When this method returns, contains the deserialized family information of type <typeparamref name="TInfo"/> 
+    /// if the operation was successful; otherwise, <see langword="null"/>.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the family information was successfully retrieved and deserialized; 
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// This method attempts to locate and deserialize the family information associated with the specified name.
+    /// If the operation succeeds, the <paramref name="info"/> parameter will contain the deserialized object.
+    /// </remarks>
     public bool TryGetFamilyInfo<TInfo>(string name, [NotNullWhen(true)] out TInfo? info) where TInfo : class
     {
         info = null;
@@ -276,7 +293,18 @@ public sealed class RevitFamily : IRevitFamily
         Initialize();
     }
 
+    /// <summary>
+    /// Gets the product name associated with the Revit family.
+    /// </summary>
+    /// <value>
+    /// A <see cref="string"/> representing the product name.
+    /// </value>
+    /// <remarks>
+    /// This property retrieves the product name from the underlying <see cref="RevitFamilyInfo"/> instance.
+    /// </remarks>
     public string Product => _familyInfo.Product;
+    
     public string ProductVersion => _familyInfo.ProductVersion;
+    
     public DateTime Updated => _familyInfo.Updated;
 }

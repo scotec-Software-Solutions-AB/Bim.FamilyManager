@@ -583,21 +583,40 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         return true;
     }
 
+    /// <summary>
+    /// Handles the <see cref="DocumentSavingAsEventArgs"/> event when a document is being saved as a new file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data containing the document being saved.</param>
     private void OnDocumentSavingAs(object? sender, DocumentSavingAsEventArgs e)
     {
         OnDocumentSaving(e.Document);
     }
 
+    /// <summary>
+    /// Handles the <see cref="DocumentSavedAsEventArgs"/> event when a document has been saved as a new file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data containing the document that was saved.</param>
     private void OnDocumentSavedAs(object? sender, DocumentSavedAsEventArgs e)
     {
         OnDocumentSaved(e.Document);
     }
 
+    /// <summary>
+    /// Handles the <see cref="DocumentSavingEventArgs"/> event when a document is being saved.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data containing the document being saved.</param>
     private void OnDocumentSaving(object? sender, DocumentSavingEventArgs e)
     {
         OnDocumentSaving(e.Document);
     }
 
+    /// <summary>
+    /// Updates the family metadata when a document is being saved.
+    /// </summary>
+    /// <param name="document">The <see cref="Document"/> being saved.</param>
     private void OnDocumentSaving(Document document)
     {
         // Only handle family documents.
@@ -750,6 +769,20 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         stream.Position = 0;
     }
 
+    /// <summary>
+    /// Retrieves the username associated with the specified Revit document.
+    /// </summary>
+    /// <param name="document">
+    /// The <see cref="Autodesk.Revit.DB.Document"/> instance from which to retrieve the username.
+    /// </param>
+    /// <returns>
+    /// A <see cref="string"/> representing the username. If the username is not available in the Revit document,
+    /// the system's current user name is returned instead.
+    /// </returns>
+    /// <remarks>
+    /// This method first attempts to retrieve the username from the Revit application's <c>Username</c> property.
+    /// If the username is not set or is empty, it falls back to the system's environment username.
+    /// </remarks>
     private static string GetUserName(Document document)
     {
         var userName = document.Application.Username;

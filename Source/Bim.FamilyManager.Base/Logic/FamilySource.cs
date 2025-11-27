@@ -146,32 +146,106 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     /// </remarks>
     public event EventHandler<EventArgs>? Reloaded;
 
+    /// <summary>
+    /// Gets the type of the family source.
+    /// </summary>
+    /// <value>
+    /// A <see cref="string"/> representing the type of the family source, as defined by the associated <see cref="IFamilySourceOptions"/>.
+    /// </value>
+    /// <remarks>
+    /// This property retrieves the <c>Type</c> value from the <see cref="Options"/> of the family source.
+    /// </remarks>
     public string Type => Options.Type;
 
+    /// <summary>
+    /// Gets a stream that provides a preview of the family data.
+    /// </summary>
+    /// <remarks>
+    /// The returned <see cref="Stream" /> may contain data specific to the implementation of the family source.
+    /// It is the caller's responsibility to ensure proper disposal of the stream after use.
+    /// </remarks>
+    /// <returns>
+    /// A <see cref="Stream" /> object containing the preview data, or <c>null</c> if no preview is available.
+    /// </returns>
     public abstract Stream? Preview { get; }
 
+    /// <summary>
+    /// Raises an error event with the specified exception details.
+    /// </summary>
+    /// <param name="e">The exception containing details about the error.</param>
+    /// <remarks>
+    /// This method sets the <see cref="ErrorMessage"/> property to the exception's message
+    /// and triggers the <see cref="Error"/> event to notify subscribers about the error.
+    /// </remarks>
     protected void RaiseError(Exception e)
     {
         RaiseError(e.Message);
     }
+    
+    /// <summary>
+    ///     Raises an error event with the specified error message.
+    /// </summary>
+    /// <param name="message">
+    ///     The error message to be associated with the error event.
+    /// </param>
+    /// <remarks>
+    ///     This method sets the <see cref="ErrorMessage" /> property to the provided message and triggers the
+    ///     <see cref="Error" /> event to notify subscribers about the error.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">
+    ///     Thrown if the <paramref name="message" /> is <c>null</c>.
+    /// </exception>
     protected void RaiseError(string message)
     {
         ErrorMessage = message;
         RaiseError();
     }
 
+    /// <summary>
+    /// Gets the error message associated with the most recent error event.
+    /// </summary>
+    /// <value>
+    /// A string containing the error message, or <c>null</c> if no error has occurred.
+    /// </value>
+    /// <remarks>
+    /// This property is set when an error is raised using the <see cref="RaiseError(Exception)"/> or
+    /// <see cref="RaiseError(string)"/> methods. It provides details about the error for diagnostic purposes.
+    /// </remarks>
     public string? ErrorMessage { get; private set; }
     
+    /// <summary>
+    ///     Raises an error event to notify subscribers about an error in the family source.
+    /// </summary>
+    /// <remarks>
+    ///     This method triggers the <see cref="Error" /> event, providing details about the error
+    ///     through a <see cref="FamilySourceErrorEventArgs" /> instance. It is typically called
+    ///     internally when an error occurs during operations within the family source.
+    /// </remarks>
     protected void RaiseError()
     {
         Error?.Invoke(this, new FamilySourceErrorEventArgs(true, this));
     }
     
+    /// <summary>
+    /// Resets the current error state for the family source and raises the <see cref="Error"/> event
+    /// to indicate that the error has been cleared.
+    /// </summary>
+    /// <remarks>
+    /// This method is typically called to clear any previously raised errors and notify subscribers
+    /// that the family source is no longer in an error state.
+    /// </remarks>
     protected void ResetError()
     {
         Error?.Invoke(this, new FamilySourceErrorEventArgs(false, this));
     }
     
+    /// <summary>
+    /// Occurs when an error is raised in the family source.
+    /// </summary>
+    /// <remarks>
+    /// This event is triggered to notify subscribers about an error that has occurred within the family source.
+    /// The event provides details about the error through a <see cref="FamilySourceErrorEventArgs"/> instance.
+    /// </remarks>
     public event EventHandler<FamilySourceErrorEventArgs>? Error;
 
     /// <summary>
