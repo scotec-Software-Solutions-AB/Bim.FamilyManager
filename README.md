@@ -92,6 +92,9 @@ Integration for Azure Storage management.
 
 ![Bim.FamilyManager](./Documentation/Images/family_manager_modern_view.png "Bim.FamilyManager")
 
+![Bim.FamilyManager Family Sources](./Documentation/Images/settings_family_sources.png "Bim.FamilyManager Family Sources")
+
+![Revit with Bim.FamilyManager](./Documentation/Images/family_manager_revit.png "Revit with Bim.FamilyManager")
 
 ## Professional Support & Custom Solutions
 
