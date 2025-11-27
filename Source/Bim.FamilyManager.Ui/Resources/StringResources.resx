@@ -130,10 +130,10 @@
     <value>Place symbol...</value>
   </data>
   <data name="Pane.Name" xml:space="preserve">
-    <value>Family Manager</value>
+    <value>Bim.FamilyManager</value>
   </data>
   <data name="FamilyManager.Name" xml:space="preserve">
-    <value>Family Manager</value>
+    <value>Bim.FamilyManager</value>
   </data>
   <data name="DirectorySource.Message.Save.Error" xml:space="preserve">
     <value>Could not save the family to the family source. Please ensure the destination is accessible and writable.</value>
@@ -172,7 +172,7 @@
     <value>Name</value>
   </data>
   <data name="SettingsManager.Window.Title" xml:space="preserve">
-    <value>Family Manager settings</value>
+    <value>Bim.FamilyManager settings</value>
   </data>
   <data name="FamilySourceSettings.Text.SelectSourceType" xml:space="preserve">
     <value>Select family source type</value>

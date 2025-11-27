@@ -89,7 +89,9 @@ Integration for Azure Storage management.
 
 ## Screenshots
 
-*Add screenshots of the main UI, settings, and family management views here.*
+
+![Bim.FamilyManager](./Documentation/Images/family_manager_modern_view.png "Bim.FamilyManager")
+
 
 ## Professional Support & Custom Solutions
 
