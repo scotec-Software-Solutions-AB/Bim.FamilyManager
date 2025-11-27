@@ -26,12 +26,12 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
-	  <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1-dev.11" />
-	  <!--<PackageReference Include="Scotec.Identity.AzureActiveDirectory" Version="1.0.9-dev.10" />-->
+	  <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1-dev.12" />
+	  <PackageReference Include="Scotec.Identity.AzureActiveDirectory" Version="1.1.1-dev.12" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\scotec_ssc\Source\Scotec.Ssc\Scotec.Identity.AzureActiveDirectory\Scotec.Identity.AzureActiveDirectory.csproj" />
+		<!--<ProjectReference Include="..\..\..\scotec_ssc\Source\Scotec.Ssc\Scotec.Identity.AzureActiveDirectory\Scotec.Identity.AzureActiveDirectory.csproj" />-->
 		<ProjectReference Include="..\Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
 	</ItemGroup>
