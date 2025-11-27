@@ -11,11 +11,12 @@ using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 namespace Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings;
 
 /// <summary>
-/// Represents the view model for managing settings related to an Azure Storage-based family source.
+///     Represents the view model for managing settings related to an Azure Storage-based family source.
 /// </summary>
 /// <remarks>
-/// This class extends <see cref="FamilySourceSettingsViewModel{TOptions}" /> with specific functionality for handling Azure Storage family source options,
-/// including authentication, property management, and command handling.
+///     This class extends <see cref="FamilySourceSettingsViewModel{TOptions}" /> with specific functionality for handling
+///     Azure Storage family source options,
+///     including authentication, property management, and command handling.
 /// </remarks>
 public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel<AzureStorageSourceOptions>
 {
@@ -29,7 +30,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     private string _tenantId;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AzureStorageSourceSettingsViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="AzureStorageSourceSettingsViewModel" /> class.
     /// </summary>
     /// <param name="authService">The Azure AD authentication service.</param>
     /// <param name="options">The Azure Storage source options.</param>
@@ -52,33 +53,34 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets the command used to initiate sign-in to Azure AD.
+    ///     Gets the command used to initiate sign-in to Azure AD.
     /// </summary>
     public ICommand SignInCommand => _signInCommand;
 
     /// <summary>
-    /// Gets a value indicating whether sign-in can be performed based on the current settings.
+    ///     Gets a value indicating whether sign-in can be performed based on the current settings.
     /// </summary>
     public bool CanSignIn => CanApply();
 
     /// <summary>
-    /// Gets a string indicating the signed-in user, or "Not signed in." if no session is active.
+    ///     Gets a string indicating the signed-in user, or "Not signed in." if no session is active.
     /// </summary>
     public string SignedInAs => Session?.Account?.Username ?? "Not signed in.";
 
     /// <summary>
-    /// Gets the source identifier for the Azure Storage-based family source.
+    ///     Gets the source identifier for the Azure Storage-based family source.
     /// </summary>
     /// <remarks>
-    /// This property overrides <see cref="FamilySourceSettingsViewModel{TOptions}.Source" /> to return the value of the <see cref="RootPath" /> property.
+    ///     This property overrides <see cref="FamilySourceSettingsViewModel{TOptions}.Source" /> to return the value of the
+    ///     <see cref="RootPath" /> property.
     /// </remarks>
     public override string Source => RootPath;
 
     /// <summary>
-    /// Gets or sets the directory path associated with the Azure Storage-based family source.
+    ///     Gets or sets the directory path associated with the Azure Storage-based family source.
     /// </summary>
     /// <remarks>
-    /// Modifying this property marks the settings as modified and triggers necessary updates.
+    ///     Modifying this property marks the settings as modified and triggers necessary updates.
     /// </remarks>
     public string RootPath
     {
@@ -92,7 +94,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets or sets the name of the Azure Blob container.
+    ///     Gets or sets the name of the Azure Blob container.
     /// </summary>
     public string ContainerName
     {
@@ -105,7 +107,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets or sets the Azure AD client ID as a string.
+    ///     Gets or sets the Azure AD client ID as a string.
     /// </summary>
     public string ClientId
     {
@@ -118,7 +120,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets or sets the Azure AD tenant ID as a string.
+    ///     Gets or sets the Azure AD tenant ID as a string.
     /// </summary>
     public string TenantId
     {
@@ -131,7 +133,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets or sets the Azure Storage endpoint URL.
+    ///     Gets or sets the Azure Storage endpoint URL.
     /// </summary>
     public string EndPoint
     {
@@ -144,12 +146,12 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Gets the display name for the Azure Storage source type.
+    ///     Gets the display name for the Azure Storage source type.
     /// </summary>
     public override string TypeName => "Azure Storage";
 
     /// <summary>
-    /// Gets or sets the current Azure AD authentication session.
+    ///     Gets or sets the current Azure AD authentication session.
     /// </summary>
     private IAadAuthSession? Session
     {
@@ -180,11 +182,12 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Determines whether the settings for the Azure Storage-based family source can be applied.
+    ///     Determines whether the settings for the Azure Storage-based family source can be applied.
     /// </summary>
     /// <returns><c>true</c> if the settings can be applied; otherwise, <c>false</c>.</returns>
     /// <remarks>
-    /// This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.CanApply" /> to include additional validation specific to Azure Storage sources.
+    ///     This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.CanApply" /> to include additional
+    ///     validation specific to Azure Storage sources.
     /// </remarks>
     public override bool CanApply()
     {
@@ -196,11 +199,11 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Applies the current settings for the Azure Storage-based family source.
+    ///     Applies the current settings for the Azure Storage-based family source.
     /// </summary>
     /// <remarks>
-    /// This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.OnApply" /> to update the
-    /// <see cref="AzureStorageSourceOptions" /> properties and attempts a silent sign-in operation.
+    ///     This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.OnApply" /> to update the
+    ///     <see cref="AzureStorageSourceOptions" /> properties and attempts a silent sign-in operation.
     /// </remarks>
     protected override void OnApply()
     {
@@ -215,7 +218,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Called when the modification state changes. Resets the session and updates command state.
+    ///     Called when the modification state changes. Resets the session and updates command state.
     /// </summary>
     protected override void OnIsModified()
     {
@@ -225,18 +228,11 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Notifies the sign-in command that its ability to execute may have changed.
-    /// </summary>
-    private void NotifyCanExecuteChanged()
-    {
-        _signInCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
-    /// Handles the cancellation of changes made to the Azure Storage-based family source settings.
+    ///     Handles the cancellation of changes made to the Azure Storage-based family source settings.
     /// </summary>
     /// <remarks>
-    /// This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.OnReset" /> to reset all relevant properties to their values in <see cref="Options" />.
+    ///     This method overrides <see cref="FamilySourceSettingsViewModel{TOptions}.OnReset" /> to reset all relevant
+    ///     properties to their values in <see cref="Options" />.
     /// </remarks>
     protected override void OnReset()
     {
@@ -249,7 +245,15 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Attempts to silently sign in to Azure AD using cached credentials.
+    ///     Notifies the sign-in command that its ability to execute may have changed.
+    /// </summary>
+    private void NotifyCanExecuteChanged()
+    {
+        _signInCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>
+    ///     Attempts to silently sign in to Azure AD using cached credentials.
     /// </summary>
     private async void TrySilentSignInAsync()
     {
@@ -282,7 +286,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Handles the SignedOut event for the Azure AD session.
+    ///     Handles the SignedOut event for the Azure AD session.
     /// </summary>
     /// <param name="arg1">The Azure AD session.</param>
     /// <param name="arg2">The event arguments.</param>
@@ -292,7 +296,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Handles the SignedIn event for the Azure AD session.
+    ///     Handles the SignedIn event for the Azure AD session.
     /// </summary>
     /// <param name="arg1">The Azure AD session.</param>
     /// <param name="arg2">The event arguments.</param>
@@ -302,7 +306,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     }
 
     /// <summary>
-    /// Initiates the interactive sign-in process to Azure AD.
+    ///     Initiates the interactive sign-in process to Azure AD.
     /// </summary>
     private async void SignIn()
     {

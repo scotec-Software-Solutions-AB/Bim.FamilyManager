@@ -3,18 +3,18 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Autodesk.Revit.UI;
 using Autofac;
-using log4net;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Scotec.Extensions.Linq;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;
 using Bim.FamilyManager.Resources;
 using Bim.FamilyManager.Ui.Views;
+using log4net;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Scotec.Extensions.Linq;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
 using Scotec.Revit.Ui;
@@ -185,9 +185,9 @@ public class RevitFamilyManagerApp : RevitApp
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile(Path.Combine(appSettingsPath, "appsettings.json"), optional: false, reloadOnChange: false)
-            .AddJsonFile(Path.Combine(appSettingsPath, $"appsettings.{environment}.json"), optional: true, reloadOnChange: false)
-            .Build();
+                            .AddJsonFile(Path.Combine(appSettingsPath, "appsettings.json"), false, false)
+                            .AddJsonFile(Path.Combine(appSettingsPath, $"appsettings.{environment}.json"), true, false)
+                            .Build();
 
         var context = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
         if (context is null)

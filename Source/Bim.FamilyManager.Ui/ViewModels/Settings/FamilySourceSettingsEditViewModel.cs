@@ -1,29 +1,27 @@
-﻿using System.ComponentModel;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using Scotec.Extensions.Linq;
+﻿using System.Windows.Input;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
+using Scotec.Extensions.Linq;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels.Settings;
 
 /// <summary>
-/// View model for editing a family source in the settings UI.
-/// Provides commands and state for managing the selected source and applying or cancelling changes.
+///     View model for editing a family source in the settings UI.
+///     Provides commands and state for managing the selected source and applying or cancelling changes.
 /// </summary>
 public class FamilySourceSettingsEditViewModel : ViewModel
 {
     /// <summary>
-    /// Factory delegate for creating <see cref="FamilySourceSettingsEditViewModel"/> instances.
+    ///     Factory delegate for creating <see cref="FamilySourceSettingsEditViewModel" /> instances.
     /// </summary>
     /// <param name="applyAction">The action to execute when applying changes.</param>
     /// <param name="cancelAction">The action to execute when cancelling changes.</param>
     /// <param name="familySource">The family source to edit, or <c>null</c> to allow selection.</param>
-    /// <returns>A new <see cref="FamilySourceSettingsEditViewModel"/> instance.</returns>
+    /// <returns>A new <see cref="FamilySourceSettingsEditViewModel" /> instance.</returns>
     public delegate FamilySourceSettingsEditViewModel Factory(Action applyAction, Action cancelAction,
                                                               IFamilySourceSettingsViewModel? familySource = null);
 
@@ -34,7 +32,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     private IFamilySourceSettingsViewModel? _selectedFamilySource;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamilySourceSettingsEditViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="FamilySourceSettingsEditViewModel" /> class.
     /// </summary>
     /// <param name="applyAction">The action to execute when applying changes.</param>
     /// <param name="cancelAction">The action to execute when cancelling changes.</param>
@@ -65,20 +63,21 @@ public class FamilySourceSettingsEditViewModel : ViewModel
 
         SelectedFamilySource = FamilySources.First();
 
-        FamilySources.ForAll(fs => StaticWeakEventManager.AddWeakHandler(fs, nameof(fs.PropertyChanged), (sender, args) => { _applyCommand?.NotifyCanExecuteChanged(); }));
+        FamilySources.ForAll(fs =>
+            StaticWeakEventManager.AddWeakHandler(fs, nameof(fs.PropertyChanged), (sender, args) => { _applyCommand?.NotifyCanExecuteChanged(); }));
 
         _applyCommand = new RelayCommand(Apply, CanApply);
         _cancelCommand = new RelayCommand(Cancel, () => true);
     }
 
     /// <summary>
-    /// Gets the list of available family source view models.
+    ///     Gets the list of available family source view models.
     /// </summary>
     public IList<IFamilySourceSettingsViewModel> FamilySources { get; }
 
     /// <summary>
-    /// Gets or sets the currently selected family source view model.
-    /// Changing the selection updates event subscriptions and command state.
+    ///     Gets or sets the currently selected family source view model.
+    ///     Changing the selection updates event subscriptions and command state.
     /// </summary>
     public IFamilySourceSettingsViewModel? SelectedFamilySource
     {
@@ -89,6 +88,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
             {
                 _selectedFamilySource.Modified -= SelectedFamilySourceOnModified;
             }
+
             SetProperty(ref _selectedFamilySource, value);
             if (_selectedFamilySource is not null)
             {
@@ -103,7 +103,17 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     }
 
     /// <summary>
-    /// Notifies the apply and cancel commands that their ability to execute may have changed.
+    ///     Gets the command to apply changes to the selected family source.
+    /// </summary>
+    public ICommand ApplyCommand => _applyCommand;
+
+    /// <summary>
+    ///     Gets the command to cancel changes and reset the selected family source.
+    /// </summary>
+    public ICommand CancelCommand => _cancelCommand;
+
+    /// <summary>
+    ///     Notifies the apply and cancel commands that their ability to execute may have changed.
     /// </summary>
     private void NotifyCanExecuteChanged()
     {
@@ -112,17 +122,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     }
 
     /// <summary>
-    /// Gets the command to apply changes to the selected family source.
-    /// </summary>
-    public ICommand ApplyCommand => _applyCommand;
-
-    /// <summary>
-    /// Gets the command to cancel changes and reset the selected family source.
-    /// </summary>
-    public ICommand CancelCommand => _cancelCommand;
-
-    /// <summary>
-    /// Executes the cancel action and resets the selected family source.
+    ///     Executes the cancel action and resets the selected family source.
     /// </summary>
     private void Cancel()
     {
@@ -131,7 +131,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     }
 
     /// <summary>
-    /// Determines whether the apply command can execute.
+    ///     Determines whether the apply command can execute.
     /// </summary>
     /// <returns><c>true</c> if the selected family source can be applied; otherwise, <c>false</c>.</returns>
     private bool CanApply()
@@ -140,7 +140,7 @@ public class FamilySourceSettingsEditViewModel : ViewModel
     }
 
     /// <summary>
-    /// Executes the apply action and applies changes to the selected family source.
+    ///     Executes the apply action and applies changes to the selected family source.
     /// </summary>
     private void Apply()
     {

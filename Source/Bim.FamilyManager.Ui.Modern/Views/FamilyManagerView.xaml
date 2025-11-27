@@ -108,7 +108,7 @@
                     <ContentControl Grid.Row="0" Content="{Binding SelectedFamilySource.Panel}"
                                     ContentTemplateSelector="{Binding DataTemplateSelector}" />
 
-                    <Border Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush}"/>
+                    <Border Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush}" />
                     <ScrollViewer Grid.Row="2" x:Name="ScrollViewer" VerticalScrollBarVisibility="Visible"
                                   HorizontalScrollBarVisibility="Hidden">
                         <!-- Use ItemsControl with StackPanel as ItemsPanel -->

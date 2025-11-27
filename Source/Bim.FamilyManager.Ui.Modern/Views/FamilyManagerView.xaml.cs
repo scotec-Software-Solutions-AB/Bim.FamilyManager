@@ -68,17 +68,19 @@ public partial class FamilyManagerView : UserControl
     }
 
     /// <summary>
-    /// Handles the MouseDoubleClick event for a <see cref="ContentControl"/> within the view.
+    ///     Handles the MouseDoubleClick event for a <see cref="ContentControl" /> within the view.
     /// </summary>
     /// <param name="sender">
-    /// The source of the event, expected to be a <see cref="ContentControl"/> with a data context of type <see cref="IFamilyManagerItemViewModel"/>.
+    ///     The source of the event, expected to be a <see cref="ContentControl" /> with a data context of type
+    ///     <see cref="IFamilyManagerItemViewModel" />.
     /// </param>
     /// <param name="e">
-    /// The event data associated with the mouse double-click action.
+    ///     The event data associated with the mouse double-click action.
     /// </param>
     /// <remarks>
-    /// This method sets the <see cref="FamilyManagerViewModel.SelectedItem"/> property to the data context of the clicked <see cref="ContentControl"/>.
-    /// It ensures that the selected item in the view model is updated based on user interaction.
+    ///     This method sets the <see cref="FamilyManagerViewModel.SelectedItem" /> property to the data context of the clicked
+    ///     <see cref="ContentControl" />.
+    ///     It ensures that the selected item in the view model is updated based on user interaction.
     /// </remarks>
     private void OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {

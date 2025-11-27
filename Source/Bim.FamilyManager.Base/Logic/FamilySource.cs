@@ -50,6 +50,18 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     }
 
     /// <summary>
+    ///     Gets the error message associated with the most recent error event.
+    /// </summary>
+    /// <value>
+    ///     A string containing the error message, or <c>null</c> if no error has occurred.
+    /// </value>
+    /// <remarks>
+    ///     This property is set when an error is raised using the <see cref="RaiseError(Exception)" /> or
+    ///     <see cref="RaiseError(string)" /> methods. It provides details about the error for diagnostic purposes.
+    /// </remarks>
+    public string? ErrorMessage { get; private set; }
+
+    /// <summary>
     ///     Gets the instance of <see cref="IFamilyManager" /> associated with this family source.
     /// </summary>
     /// <remarks>
@@ -147,41 +159,51 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     public event EventHandler<EventArgs>? Reloaded;
 
     /// <summary>
-    /// Gets the type of the family source.
+    ///     Gets the type of the family source.
     /// </summary>
     /// <value>
-    /// A <see cref="string"/> representing the type of the family source, as defined by the associated <see cref="IFamilySourceOptions"/>.
+    ///     A <see cref="string" /> representing the type of the family source, as defined by the associated
+    ///     <see cref="IFamilySourceOptions" />.
     /// </value>
     /// <remarks>
-    /// This property retrieves the <c>Type</c> value from the <see cref="Options"/> of the family source.
+    ///     This property retrieves the <c>Type</c> value from the <see cref="Options" /> of the family source.
     /// </remarks>
     public string Type => Options.Type;
 
     /// <summary>
-    /// Gets a stream that provides a preview of the family data.
+    ///     Gets a stream that provides a preview of the family data.
     /// </summary>
     /// <remarks>
-    /// The returned <see cref="Stream" /> may contain data specific to the implementation of the family source.
-    /// It is the caller's responsibility to ensure proper disposal of the stream after use.
+    ///     The returned <see cref="Stream" /> may contain data specific to the implementation of the family source.
+    ///     It is the caller's responsibility to ensure proper disposal of the stream after use.
     /// </remarks>
     /// <returns>
-    /// A <see cref="Stream" /> object containing the preview data, or <c>null</c> if no preview is available.
+    ///     A <see cref="Stream" /> object containing the preview data, or <c>null</c> if no preview is available.
     /// </returns>
     public abstract Stream? Preview { get; }
 
     /// <summary>
-    /// Raises an error event with the specified exception details.
+    ///     Occurs when an error is raised in the family source.
+    /// </summary>
+    /// <remarks>
+    ///     This event is triggered to notify subscribers about an error that has occurred within the family source.
+    ///     The event provides details about the error through a <see cref="FamilySourceErrorEventArgs" /> instance.
+    /// </remarks>
+    public event EventHandler<FamilySourceErrorEventArgs>? Error;
+
+    /// <summary>
+    ///     Raises an error event with the specified exception details.
     /// </summary>
     /// <param name="e">The exception containing details about the error.</param>
     /// <remarks>
-    /// This method sets the <see cref="ErrorMessage"/> property to the exception's message
-    /// and triggers the <see cref="Error"/> event to notify subscribers about the error.
+    ///     This method sets the <see cref="ErrorMessage" /> property to the exception's message
+    ///     and triggers the <see cref="Error" /> event to notify subscribers about the error.
     /// </remarks>
     protected void RaiseError(Exception e)
     {
         RaiseError(e.Message);
     }
-    
+
     /// <summary>
     ///     Raises an error event with the specified error message.
     /// </summary>
@@ -202,18 +224,6 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     }
 
     /// <summary>
-    /// Gets the error message associated with the most recent error event.
-    /// </summary>
-    /// <value>
-    /// A string containing the error message, or <c>null</c> if no error has occurred.
-    /// </value>
-    /// <remarks>
-    /// This property is set when an error is raised using the <see cref="RaiseError(Exception)"/> or
-    /// <see cref="RaiseError(string)"/> methods. It provides details about the error for diagnostic purposes.
-    /// </remarks>
-    public string? ErrorMessage { get; private set; }
-    
-    /// <summary>
     ///     Raises an error event to notify subscribers about an error in the family source.
     /// </summary>
     /// <remarks>
@@ -225,28 +235,19 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     {
         Error?.Invoke(this, new FamilySourceErrorEventArgs(true, this));
     }
-    
+
     /// <summary>
-    /// Resets the current error state for the family source and raises the <see cref="Error"/> event
-    /// to indicate that the error has been cleared.
+    ///     Resets the current error state for the family source and raises the <see cref="Error" /> event
+    ///     to indicate that the error has been cleared.
     /// </summary>
     /// <remarks>
-    /// This method is typically called to clear any previously raised errors and notify subscribers
-    /// that the family source is no longer in an error state.
+    ///     This method is typically called to clear any previously raised errors and notify subscribers
+    ///     that the family source is no longer in an error state.
     /// </remarks>
     protected void ResetError()
     {
         Error?.Invoke(this, new FamilySourceErrorEventArgs(false, this));
     }
-    
-    /// <summary>
-    /// Occurs when an error is raised in the family source.
-    /// </summary>
-    /// <remarks>
-    /// This event is triggered to notify subscribers about an error that has occurred within the family source.
-    /// The event provides details about the error through a <see cref="FamilySourceErrorEventArgs"/> instance.
-    /// </remarks>
-    public event EventHandler<FamilySourceErrorEventArgs>? Error;
 
     /// <summary>
     ///     Executes the logic required to reload the family source.
@@ -325,17 +326,17 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RevitFamilyInfo"/> using the provided file stream loader.
+    ///     Creates a new instance of <see cref="RevitFamilyInfo" /> using the provided file stream loader.
     /// </summary>
     /// <param name="fileStreamLoader">
-    /// A function that returns a <see cref="Stream"/> for loading the family file.
+    ///     A function that returns a <see cref="Stream" /> for loading the family file.
     /// </param>
     /// <returns>
-    /// A <see cref="RevitFamilyInfo"/> object containing information about the Revit family.
+    ///     A <see cref="RevitFamilyInfo" /> object containing information about the Revit family.
     /// </returns>
     /// <remarks>
-    /// The method attempts to retrieve additional information from the "BIM.FamilyManager" storage
-    /// if it is present within the family file.
+    ///     The method attempts to retrieve additional information from the "BIM.FamilyManager" storage
+    ///     if it is present within the family file.
     /// </remarks>
     protected RevitFamilyInfo CreateFamilyInfo(Func<Stream> fileStreamLoader)
     {

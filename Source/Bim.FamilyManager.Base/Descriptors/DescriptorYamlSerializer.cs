@@ -17,10 +17,14 @@ public static class DescriptorYamlSerializer
                                                      .Build();
 
     public static T Deserialize<T>(string yaml) where T : IItemDescriptor
-        => Deserializer.Deserialize<T>(yaml);
+    {
+        return Deserializer.Deserialize<T>(yaml);
+    }
 
     public static string Serialize<T>(T descriptor) where T : IItemDescriptor
-        => Serializer.Serialize(descriptor);
+    {
+        return Serializer.Serialize(descriptor);
+    }
 
     public static T DeserializeFromStream<T>(Stream stream) where T : IItemDescriptor
     {

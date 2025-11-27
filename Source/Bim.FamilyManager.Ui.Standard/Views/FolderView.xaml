@@ -30,10 +30,12 @@
             <StackPanel Orientation="Vertical">
                 <!-- ToggleButton to control visibility -->
                 <StackPanel Orientation="Horizontal">
-                    <ToggleButton IsChecked="{Binding IsExpanded}" Style="{StaticResource ExpandButtonStyle}" RenderTransformOrigin="-1.712,-2.633" />
+                    <ToggleButton IsChecked="{Binding IsExpanded}" Style="{StaticResource ExpandButtonStyle}"
+                                  RenderTransformOrigin="-1.712,-2.633" />
                     <!-- Header displaying the Name -->
-                    <TextBlock Text="{Binding Name, FallbackValue='#Header'}" Margin="5,0,0,0" Style="{StaticResource HeaderStyle}"
-                               LineHeight="16px" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Name, FallbackValue='#Header'}" Margin="5,0,0,0"
+                               Style="{StaticResource HeaderStyle}"
+                               LineHeight="16px" VerticalAlignment="Center" />
 
                 </StackPanel>
                 <ItemsControl x:Name="ItemsControl" HorizontalAlignment="Stretch"

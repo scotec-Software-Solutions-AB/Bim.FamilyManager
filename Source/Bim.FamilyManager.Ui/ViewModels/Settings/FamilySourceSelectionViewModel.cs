@@ -1,24 +1,24 @@
 ﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels.Settings;
 
 /// <summary>
-/// View model for selecting and applying a family source in the settings UI.
-/// Provides commands and state for managing available sources and user selection.
+///     View model for selecting and applying a family source in the settings UI.
+///     Provides commands and state for managing available sources and user selection.
 /// </summary>
 public class FamilySourceSelectionViewModel : ViewModel
 {
     /// <summary>
-    /// Factory delegate for creating <see cref="FamilySourceSelectionViewModel"/> instances.
+    ///     Factory delegate for creating <see cref="FamilySourceSelectionViewModel" /> instances.
     /// </summary>
     /// <param name="applyAction">The action to execute when applying the selection.</param>
     /// <param name="cancelAction">The action to execute when cancelling the selection.</param>
-    /// <returns>A new <see cref="FamilySourceSelectionViewModel"/> instance.</returns>
+    /// <returns>A new <see cref="FamilySourceSelectionViewModel" /> instance.</returns>
     public delegate FamilySourceSelectionViewModel Factory(Action applyAction, Action cancelAction);
 
     private readonly Action _applyAction;
@@ -30,7 +30,7 @@ public class FamilySourceSelectionViewModel : ViewModel
     private IFamilySourceSettingsViewModel? _selectedFamilySource;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamilySourceSelectionViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="FamilySourceSelectionViewModel" /> class.
     /// </summary>
     /// <param name="applyAction">The action to execute when applying the selection.</param>
     /// <param name="cancelAction">The action to execute when cancelling the selection.</param>
@@ -60,23 +60,23 @@ public class FamilySourceSelectionViewModel : ViewModel
     }
 
     /// <summary>
-    /// Gets the command to apply the selected family source.
+    ///     Gets the command to apply the selected family source.
     /// </summary>
     public ICommand ApplyCommand => _applyCommand;
 
     /// <summary>
-    /// Gets the command to cancel the selection.
+    ///     Gets the command to cancel the selection.
     /// </summary>
     public ICommand CancelCommand => _cancelCommand;
 
     /// <summary>
-    /// Gets the list of available family source view models.
+    ///     Gets the list of available family source view models.
     /// </summary>
     public IList<IFamilySourceSettingsViewModel> FamilySources { get; }
 
     /// <summary>
-    /// Gets or sets the currently selected family source view model.
-    /// Changing the selection updates the apply command's state.
+    ///     Gets or sets the currently selected family source view model.
+    ///     Changing the selection updates the apply command's state.
     /// </summary>
     public IFamilySourceSettingsViewModel? SelectedFamilySource
     {
@@ -89,7 +89,7 @@ public class FamilySourceSelectionViewModel : ViewModel
     }
 
     /// <summary>
-    /// Executes the cancel action.
+    ///     Executes the cancel action.
     /// </summary>
     private void Cancel()
     {
@@ -97,7 +97,7 @@ public class FamilySourceSelectionViewModel : ViewModel
     }
 
     /// <summary>
-    /// Determines whether the apply command can execute.
+    ///     Determines whether the apply command can execute.
     /// </summary>
     /// <returns><c>true</c> if a family source is selected; otherwise, <c>false</c>.</returns>
     private bool CanApply()
@@ -106,7 +106,7 @@ public class FamilySourceSelectionViewModel : ViewModel
     }
 
     /// <summary>
-    /// Executes the apply action.
+    ///     Executes the apply action.
     /// </summary>
     private void Apply()
     {

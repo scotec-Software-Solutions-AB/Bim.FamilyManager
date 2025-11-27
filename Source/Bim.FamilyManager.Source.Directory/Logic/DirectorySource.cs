@@ -357,22 +357,22 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     }
 
     /// <summary>
-    /// Groups Revit family files and their corresponding description files into a list of tuples.
+    ///     Groups Revit family files and their corresponding description files into a list of tuples.
     /// </summary>
     /// <param name="familyFiles">
-    /// A collection of file paths representing Revit family files (*.rfa).
+    ///     A collection of file paths representing Revit family files (*.rfa).
     /// </param>
     /// <param name="descriptionFiles">
-    /// A collection of file paths representing description files (*.yaml).
+    ///     A collection of file paths representing description files (*.yaml).
     /// </param>
     /// <returns>
-    /// A list of tuples where each tuple contains the name of the family, the path to the family file,
-    /// and the path to the corresponding description file (if available).
+    ///     A list of tuples where each tuple contains the name of the family, the path to the family file,
+    ///     and the path to the corresponding description file (if available).
     /// </returns>
     /// <remarks>
-    /// This method matches Revit family files with their corresponding description files based on
-    /// their filenames (excluding extensions). If a matching description file is not found for a
-    /// family file, the description file path in the tuple will be <c>null</c>.
+    ///     This method matches Revit family files with their corresponding description files based on
+    ///     their filenames (excluding extensions). If a matching description file is not found for a
+    ///     family file, the description file path in the tuple will be <c>null</c>.
     /// </remarks>
     private static List<(string Name, string FamilyFile, string? DescriptionFile)> GroupFamiliesAndDescriptions(
         IEnumerable<string> familyFiles, IEnumerable<string> descriptionFiles)

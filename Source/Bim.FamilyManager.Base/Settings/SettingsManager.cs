@@ -2,12 +2,12 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
+using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scotec.Extensions.Utilities.Configuration;
 using Scotec.Extensions.Utilities.Strings;
-using Bim.FamilyManager.Base.Options;
 using SettingsManagerOptions = Bim.FamilyManager.Base.Options.SettingsManagerOptions;
 
 namespace Bim.FamilyManager.Base.Settings;

@@ -1,8 +1,8 @@
 ﻿using System.Windows.Media;
-using Microsoft.Extensions.Options;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
 
@@ -11,7 +11,8 @@ namespace Bim.FamilyManager.Ui.ViewModels;
 /// </summary>
 /// <remarks>
 ///     This class provides properties and commands to interact with folder data, such as its name and path.
-///     It is designed to work with the <see cref="IFolder" /> abstraction and integrates with WPF commands for UI interaction.
+///     It is designed to work with the <see cref="IFolder" /> abstraction and integrates with WPF commands for UI
+///     interaction.
 /// </remarks>
 public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewModel<TLayoutOptions>, IFolderViewModel
     where TLayoutOptions : LayoutOptions
@@ -21,7 +22,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     private bool _isExpanded;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="FolderViewModel{TLayoutOptions}" /> class with the specified folder and layout options.
+    ///     Initializes a new instance of the <see cref="FolderViewModel{TLayoutOptions}" /> class with the specified folder
+    ///     and layout options.
     /// </summary>
     /// <param name="folder">
     ///     An instance of <see cref="IFolder" /> representing the folder data to be encapsulated by the view model.
@@ -30,8 +32,10 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     The <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout options.
     /// </param>
     /// <remarks>
-    ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and layout options, enabling
-    ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and supports dynamic creation of subfolder and family view models.
+    ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and
+    ///     layout options, enabling
+    ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and
+    ///     supports dynamic creation of subfolder and family view models.
     /// </remarks>
     protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
         : base(layoutOptions)
@@ -56,7 +60,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     Gets the preview image associated with the folder.
     /// </summary>
     /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image of the folder, or <c>null</c> if no preview is available.
+    ///     An <see cref="ImageSource" /> representing the preview image of the folder, or <c>null</c> if no preview is
+    ///     available.
     /// </value>
     /// <remarks>
     ///     The preview image is typically used to visually represent the folder in the user interface.
@@ -80,7 +85,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     Gets the collection of subfolders associated with the current folder.
     /// </summary>
     /// <value>
-    ///     An <see cref="IEnumerable{IFolderViewModel}" /> representing the subfolders, or <c>null</c> if there are no subfolders.
+    ///     An <see cref="IEnumerable{IFolderViewModel}" /> representing the subfolders, or <c>null</c> if there are no
+    ///     subfolders.
     /// </value>
     /// <remarks>
     ///     This property retrieves subfolder data from the underlying <see cref="IFolder" /> abstraction
@@ -97,10 +103,12 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     Gets the collection of families associated with the folder represented by this view model.
     /// </summary>
     /// <value>
-    ///     A collection of <see cref="IFamilyViewModel" /> objects representing the families in the folder, or <c>null</c> if the folder is not expanded.
+    ///     A collection of <see cref="IFamilyViewModel" /> objects representing the families in the folder, or <c>null</c> if
+    ///     the folder is not expanded.
     /// </value>
     /// <remarks>
-    ///     This property dynamically loads and returns the families when the folder is expanded or selected. If the folder is not expanded,
+    ///     This property dynamically loads and returns the families when the folder is expanded or selected. If the folder is
+    ///     not expanded,
     ///     the property returns <c>null</c>. The families are represented as instances of <see cref="IFamilyViewModel" />.
     /// </remarks>
     public IEnumerable<IFamilyViewModel>? Families =>
@@ -118,7 +126,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     /// <remarks>
     ///     When the folder is expanded, its associated families are loaded and displayed.
     ///     Changing this property triggers the <see cref="Families" /> property to update, ensuring
-    ///     that the families are loaded only when needed. This property is typically bound to a UI element to control expansion state.
+    ///     that the families are loaded only when needed. This property is typically bound to a UI element to control
+    ///     expansion state.
     /// </remarks>
     public bool IsExpanded
     {

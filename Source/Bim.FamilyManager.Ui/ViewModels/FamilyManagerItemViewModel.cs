@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Microsoft.Extensions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Microsoft.Extensions.Options;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
@@ -27,10 +27,10 @@ namespace Bim.FamilyManager.Ui.ViewModels;
 public abstract class FamilyManagerItemViewModel<TLayoutOptions> : ViewModel, IFamilyManagerItemViewModel
     where TLayoutOptions : LayoutOptions
 {
+    private int _contentHeight;
     private bool _isSelected;
     private bool _showItemName;
     private bool _showPreviewImage;
-    private int _contentHeight;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManagerItemViewModel{TLayoutOptions}" /> class.

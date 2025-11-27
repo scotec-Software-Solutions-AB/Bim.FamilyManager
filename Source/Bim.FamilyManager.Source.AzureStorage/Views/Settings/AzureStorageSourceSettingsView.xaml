@@ -45,15 +45,15 @@
                 </Style>
                 <Style TargetType="controls:ExtendedTextBox">
                     <Setter Property="Margin" Value="10,5,10,0" />
-                    <Setter Property="Width" Value="250"/>
+                    <Setter Property="Width" Value="250" />
                 </Style>
 
             </ResourceDictionary>
         </Grid.Resources>
 
-        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#e0f3e8" Padding="5" >
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#e0f3e8" Padding="5">
             <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Description}"
-                       TextWrapping="Wrap" Margin="0"/>
+                       TextWrapping="Wrap" Margin="0" />
         </Border>
 
         <TextBlock Grid.Row="1" Grid.Column="0"
@@ -95,26 +95,26 @@
 
         <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Horizontal" Margin="10,10,0,0"
                     VerticalAlignment="Top">
-            <CheckBox IsChecked="{Binding IsActive}" Margin="0" VerticalAlignment="Center"/>
+            <CheckBox IsChecked="{Binding IsActive}" Margin="0" VerticalAlignment="Center" />
             <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Active}"
-                       Margin="5,0,0,0" VerticalAlignment="Center"/>
+                       Margin="5,0,0,0" VerticalAlignment="Center" />
         </StackPanel>
 
 
-        <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="1"  Margin="10,10,0,0">
+        <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="1" Margin="10,10,0,0">
             <controls1:MaterialIconButton Kind="{StaticResource IconAccount}"
-                                          Width="40" Height="40" Padding="0" Margin="0" 
+                                          Width="40" Height="40" Padding="0" Margin="0"
                                           HorizontalContentAlignment="Center"
                                           HorizontalAlignment="Left"
-                                          Command="{Binding SignInCommand}"/>
+                                          Command="{Binding SignInCommand}" />
             <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_SignedInAs}"  Margin="5,5,5,0"/>
-                <TextBlock Text="{Binding SignedInAs}" Margin="5,5,0,0"/>
+                <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_SignedInAs}"
+                           Margin="5,5,5,0" />
+                <TextBlock Text="{Binding SignedInAs}" Margin="5,5,0,0" />
             </StackPanel>
 
         </StackPanel>
     </Grid>
 
-    
 
 </UserControl>

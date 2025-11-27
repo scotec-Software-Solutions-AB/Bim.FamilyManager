@@ -1,5 +1,4 @@
-﻿using System.Runtime.Loader;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
 namespace Bim.FamilyManager.Ui.Views.Settings;
 

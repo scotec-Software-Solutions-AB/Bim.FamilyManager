@@ -1,13 +1,12 @@
 ﻿using Autofac;
 using Autofac.Core;
-using Scotec.Extensions.Utilities.Configuration;
-using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Ui.ViewModels.Settings;
 using Bim.FamilyManager.Ui.Views;
 using Bim.FamilyManager.Ui.Views.Settings;
+using Scotec.Extensions.Utilities.Configuration;
 using Scotec.Wpf.ViewModels;
 using Module = Autofac.Module;
 
@@ -79,14 +78,13 @@ public class RegistrationModule : Module
         builder.RegisterType<ViewModelDescriptor<FamilySourceSettingsEditViewModel, FamilySourceSettingsEditView>>()
                .As<IViewModelDescriptor>()
                .SingleInstance();
-        
+
         builder.RegisterType<FamilySourceSelectionViewModel>()
                .InstancePerDependency();
-        
+
         builder.RegisterType<ViewModelDescriptor<FamilySourceSelectionViewModel, FamilySourceSelectionView>>()
                .As<IViewModelDescriptor>()
                .SingleInstance();
-
 
         builder.RegisterType<SettingsManager>()
                .SingleInstance();

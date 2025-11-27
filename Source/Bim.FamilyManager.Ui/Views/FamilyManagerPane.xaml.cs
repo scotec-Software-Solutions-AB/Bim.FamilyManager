@@ -2,10 +2,10 @@
 using System.Windows.Controls;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.Views;
@@ -104,7 +104,8 @@ public partial class FamilyManagerPane : Page, IDockablePaneProvider
     /// </summary>
     /// <param name="layout">
     ///     A <see cref="string" /> representing the layout type for the Family Manager.
-    ///     This determines which implementation of <see cref="IFamilyManagerViewModel" /> is resolved and set as the data context.
+    ///     This determines which implementation of <see cref="IFamilyManagerViewModel" /> is resolved and set as the data
+    ///     context.
     /// </param>
     /// <remarks>
     ///     This method ensures that the view model is updated only when the layout changes. It uses the

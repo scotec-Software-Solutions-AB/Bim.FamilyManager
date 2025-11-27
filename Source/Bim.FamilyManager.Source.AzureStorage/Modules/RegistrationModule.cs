@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Scotec.Identity.AzureActiveDirectory;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
@@ -9,6 +8,7 @@ using Bim.FamilyManager.Source.AzureStorage.ViewModels;
 using Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings;
 using Bim.FamilyManager.Source.AzureStorage.Views;
 using Bim.FamilyManager.Source.AzureStorage.Views.Settings;
+using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Wpf.ViewModels;
 using Module = Autofac.Module;
 
@@ -77,6 +77,5 @@ public class RegistrationModule : Module
         builder.RegisterType<ViewModelDescriptor<AzureStorageSourcePanelViewModel, AzureStorageSourcePanelView>>()
                .As<IViewModelDescriptor>()
                .SingleInstance();
-
     }
 }

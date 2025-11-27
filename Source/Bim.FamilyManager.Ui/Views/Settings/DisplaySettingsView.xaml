@@ -30,11 +30,12 @@
 
         <Border Grid.Row="0" Padding="5" Background="#e0f3e8">
             <TextBlock Text="{x:Static resources:StringResources.DisplaySettings_View_Description}"
-                       Margin="0" TextWrapping="Wrap"/>
+                       Margin="0" TextWrapping="Wrap" />
         </Border>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="10,10,0,0">
-            <TextBlock Text="{x:Static resources:StringResources.DisplaySettings_Text_Layout}" VerticalAlignment="Center" />
+            <TextBlock Text="{x:Static resources:StringResources.DisplaySettings_Text_Layout}"
+                       VerticalAlignment="Center" />
             <ComboBox Style="{StaticResource FamilyManagerComboBoxStyle}" Width="200" Margin="5,0,0,0"
                       ItemsSource="{Binding LayoutOptions}" DisplayMemberPath="LayoutName"
                       SelectedItem="{Binding SelectedLayoutOptions}" />

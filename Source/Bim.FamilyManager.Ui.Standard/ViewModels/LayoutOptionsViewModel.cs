@@ -101,7 +101,7 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     ///     to ensure the content height remains within a valid range.
     /// </remarks>
     public int ContentMinHeight => 32;
-    
+
     /// <summary>
     ///     Gets the maximum height for the content area in the layout.
     /// </summary>

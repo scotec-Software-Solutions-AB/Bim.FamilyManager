@@ -50,14 +50,14 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Top">
                     <controls1:MaterialIconButton Padding="2" Height="32" Foreground="#b066c2"
-                                                     BorderThickness="0" Kind="{StaticResource IconReload}"
-                                                     ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Refresh}"
-                                                     Command="{Binding Path=ReloadCommand}" BorderBrush="#FFABADB3" />
+                                                  BorderThickness="0" Kind="{StaticResource IconReload}"
+                                                  ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Refresh}"
+                                                  Command="{Binding Path=ReloadCommand}" BorderBrush="#FFABADB3" />
 
                     <controls1:MaterialIconButton Padding="2" Height="32" Foreground="#c26666"
-                                                     BorderThickness="0" Kind="{StaticResource IconSettings}"
-                                                     ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}"
-                                                     Click="OnSettingsButtonClick" BorderBrush="#FFABADB3" />
+                                                  BorderThickness="0" Kind="{StaticResource IconSettings}"
+                                                  ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}"
+                                                  Click="OnSettingsButtonClick" BorderBrush="#FFABADB3" />
 
                     <!--<controls1:ImageButton
                         ImageSource="pack://application:,,,/Bim.FamilyManager.Ui;component/Resources/Images/RefreshPrimary_24x24.png"

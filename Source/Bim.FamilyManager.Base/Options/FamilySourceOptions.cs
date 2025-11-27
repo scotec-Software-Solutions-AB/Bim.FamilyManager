@@ -28,6 +28,7 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
         {
             Id = Guid.NewGuid();
         }
+
         Type = GetType().Name.Replace("Options", "");
     }
 
@@ -35,7 +36,7 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
     ///     Gets or sets the unique identifier for the family source options.
     /// </summary>
     /// <value>
-    ///     A <see cref="Guid"/> representing the unique identifier.
+    ///     A <see cref="Guid" /> representing the unique identifier.
     /// </value>
     public Guid Id { get; init; }
 
@@ -43,7 +44,7 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
     ///     Gets or sets the type of the family source.
     /// </summary>
     /// <value>
-    ///     A <see cref="string"/> representing the type of the family source.
+    ///     A <see cref="string" /> representing the type of the family source.
     /// </value>
     public string Type { get; set; }
 
@@ -51,7 +52,7 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
     ///     Gets or sets the name of the family source.
     /// </summary>
     /// <value>
-    ///     A <see cref="string"/> representing the name of the family source.
+    ///     A <see cref="string" /> representing the name of the family source.
     /// </value>
     public string Name { get; set; }
 

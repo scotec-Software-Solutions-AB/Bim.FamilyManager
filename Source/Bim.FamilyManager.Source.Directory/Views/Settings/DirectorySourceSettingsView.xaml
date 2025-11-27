@@ -46,9 +46,9 @@
             </ResourceDictionary>
         </Grid.Resources>
 
-        <Border Grid.Row="0" Background="#e0f3e8" Padding="5" >
+        <Border Grid.Row="0" Background="#e0f3e8" Padding="5">
             <TextBlock Text="{x:Static resources:StringResources.DirectorySourceSettings_Text_Description}"
-                       TextWrapping="Wrap" Margin="0"/>
+                       TextWrapping="Wrap" Margin="0" />
         </Border>
 
         <TextBlock Grid.Row="1"
@@ -62,8 +62,8 @@
                    Text="{x:Static resources:StringResources.DirectorySourceSettings_Text_Directory}" />
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <controls:ExtendedTextBox Width="200"
                                       x:Name="FolderTextBox"

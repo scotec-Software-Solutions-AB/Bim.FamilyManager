@@ -1,8 +1,8 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Microsoft.Extensions.DependencyInjection;
 using Bim.FamilyManager.Resources;
 using Bim.FamilyManager.Ui.Views.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
 

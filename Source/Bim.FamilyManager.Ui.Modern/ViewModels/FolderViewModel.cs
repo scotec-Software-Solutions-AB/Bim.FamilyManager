@@ -1,16 +1,18 @@
-﻿using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.Modern.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.Modern.ViewModels;
 
 /// <summary>
-///     Provides a view model for a folder, enabling interaction with folder data, subfolders, and families using standard layout options.
+///     Provides a view model for a folder, enabling interaction with folder data, subfolders, and families using standard
+///     layout options.
 /// </summary>
 /// <remarks>
-///     This class extends <see cref="FolderViewModel{StandardLayoutOptions}" /> and customizes the creation of subfolder and family view models.
+///     This class extends <see cref="FolderViewModel{StandardLayoutOptions}" /> and customizes the creation of subfolder
+///     and family view models.
 ///     It manages dependencies for folder operations, subfolder instantiation, and family instantiation.
 /// </remarks>
 public class FolderViewModel : FolderViewModel<ModernLayoutOptions>

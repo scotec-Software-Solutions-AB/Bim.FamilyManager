@@ -1,5 +1,4 @@
-﻿using Scotec.Revit.Wpf;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Bim.FamilyManager.Ui.Views.Settings;
 
@@ -20,7 +19,7 @@ public partial class SettingsContentWindow : Window
     ///     This constructor sets up the window by initializing its components. It is typically invoked when creating a new
     ///     instance of the settings window.
     /// </remarks>
-    public SettingsContentWindow() 
+    public SettingsContentWindow()
     {
         InitializeComponent();
     }

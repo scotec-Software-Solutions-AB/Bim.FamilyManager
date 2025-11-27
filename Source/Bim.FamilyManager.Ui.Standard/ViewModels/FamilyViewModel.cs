@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.Standard.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Scotec.Revit;
 
 namespace Bim.FamilyManager.Ui.Standard.ViewModels;
@@ -38,7 +38,7 @@ public class FamilyViewModel : FamilyViewModel<StandardLayoutOptions>
     /// <param name="dropHandlerFactory">A factory function for creating <see cref="FamilyDropHandler" /> instances.</param>
     /// <param name="layoutOptions">An <see cref="IOptionsMonitor{StandardLayoutOptions}" /> for monitoring layout options.</param>
     /// <param name="revitTask">The <see cref="RevitTask" /> instance for executing Revit-related tasks.</param>
-    /// <param name="logger">The <see cref="ILogger{FamilyViewModel{StandardLayoutOptions}}" /> for logging messages.</param>
+    /// <param name="logger">The <see cref="ILogger{FamilyViewModel}" /> for logging messages.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the provided dependencies, enabling management of family data,
     ///     symbol instantiation, drag-and-drop handling, and logging.

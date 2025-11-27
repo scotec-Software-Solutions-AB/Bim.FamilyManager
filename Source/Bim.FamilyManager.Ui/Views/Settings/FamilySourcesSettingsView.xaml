@@ -7,7 +7,6 @@
              xmlns:settings1="clr-namespace:Bim.FamilyManager.Ui.Views.Settings"
              xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls"
              xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Resources"
-             xmlns:viewModels="clr-namespace:Bim.FamilyManager.Abstractions.ViewModels;assembly=Bim.FamilyManager.Abstractions"
              xmlns:viewModels1="clr-namespace:Bim.FamilyManager.Abstractions.ViewModels.Settings;assembly=Bim.FamilyManager.Abstractions"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
@@ -30,34 +29,34 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <settings1:SettingsContentDialog Grid.Row="0" Content="{Binding EditViewModel}" 
-                                                  IsDialogVisible="{Binding IsEditing}" />
-        <settings1:SettingsContentDialog Grid.Row="0" Content="{Binding SelectionViewModel}" 
-                                                  IsDialogVisible="{Binding IsSelecting}" />
+        <settings1:SettingsContentDialog Grid.Row="0" Content="{Binding EditViewModel}"
+                                         IsDialogVisible="{Binding IsEditing}" />
+        <settings1:SettingsContentDialog Grid.Row="0" Content="{Binding SelectionViewModel}"
+                                         IsDialogVisible="{Binding IsSelecting}" />
 
         <Border Grid.Row="0" Padding="5" Background="#e0f3e8">
             <TextBlock Text="{x:Static resources:StringResources.FamilySourceSettings_SourcesSettingsView_Description}"
-                       Margin="0" TextWrapping="Wrap"/>
+                       Margin="0" TextWrapping="Wrap" />
         </Border>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
-            <controls:MaterialIconButton  Height="32" Foreground="{StaticResource ButtonAddBrush}" 
-                                          Background="{StaticResource PrimaryBackgroundBrush}"
+            <controls:MaterialIconButton Height="32" Foreground="{StaticResource ButtonAddBrush}"
+                                         Background="{StaticResource PrimaryBackgroundBrush}"
                                          Content="{x:Static resources:StringResources.FamilySourceSettings_Button_Add}"
-                                                     BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderAdd}"
-                                                     Command="{Binding Path=AddCommand}"/>
+                                         BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderAdd}"
+                                         Command="{Binding Path=AddCommand}" />
 
-            <controls:MaterialIconButton  Height="32" Foreground="{StaticResource ButtonEditBrush}" Margin="15,0,0,0"
-                                          Background="{StaticResource PrimaryBackgroundBrush}"
+            <controls:MaterialIconButton Height="32" Foreground="{StaticResource ButtonEditBrush}" Margin="15,0,0,0"
+                                         Background="{StaticResource PrimaryBackgroundBrush}"
                                          Content="{x:Static resources:StringResources.FamilySourceSettings_Button_Edit}"
-                                                     BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderEdit}"
-                                                     Command="{Binding Path=EditCommand}"/>
+                                         BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderEdit}"
+                                         Command="{Binding Path=EditCommand}" />
 
-            <controls:MaterialIconButton  Height="32" Foreground="{StaticResource ButtonRemoveBrush}" Margin="15,0,0,0"
-                                          Background="{StaticResource PrimaryBackgroundBrush}"
+            <controls:MaterialIconButton Height="32" Foreground="{StaticResource ButtonRemoveBrush}" Margin="15,0,0,0"
+                                         Background="{StaticResource PrimaryBackgroundBrush}"
                                          Content="{x:Static resources:StringResources.FamilySourceSettings_Button_Remove}"
-                                                     BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderRemove}"
-                                                     Command="{Binding Path=RemoveCommand}"/>
+                                         BorderThickness="0,0,1,0" Kind="{StaticResource IconFolderRemove}"
+                                         Command="{Binding Path=RemoveCommand}" />
 
         </StackPanel>
 

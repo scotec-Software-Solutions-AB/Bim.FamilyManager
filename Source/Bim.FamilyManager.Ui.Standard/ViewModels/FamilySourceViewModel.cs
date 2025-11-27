@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.Standard.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.Standard.ViewModels;
 
@@ -10,8 +10,10 @@ namespace Bim.FamilyManager.Ui.Standard.ViewModels;
 ///     Represents the view model for a family source in the Revit Family Manager with standard layout options.
 /// </summary>
 /// <remarks>
-///     This class provides functionality to manage and interact with a family source, including its folders and selection state,
-///     using standard layout options. It extends <see cref="FamilySourceViewModel{StandardLayoutOptions}" /> and customizes
+///     This class provides functionality to manage and interact with a family source, including its folders and selection
+///     state,
+///     using standard layout options. It extends <see cref="FamilySourceViewModel{StandardLayoutOptions}" /> and
+///     customizes
 ///     folder view model creation.
 /// </remarks>
 public class FamilySourceViewModel : FamilySourceViewModel<StandardLayoutOptions>
@@ -34,9 +36,13 @@ public class FamilySourceViewModel : FamilySourceViewModel<StandardLayoutOptions
     /// <param name="familySource">An instance of <see cref="IFamilySource" /> representing the family source to be managed.</param>
     /// <param name="folderFactory">A factory delegate for creating <see cref="FolderViewModel" /> instances.</param>
     /// <param name="panelFactory">A factory delegate for creating <see cref="IFamilySourcePanelViewModel" /> instances.</param>
-    /// <param name="layoutOptions">An <see cref="IOptionsMonitor{StandardLayoutOptions}" /> providing the current and updated layout options.</param>
+    /// <param name="layoutOptions">
+    ///     An <see cref="IOptionsMonitor{StandardLayoutOptions}" /> providing the current and updated
+    ///     layout options.
+    /// </param>
     /// <remarks>
-    ///     This constructor sets up the view model with the specified family source, folder factory, panel factory, and layout options.
+    ///     This constructor sets up the view model with the specified family source, folder factory, panel factory, and layout
+    ///     options.
     ///     It enables interaction with the family source's data and its associated folders and panel.
     /// </remarks>
     public FamilySourceViewModel(

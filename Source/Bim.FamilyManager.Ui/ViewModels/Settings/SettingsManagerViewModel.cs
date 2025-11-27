@@ -3,12 +3,12 @@ using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Options;
-using Scotec.Extensions.Linq;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Base.Settings;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
+using Scotec.Extensions.Linq;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels.Settings;

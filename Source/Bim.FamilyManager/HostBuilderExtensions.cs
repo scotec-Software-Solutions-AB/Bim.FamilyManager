@@ -1,12 +1,12 @@
 ﻿using System.IO;
 using System.Reflection;
+using Bim.FamilyManager.Base.Options;
+using Bim.FamilyManager.Base.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Base.Options;
-using Bim.FamilyManager.Base.Settings;
 
 namespace Bim.FamilyManager;
 
@@ -89,8 +89,8 @@ public static class HostBuilderExtensions
 
         // Build the configuration
         var configuration = new ConfigurationBuilder()
-                            .AddJsonFile(Path.Combine(appSettingsPath, "appsettings.json"), optional: false, reloadOnChange: false)
-                            .AddJsonFile(Path.Combine(appSettingsPath, $"appsettings.{environment}.json"), optional: true, reloadOnChange: false)
+                            .AddJsonFile(Path.Combine(appSettingsPath, "appsettings.json"), false, false)
+                            .AddJsonFile(Path.Combine(appSettingsPath, $"appsettings.{environment}.json"), true, false)
                             .Build();
 
         var options = configuration.GetSection("SettingsManager").Get<SettingsManagerOptions>();

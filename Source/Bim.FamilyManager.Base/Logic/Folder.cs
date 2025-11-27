@@ -65,7 +65,7 @@ public class Folder : IFolder
     ///     Gets the name of the folder.
     /// </summary>
     /// <value>
-    ///     A <see cref="string"/> representing the name of the folder.
+    ///     A <see cref="string" /> representing the name of the folder.
     /// </value>
     public string Name { get; }
 
@@ -73,7 +73,7 @@ public class Folder : IFolder
     ///     Gets the collection of subfolders contained within this folder.
     /// </summary>
     /// <value>
-    ///     An <see cref="IEnumerable{IFolder}"/> representing the subfolders.
+    ///     An <see cref="IEnumerable{IFolder}" /> representing the subfolders.
     /// </value>
     public IEnumerable<IFolder> Subfolders => _subFolders();
 
@@ -81,7 +81,7 @@ public class Folder : IFolder
     ///     Gets the collection of Revit families contained within this folder.
     /// </summary>
     /// <value>
-    ///     An <see cref="IEnumerable{IRevitFamily}"/> representing the Revit families.
+    ///     An <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families.
     /// </value>
     public IEnumerable<IRevitFamily> Families => _families();
 
@@ -89,7 +89,7 @@ public class Folder : IFolder
     ///     Gets the preview image stream associated with this folder.
     /// </summary>
     /// <value>
-    ///     A <see cref="Stream"/> containing the preview image for the folder.
+    ///     A <see cref="Stream" /> containing the preview image for the folder.
     /// </value>
     /// <remarks>
     ///     The preview image provides a visual representation of the folder in the UI.

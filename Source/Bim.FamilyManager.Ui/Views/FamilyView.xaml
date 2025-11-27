@@ -71,12 +71,12 @@
                             Margin="3">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="{Binding ProductVersion, FallbackValue='----'}" 
+                            <TextBlock Grid.Row="0" Text="{Binding ProductVersion, FallbackValue='----'}"
                                        HorizontalAlignment="Right" FontSize="8" VerticalAlignment="Top"
-                                       Margin="0" Padding="0" LineHeight="8"/>
+                                       Margin="0" Padding="0" LineHeight="8" />
                             <TextBlock Grid.Row="1" Text="{Binding Path=Name, FallbackValue='#Family'}"
                                        Height="Auto" Width="120"
                                        Visibility="{Binding ShowItemName, Converter={StaticResource TrueToVisibleConverterKey}}"
@@ -92,14 +92,17 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                        <material:MaterialIcon Kind="{StaticResource IconCheckbox}" Foreground="{StaticResource ButtonCheckedBrush}"
+                        <material:MaterialIcon Kind="{StaticResource IconCheckbox}"
+                                               Foreground="{StaticResource ButtonCheckedBrush}"
                                                Margin="2,0,0,0"
                                                ToolTip="{x:Static resources:StringResources.Family_Icon_Imported}"
                                                Visibility="{Binding IsLoadedInDocument, Converter={StaticResource TrueToVisibleConverterKey}}" />
-                        <material:MaterialIcon Kind="{StaticResource IconCheckboxBlank}" Foreground="{StaticResource ButtonUncheckedBrush}"
+                        <material:MaterialIcon Kind="{StaticResource IconCheckboxBlank}"
+                                               Foreground="{StaticResource ButtonUncheckedBrush}"
                                                ToolTip="{x:Static resources:StringResources.Family_Icon_NotImported}"
                                                Visibility="{Binding IsLoadedInDocument, Converter={StaticResource FalseToVisibleConverterKey}}" />
-                        <material:MaterialIcon Kind="{StaticResource IconListBulleted}" Foreground="{StaticResource ButtonListBrush}" Margin="2,0,0,0">
+                        <material:MaterialIcon Kind="{StaticResource IconListBulleted}"
+                                               Foreground="{StaticResource ButtonListBrush}" Margin="2,0,0,0">
                             <material:MaterialIcon.ToolTip>
                                 <ToolTip Padding="0">
                                     <StackPanel Orientation="Vertical"
@@ -120,25 +123,27 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <controls:MaterialIconButton Kind="{StaticResource IconDownload}" 
+                        <controls:MaterialIconButton Kind="{StaticResource IconDownload}"
                                                      ToolTip="{x:Static resources:StringResources.Family_Button_Load}"
                                                      Padding="0"
-                                                     Command="{Binding LoadFamilyCommand}" Foreground="{StaticResource ButtonLoadBrush}" />
+                                                     Command="{Binding LoadFamilyCommand}"
+                                                     Foreground="{StaticResource ButtonLoadBrush}" />
                         <controls:MaterialIconButton Kind="{StaticResource IconEdit}"
                                                      ToolTip="{x:Static resources:StringResources.Family_Button_Edit}"
                                                      Padding="0"
-                                                     Command="{Binding EditFamilyCommand}" Foreground="{StaticResource ButtonEditBrush}" />
+                                                     Command="{Binding EditFamilyCommand}"
+                                                     Foreground="{StaticResource ButtonEditBrush}" />
                         <controls:MaterialIconButton Kind="{StaticResource IconDelete}"
                                                      ToolTip="{x:Static resources:StringResources.Family_Button_Remove}"
                                                      Padding="0"
-                                                     Command="{Binding RemoveFamilyCommand}" Foreground="{StaticResource ButtonRemoveBrush}" />
+                                                     Command="{Binding RemoveFamilyCommand}"
+                                                     Foreground="{StaticResource ButtonRemoveBrush}" />
                     </StackPanel>
 
                 </Grid>
             </Grid>
         </Border>
     </Grid>
-
 
 
 </UserControl>

@@ -17,9 +17,9 @@ namespace Bim.FamilyManager.Ui.Modern.ViewModels;
 public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
 {
     private readonly ModernLayoutOptions _options;
+    private int _contentHeight;
     private bool _showItemName;
     private bool _showPreviewImage;
-    private int _contentHeight;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="LayoutOptionsViewModel" /> class.

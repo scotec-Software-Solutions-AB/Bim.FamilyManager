@@ -7,17 +7,17 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using Bim.FamilyManager.Abstractions;
+using Bim.FamilyManager.Abstractions.Options;
+using Bim.FamilyManager.Base.Logic.EStorage;
+using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMcdf;
 using Scotec.Extensions.Utilities.Strings;
 using Scotec.Queues;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Abstractions.Options;
-using Bim.FamilyManager.Base.Options;
 using Version = System.Version;
-using Bim.FamilyManager.Base.Logic.EStorage;
 
 namespace Bim.FamilyManager.Base.Logic;
 
@@ -585,7 +585,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    /// Handles the <see cref="DocumentSavingAsEventArgs"/> event when a document is being saved as a new file.
+    ///     Handles the <see cref="DocumentSavingAsEventArgs" /> event when a document is being saved as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document being saved.</param>
@@ -595,7 +595,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    /// Handles the <see cref="DocumentSavedAsEventArgs"/> event when a document has been saved as a new file.
+    ///     Handles the <see cref="DocumentSavedAsEventArgs" /> event when a document has been saved as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document that was saved.</param>
@@ -605,7 +605,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    /// Handles the <see cref="DocumentSavingEventArgs"/> event when a document is being saved.
+    ///     Handles the <see cref="DocumentSavingEventArgs" /> event when a document is being saved.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document being saved.</param>
@@ -615,9 +615,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    /// Updates the family metadata when a document is being saved.
+    ///     Updates the family metadata when a document is being saved.
     /// </summary>
-    /// <param name="document">The <see cref="Document"/> being saved.</param>
+    /// <param name="document">The <see cref="Document" /> being saved.</param>
     private void OnDocumentSaving(Document document)
     {
         // Only handle family documents.
@@ -693,8 +693,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         {
             fileStream.CopyTo(memoryStream);
         }
+
         memoryStream.Position = 0;
-        
+
         // Add the family info to the currently saved family file.
         UpdateFamilyInfo(document, memoryStream);
 
@@ -716,7 +717,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     The <see cref="System.IO.MemoryStream" /> containing the family file data to be updated with new metadata.
     /// </param>
     /// <remarks>
-    ///     This method retrieves or creates the <c>FamilyMetadata</c> metadata for the specified family, increments its version,
+    ///     This method retrieves or creates the <c>FamilyMetadata</c> metadata for the specified family, increments its
+    ///     version,
     ///     updates the last modified date and user, and serializes the updated information into the family file stream.
     ///     It ensures the metadata is stored in the "BIM.FamilyManager" storage section of the family file.
     /// </remarks>
@@ -767,22 +769,23 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
             root.Flush(true);
         }
+
         stream.Position = 0;
     }
 
     /// <summary>
-    /// Retrieves the username associated with the specified Revit document.
+    ///     Retrieves the username associated with the specified Revit document.
     /// </summary>
     /// <param name="document">
-    /// The <see cref="Autodesk.Revit.DB.Document"/> instance from which to retrieve the username.
+    ///     The <see cref="Autodesk.Revit.DB.Document" /> instance from which to retrieve the username.
     /// </param>
     /// <returns>
-    /// A <see cref="string"/> representing the username. If the username is not available in the Revit document,
-    /// the system's current user name is returned instead.
+    ///     A <see cref="string" /> representing the username. If the username is not available in the Revit document,
+    ///     the system's current user name is returned instead.
     /// </returns>
     /// <remarks>
-    /// This method first attempts to retrieve the username from the Revit application's <c>Username</c> property.
-    /// If the username is not set or is empty, it falls back to the system's environment username.
+    ///     This method first attempts to retrieve the username from the Revit application's <c>Username</c> property.
+    ///     If the username is not set or is empty, it falls back to the system's environment username.
     /// </remarks>
     private static string GetUserName(Document document)
     {

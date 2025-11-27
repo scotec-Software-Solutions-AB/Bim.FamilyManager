@@ -5,12 +5,12 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Options;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Ui.Views.Settings;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
 
@@ -76,8 +76,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         _familyFactory = familyFactory;
 
         _logo = options.Value.Logo;
-        StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded );
-
+        StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded);
 
         _reloadCommand = new RelayCommand(() => { _familyManager.Reload(); });
         _goHomeCommand = new RelayCommand(GoHome, CanGoHome);
@@ -157,10 +156,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     ///     The selected family source determines the context for operations such as
     ///     filtering and searching families.
     /// </remarks>
-    public IFamilySourceViewModel? SelectedFamilySource
-    {
-        get => _history.FirstOrDefault() as IFamilySourceViewModel;
-    }
+    public IFamilySourceViewModel? SelectedFamilySource => _history.FirstOrDefault() as IFamilySourceViewModel;
 
     /// <summary>
     ///     Gets or sets the collection of items currently displayed in the Family Manager.

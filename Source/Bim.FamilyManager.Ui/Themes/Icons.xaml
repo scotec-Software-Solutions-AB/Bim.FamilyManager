@@ -6,12 +6,11 @@
     <icons:MaterialIconKind x:Key="IconCancel">CancelOutline</icons:MaterialIconKind>
     <icons:MaterialIconKind x:Key="IconOk">CheckOutline</icons:MaterialIconKind>
     <icons:MaterialIconKind x:Key="IconSave">FloppyDisc</icons:MaterialIconKind>
-    
+
     <icons:MaterialIconKind x:Key="IconFolder">FolderOutline</icons:MaterialIconKind>
     <icons:MaterialIconKind x:Key="IconFolderAdd">FolderAddOutline</icons:MaterialIconKind>
     <icons:MaterialIconKind x:Key="IconFolderEdit">FolderEditOutline</icons:MaterialIconKind>
     <icons:MaterialIconKind x:Key="IconFolderRemove">FolderRemoveOutline</icons:MaterialIconKind>
-
 
 
     <icons:MaterialIconKind x:Key="IconCheckbox">CheckboxOutline</icons:MaterialIconKind>

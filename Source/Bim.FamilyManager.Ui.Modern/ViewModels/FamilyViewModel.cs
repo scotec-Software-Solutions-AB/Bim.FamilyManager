@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.Modern.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Scotec.Revit;
 
 namespace Bim.FamilyManager.Ui.Modern.ViewModels;
@@ -34,11 +34,14 @@ public class FamilyViewModel : FamilyViewModel<ModernLayoutOptions>
     /// </summary>
     /// <param name="family">The <see cref="IRevitFamily" /> instance representing the Revit family to be managed.</param>
     /// <param name="familyManager">The <see cref="IFamilyManager" /> responsible for family operations.</param>
-    /// <param name="symbolFactory">A factory delegate for creating <see cref="Ui.ViewModels.FamilySymbolViewModel" /> instances.</param>
+    /// <param name="symbolFactory">
+    ///     A factory delegate for creating <see cref="Ui.ViewModels.FamilySymbolViewModel" />
+    ///     instances.
+    /// </param>
     /// <param name="dropHandlerFactory">A factory function for creating <see cref="FamilyDropHandler" /> instances.</param>
     /// <param name="layoutOptions">An <see cref="IOptionsMonitor{ModernLayoutOptions}" /> for monitoring layout options.</param>
     /// <param name="revitTask">The <see cref="RevitTask" /> instance for executing Revit-related tasks.</param>
-    /// <param name="logger">The <see cref="ILogger{FamilyViewModel{ModernLayoutOptions}}" /> for logging messages.</param>
+    /// <param name="logger">The <see cref="ILogger{FamilyViewModel}" /> for logging messages.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the provided dependencies, enabling management of family data,
     ///     symbol instantiation, drag-and-drop handling, and logging.

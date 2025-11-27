@@ -27,7 +27,8 @@
                             VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <material:MaterialIcon x:Name="PART_Icon" Kind="{TemplateBinding Kind}"
-                                                   Foreground="{TemplateBinding Foreground}" Background="Transparent" Padding="0" />
+                                                   Foreground="{TemplateBinding Foreground}" Background="Transparent"
+                                                   Padding="0" />
                             <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
                                        VerticalAlignment="Center" FontSize="{TemplateBinding FontSize}">
                                 <TextBlock.Style>

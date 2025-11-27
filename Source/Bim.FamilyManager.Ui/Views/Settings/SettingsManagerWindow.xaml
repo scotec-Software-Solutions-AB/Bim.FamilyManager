@@ -71,12 +71,12 @@
 
             <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
                         Margin="0,10,10,10">
-                <controls:MaterialIconButton  Height="32" Foreground="{StaticResource ButtonSaveBrush}"
-                                              Content="Save" Kind="{StaticResource IconSave}" 
-                                              Command="{Binding Path=SaveCommand}"/>
-                <controls:MaterialIconButton  Height="32" Foreground="{StaticResource ButtonCancelBrush}" 
-                                              Margin="15,0,0,0" Content="Cancel" Kind="{StaticResource IconCancel}" 
-                                              Command="{Binding Path=CloseCommand}"/>
+                <controls:MaterialIconButton Height="32" Foreground="{StaticResource ButtonSaveBrush}"
+                                             Content="Save" Kind="{StaticResource IconSave}"
+                                             Command="{Binding Path=SaveCommand}" />
+                <controls:MaterialIconButton Height="32" Foreground="{StaticResource ButtonCancelBrush}"
+                                             Margin="15,0,0,0" Content="Cancel" Kind="{StaticResource IconCancel}"
+                                             Command="{Binding Path=CloseCommand}" />
 
             </StackPanel>
         </Grid>

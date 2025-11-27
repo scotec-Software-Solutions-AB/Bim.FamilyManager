@@ -7,8 +7,10 @@ namespace Bim.FamilyManager.Ui.Standard.ViewModels;
 ///     Represents the view model for a Revit family symbol in the standard UI layer.
 /// </summary>
 /// <remarks>
-///     This class extends <see cref="Ui.ViewModels.FamilySymbolViewModel" /> and implements <see cref="IFamilySymbolViewModel" />.
-///     It provides a factory delegate for instantiation and encapsulates the logic for managing a Revit family symbol within the UI.
+///     This class extends <see cref="Ui.ViewModels.FamilySymbolViewModel" /> and implements
+///     <see cref="IFamilySymbolViewModel" />.
+///     It provides a factory delegate for instantiation and encapsulates the logic for managing a Revit family symbol
+///     within the UI.
 /// </remarks>
 public class FamilySymbolViewModel : Ui.ViewModels.FamilySymbolViewModel, IFamilySymbolViewModel
 {
@@ -25,7 +27,10 @@ public class FamilySymbolViewModel : Ui.ViewModels.FamilySymbolViewModel, IFamil
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilySymbolViewModel" /> class.
     /// </summary>
-    /// <param name="familySymbol">The <see cref="IRevitFamilySymbol" /> instance representing the Revit family symbol to be encapsulated by this view model.</param>
+    /// <param name="familySymbol">
+    ///     The <see cref="IRevitFamilySymbol" /> instance representing the Revit family symbol to be
+    ///     encapsulated by this view model.
+    /// </param>
     /// <remarks>
     ///     This constructor passes the provided <paramref name="familySymbol" /> to the base class,
     ///     enabling access to its properties and functionality within the UI context.

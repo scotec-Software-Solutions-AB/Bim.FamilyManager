@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Bim.FamilyManager.Abstractions.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Bim.FamilyManager.Abstractions.Options;
 
 namespace Bim.FamilyManager.Base.Options;
 

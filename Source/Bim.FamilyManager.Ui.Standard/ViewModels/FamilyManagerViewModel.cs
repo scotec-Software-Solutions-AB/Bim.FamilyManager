@@ -1,4 +1,9 @@
 ﻿using System.ComponentModel;
+using System.IO;
+using System.Reflection;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
@@ -8,11 +13,6 @@ using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Extensions.Linq;
 using Scotec.Wpf.ViewModels;
-using System.IO;
-using System.Reflection;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Bim.FamilyManager.Ui.Standard.ViewModels;
 
@@ -237,16 +237,17 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
             {
                 _familySources = _familyManager.FamilySources.Select(source => (IFamilySourceViewModel)_sourceFactory(source)).ToList();
 
-                _familySources.ForAll(g => StaticWeakEventManager.AddWeakHandler<IFamilySourceViewModel, PropertyChangedEventArgs>(g, nameof(g.PropertyChanged), (source, args) =>
-                {
-                    if (args.PropertyName == nameof(IFamilySourceViewModel.IsSelected))
+                _familySources.ForAll(g => StaticWeakEventManager.AddWeakHandler<IFamilySourceViewModel, PropertyChangedEventArgs>(g, nameof(g.PropertyChanged),
+                    (source, args) =>
                     {
-                        if (source.IsSelected)
+                        if (args.PropertyName == nameof(IFamilySourceViewModel.IsSelected))
                         {
-                            SelectedFamilySource = source;
+                            if (source.IsSelected)
+                            {
+                                SelectedFamilySource = source;
+                            }
                         }
-                    }
-                }));
+                    }));
 
                 var selectedSource = _familySources.FirstOrDefault(g => g.IsSelected) ?? _familySources.FirstOrDefault();
                 if (selectedSource is not null)

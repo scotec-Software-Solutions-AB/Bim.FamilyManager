@@ -10,7 +10,8 @@ using Scotec.Identity.AzureActiveDirectory;
 namespace Bim.FamilyManager.Source.AzureStorage.ViewModels;
 
 /// <summary>
-/// View model for the Azure Storage source panel, providing authentication and sign-in functionality for Azure-based family sources.
+///     View model for the Azure Storage source panel, providing authentication and sign-in functionality for Azure-based
+///     family sources.
 /// </summary>
 public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<AzureStorageSource>
 {
@@ -19,7 +20,7 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     private readonly RelayCommand _signInCommand;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AzureStorageSourcePanelViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="AzureStorageSourcePanelViewModel" /> class.
     /// </summary>
     /// <param name="familySource">The Azure storage family source.</param>
     /// <param name="authService">The Azure AD authentication service.</param>
@@ -38,17 +39,17 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     }
 
     /// <summary>
-    /// Gets the command used to initiate sign-in to Azure AD.
+    ///     Gets the command used to initiate sign-in to Azure AD.
     /// </summary>
     public ICommand SignInCommand => _signInCommand;
 
     /// <summary>
-    /// Gets the username of the currently signed-in Azure AD account, or "not signed in" if no session is active.
+    ///     Gets the username of the currently signed-in Azure AD account, or "not signed in" if no session is active.
     /// </summary>
     public string SignedInAs => _session.Account?.Username ?? "not signed in";
 
     /// <summary>
-    /// Handles the SignedOut event for the Azure AD session and updates the signed-in status.
+    ///     Handles the SignedOut event for the Azure AD session and updates the signed-in status.
     /// </summary>
     /// <param name="session">The Azure AD session.</param>
     /// <param name="args">The event arguments.</param>
@@ -58,7 +59,7 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     }
 
     /// <summary>
-    /// Handles the SignedIn event for the Azure AD session and updates the signed-in status.
+    ///     Handles the SignedIn event for the Azure AD session and updates the signed-in status.
     /// </summary>
     /// <param name="session">The Azure AD session.</param>
     /// <param name="args">The event arguments.</param>
@@ -68,7 +69,7 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     }
 
     /// <summary>
-    /// Retrieves the Azure AD authentication session for the specified options.
+    ///     Retrieves the Azure AD authentication session for the specified options.
     /// </summary>
     /// <param name="options">The Azure storage source options.</param>
     /// <returns>The Azure AD authentication session.</returns>
@@ -90,7 +91,7 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     }
 
     /// <summary>
-    /// Initiates the interactive sign-in process to Azure AD.
+    ///     Initiates the interactive sign-in process to Azure AD.
     /// </summary>
     private async void SignInAsync()
     {
