@@ -89,7 +89,30 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
         set => SetProperty(ref _contentHeight, value);
     }
 
+    /// <summary>
+    ///     Gets the minimum height for the content area in the layout.
+    /// </summary>
+    /// <value>
+    ///     The minimum height value, which is a constant set to 32.
+    /// </value>
+    /// <remarks>
+    ///     This property defines the lower boundary for the content height in the layout settings.
+    ///     It is used in conjunction with <see cref="ContentMaxHeight" /> and <see cref="ContentHeight" />
+    ///     to ensure the content height remains within a valid range.
+    /// </remarks>
     public int ContentMinHeight => 32;
+    
+    /// <summary>
+    ///     Gets the maximum height for the content area in the layout.
+    /// </summary>
+    /// <value>
+    ///     The maximum height value, which is a constant set to 128.
+    /// </value>
+    /// <remarks>
+    ///     This property defines the upper boundary for the content height in the layout settings.
+    ///     It is used in conjunction with <see cref="ContentMinHeight" /> and <see cref="ContentHeight" />
+    ///     to ensure the content height remains within a valid range.
+    /// </remarks>
     public int ContentMaxHeight => 128;
 
     /// <summary>

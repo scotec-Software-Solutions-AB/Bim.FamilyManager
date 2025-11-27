@@ -17,6 +17,7 @@ using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Base.Options;
 using Version = System.Version;
+using Bim.FamilyManager.Base.Logic.EStorage;
 
 namespace Bim.FamilyManager.Base.Logic;
 

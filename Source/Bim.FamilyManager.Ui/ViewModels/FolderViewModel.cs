@@ -33,7 +33,7 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and layout options, enabling
     ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and supports dynamic creation of subfolder and family view models.
     /// </remarks>
-    public FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
+    protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
         : base(layoutOptions)
     {
         Folder = folder;
@@ -87,16 +87,11 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     and creates corresponding <see cref="FolderViewModel{TLayoutOptions}" /> instances using the provided factory.
     ///     Subfolders are loaded only when the folder is expanded or selected for performance reasons.
     /// </remarks>
-    public IEnumerable<IFolderViewModel>? Subfolders
-    {
-        get
-        {
-            // Performance: Do not load the subfolders if the folder is not expanded.
-            return IsExpanded || IsSelected
-                ? _folders ??= Folder.Subfolders.Select(subfolder => CreateSubfolderViewModel(subfolder)).ToList()
-                : null;
-        }
-    }
+    public IEnumerable<IFolderViewModel>? Subfolders =>
+        // Performance: Do not load the subfolders if the folder is not expanded.
+        IsExpanded || IsSelected
+            ? _folders ??= Folder.Subfolders.Select(CreateSubfolderViewModel).ToList()
+            : null;
 
     /// <summary>
     ///     Gets the collection of families associated with the folder represented by this view model.
@@ -108,16 +103,11 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     This property dynamically loads and returns the families when the folder is expanded or selected. If the folder is not expanded,
     ///     the property returns <c>null</c>. The families are represented as instances of <see cref="IFamilyViewModel" />.
     /// </remarks>
-    public IEnumerable<IFamilyViewModel>? Families
-    {
-        get
-        {
-            // Performance: Do not load the families if the folder is not expanded.
-            return IsExpanded || IsSelected
-                ? _families ??= Folder.Families.Select(family => CreateFamilyViewModel(family)).ToList()
-                : null;
-        }
-    }
+    public IEnumerable<IFamilyViewModel>? Families =>
+        // Performance: Do not load the families if the folder is not expanded.
+        IsExpanded || IsSelected
+            ? _families ??= Folder.Families.Select(CreateFamilyViewModel).ToList()
+            : null;
 
     /// <summary>
     ///     Gets or sets a value indicating whether the folder is expanded in the UI.

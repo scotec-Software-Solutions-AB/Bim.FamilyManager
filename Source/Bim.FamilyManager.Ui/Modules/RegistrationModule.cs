@@ -39,11 +39,6 @@ public class RegistrationModule : Module
     {
         base.Load(builder);
 
-        
-        
-        
-        
-        
         builder.RegisterType<FamilyDropViewModel>()
                .InstancePerDependency();
 

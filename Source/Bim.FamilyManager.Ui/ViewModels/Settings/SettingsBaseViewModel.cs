@@ -62,7 +62,15 @@ public abstract class SettingsBaseViewModel : ViewModel, ISettingsViewModel
     /// </remarks>
     public Uri DefaultImageSource => GetDefaultImage();
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets or sets a value indicating whether the settings view model is selected.
+    /// </summary>
+    /// <value>
+    ///     <c>true</c> if the settings view model is selected; otherwise, <c>false</c>.
+    /// </value>
+    /// <remarks>
+    ///     Setting this property updates the <see cref="ImageSource"/> to reflect the selection state.
+    /// </remarks>
     public bool IsSelected
     {
         get => _isSelected;
@@ -73,10 +81,25 @@ public abstract class SettingsBaseViewModel : ViewModel, ISettingsViewModel
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Retrieves the options object associated with the settings view model.
+    /// </summary>
+    /// <returns>
+    ///     An <see cref="object"/> representing the options for the settings view model.
+    /// </returns>
+    /// <remarks>
+    ///     This method is abstract and must be implemented by derived classes to provide
+    ///     the specific options relevant to their settings.
+    /// </remarks>
     public abstract object GetOptions();
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Initializes the settings view model.
+    /// </summary>
+    /// <remarks>
+    ///     This method invokes <see cref="OnInitialize"/> to execute any custom initialization logic
+    ///     defined in derived classes.
+    /// </remarks>
     public void Initialize()
     {
         OnInitialize();

@@ -1,9 +1,10 @@
 ﻿using Autofac;
-using Microsoft.Extensions.Logging;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.Options;
+using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Base.Settings;
+using Microsoft.Extensions.Logging;
 using Module = Autofac.Module;
 
 namespace Bim.FamilyManager.Base.Modules;
@@ -37,17 +38,17 @@ public class RegistrationModule : Module
         //builder.RegisterType<JsonFamilySourceConverter>()
         //       .InstancePerDependency();
 
-        builder.RegisterType<Logic.RevitFamily>()
+        builder.RegisterType<RevitFamily>()
                .InstancePerDependency();
         builder.Register<IRevitFamily.Factory>(context =>
                {
                    var componentContext = context.Resolve<IComponentContext>();
                    return (name, familyInfo, saveAction) =>
-                       new Logic.RevitFamily(name, familyInfo, saveAction, componentContext.Resolve<ILogger<Logic.RevitFamily>>());
+                       new RevitFamily(name, familyInfo, saveAction, componentContext.Resolve<ILogger<RevitFamily>>());
                })
                .SingleInstance();
 
-    builder.RegisterType<Logic.FamilyManager>()
+        builder.RegisterType<Logic.FamilyManager>()
                .As<IFamilyManager>()
                .SingleInstance();
 

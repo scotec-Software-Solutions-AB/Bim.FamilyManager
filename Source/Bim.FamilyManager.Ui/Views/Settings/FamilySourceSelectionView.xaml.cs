@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
 
-namespace Bim.FamilyManager.Ui.Views.Settings
+namespace Bim.FamilyManager.Ui.Views.Settings;
+
+/// <summary>
+///     Represents the WPF user control for selecting a family source in the settings UI.
+/// </summary>
+/// <remarks>
+///     This control provides the interaction logic for the FamilySourceSelectionView.xaml, allowing users to choose among
+///     available family sources.
+/// </remarks>
+public partial class FamilySourceSelectionView : UserControl
 {
     /// <summary>
-    /// Interaction logic for FamilySourceSelectionView.xaml
+    ///     Initializes a new instance of the <see cref="FamilySourceSelectionView" /> class.
     /// </summary>
-    public partial class FamilySourceSelectionView : UserControl
+    /// <remarks>
+    ///     Calls <see cref="InitializeComponent" /> to set up the control and its bindings.
+    /// </remarks>
+    public FamilySourceSelectionView()
     {
-        public FamilySourceSelectionView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

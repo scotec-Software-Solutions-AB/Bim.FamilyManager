@@ -31,17 +31,43 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
         Type = GetType().Name.Replace("Options", "");
     }
 
+    /// <summary>
+    ///     Gets or sets the unique identifier for the family source options.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="Guid"/> representing the unique identifier.
+    /// </value>
     public Guid Id { get; init; }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets or sets the type of the family source.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="string"/> representing the type of the family source.
+    /// </value>
     public string Type { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets or sets the name of the family source.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="string"/> representing the name of the family source.
+    /// </value>
     public string Name { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets or sets a value indicating whether the family source is active.
+    /// </summary>
+    /// <value>
+    ///     <c>true</c> if the family source is active; otherwise, <c>false</c>.
+    /// </value>
     public bool IsActive { get; set; } = true;
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets or sets a value indicating whether the family source is editable.
+    /// </summary>
+    /// <value>
+    ///     <c>true</c> if the family source is editable; otherwise, <c>false</c>.
+    /// </value>
     public bool IsEditable { get; set; } = true;
 }

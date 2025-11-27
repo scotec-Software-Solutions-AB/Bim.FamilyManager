@@ -99,6 +99,18 @@ public partial class FamilyManagerPane : Page, IDockablePaneProvider
         var viewName = _document.ActiveView.Name;
     }
 
+    /// <summary>
+    ///     Builds and updates the view model for the Family Manager pane based on the specified layout.
+    /// </summary>
+    /// <param name="layout">
+    ///     A <see cref="string" /> representing the layout type for the Family Manager.
+    ///     This determines which implementation of <see cref="IFamilyManagerViewModel" /> is resolved and set as the data context.
+    /// </param>
+    /// <remarks>
+    ///     This method ensures that the view model is updated only when the layout changes. It uses the
+    ///     <see cref="Application.Current.Dispatcher" /> to perform UI updates, such as setting the data context.
+    ///     The view model is resolved from the <see cref="IServiceProvider" /> using the provided layout as a key.
+    /// </remarks>
     private void BuildFamilyManagerViewModel(string layout)
     {
         if (_displayType == layout)

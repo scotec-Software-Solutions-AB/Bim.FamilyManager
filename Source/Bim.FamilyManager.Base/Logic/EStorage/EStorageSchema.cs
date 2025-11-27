@@ -4,11 +4,11 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
 using Bim.FamilyManager.Abstractions;
 
-namespace Bim.FamilyManager.Base.Logic;
+namespace Bim.FamilyManager.Base.Logic.EStorage;
 
 /// <summary>
-/// Abstract base class for managing Revit Extensible Storage schemas.
-/// Provides methods to attach, detach, and retrieve custom data from Revit elements using a schema.
+///     Abstract base class for managing Revit Extensible Storage schemas.
+///     Provides methods to attach, detach, and retrieve custom data from Revit elements using a schema.
 /// </summary>
 public abstract class EStorageSchema
 {
@@ -20,7 +20,7 @@ public abstract class EStorageSchema
     private readonly string _vendorId;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EStorageSchema"/> class.
+    ///     Initializes a new instance of the <see cref="EStorageSchema" /> class.
     /// </summary>
     /// <param name="schemaId">The unique identifier for the schema.</param>
     /// <param name="vendorId">The vendor ID for the schema.</param>
@@ -37,7 +37,7 @@ public abstract class EStorageSchema
     }
 
     /// <summary>
-    /// Attaches the specified data to the given Revit element using the schema.
+    ///     Attaches the specified data to the given Revit element using the schema.
     /// </summary>
     /// <typeparam name="TData">The type of data to attach.</typeparam>
     /// <param name="element">The Revit element to attach data to.</param>
@@ -51,7 +51,7 @@ public abstract class EStorageSchema
     }
 
     /// <summary>
-    /// Detaches the schema data from the specified Revit element.
+    ///     Detaches the schema data from the specified Revit element.
     /// </summary>
     /// <param name="element">The Revit element to detach data from.</param>
     public void Detach(Element element)
@@ -61,7 +61,7 @@ public abstract class EStorageSchema
     }
 
     /// <summary>
-    /// Attempts to retrieve the schema data from the specified Revit element.
+    ///     Attempts to retrieve the schema data from the specified Revit element.
     /// </summary>
     /// <typeparam name="TData">The type of data to retrieve.</typeparam>
     /// <param name="element">The Revit element to retrieve data from.</param>
@@ -79,14 +79,14 @@ public abstract class EStorageSchema
 
         var dataBytes = entity.Get<IList<byte>>(_schema.GetField(_schemaDataFieldName)).ToArray();
         data = JsonSerializer.Deserialize<TData>(new ReadOnlySpan<byte>(dataBytes));
-        
+
         return data != null;
     }
 
     /// <summary>
-    /// Creates a new schema with the specified configuration.
+    ///     Creates a new schema with the specified configuration.
     /// </summary>
-    /// <returns>The created <see cref="Schema"/> instance.</returns>
+    /// <returns>The created <see cref="Schema" /> instance.</returns>
     private Schema CreateSchema()
     {
         var schemaBuilder = new SchemaBuilder(_schemaId);
@@ -102,9 +102,9 @@ public abstract class EStorageSchema
     }
 
     /// <summary>
-    /// Retrieves the schema instance if it exists.
+    ///     Retrieves the schema instance if it exists.
     /// </summary>
-    /// <returns>The existing <see cref="Schema"/> instance, or <c>null</c> if not found.</returns>
+    /// <returns>The existing <see cref="Schema" /> instance, or <c>null</c> if not found.</returns>
     private Schema? GetSchema()
     {
         return Schema.ListSchemas()

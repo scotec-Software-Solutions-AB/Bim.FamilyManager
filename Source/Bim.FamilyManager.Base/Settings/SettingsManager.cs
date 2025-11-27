@@ -25,7 +25,7 @@ public class SettingsManager
     private readonly ILogger<SettingsManager> _logger;
 
     /// <summary>
-    ///     Static constructor for the <see cref="Bim.FamilyManager.Base.Settings.SettingsManager" /> class.
+    ///     Static constructor for the <see cref="SettingsManager" /> class.
     ///     Initializes static members, including the JSON serializer options used for handling settings serialization.
     /// </summary>
     /// <remarks>
@@ -94,6 +94,15 @@ public class SettingsManager
     /// </exception>
     public SettingsManagerOptions Options { get; }
 
+    /// <summary>
+    ///     Initializes the settings manager using the provided configuration and returns the user settings file path.
+    /// </summary>
+    /// <param name="configuration">The application configuration containing settings manager options.</param>
+    /// <param name="optionTypes">When this method returns, contains the dictionary of option types discovered.</param>
+    /// <returns>The expanded path to the user settings file.</returns>
+    /// <exception cref="System.InvalidOperationException">
+    ///     Thrown if the settings manager is already initialized or if the settings file path is not specified.
+    /// </exception>
     public static string InitializeSettings(IConfiguration configuration, out Dictionary<string, Type> optionTypes)
     {
         if (s_isInitialized)

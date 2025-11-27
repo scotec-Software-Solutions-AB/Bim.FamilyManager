@@ -1,13 +1,12 @@
 ﻿using System.IO;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Autodesk.Internal.InfoCenter;
 using Autodesk.Windows;
-using Microsoft.Extensions.Logging;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Source.Directory.Options;
 using Bim.FamilyManager.Ui.Resources;
+using Microsoft.Extensions.Logging;
 using Scotec.Revit.RevitFamily;
 using Folder = Bim.FamilyManager.Base.Logic.Folder;
 
@@ -39,6 +38,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     private readonly ILogger<DirectorySource> _logger;
     private readonly string _rootPath;
     private IEnumerable<IFolder>? _folders;
+
     /// <summary>
     ///     Initializes static members of the <see cref="DirectorySource" /> class.
     /// </summary>
@@ -266,20 +266,18 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
 
         var sets = GroupFamiliesAndDescriptions(familyFiles, descriptionFiles);
 
-
-
         var families = sets.Select(set =>
-                             {
-                                 var familyName = set.Name;
-                                 if (FamilyManager.TryGetRevitFamily(familyName, out var family))
-                                 {
-                                     return family;
-                                 }
+                           {
+                               var familyName = set.Name;
+                               if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+                               {
+                                   return family;
+                               }
 
-                                 return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
-                                     (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
-                             })
-                             .ToList();
+                               return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
+                                   (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+                           })
+                           .ToList();
 
         return families;
     }
@@ -357,24 +355,43 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
             return memoryStream;
         }
     }
-    
-    private static List<(string Name, string FamilyFile, string? DescriptionFile)> GroupFamiliesAndDescriptions(IEnumerable<string> familyFiles, IEnumerable<string> descroptionFiles)
+
+    /// <summary>
+    /// Groups Revit family files and their corresponding description files into a list of tuples.
+    /// </summary>
+    /// <param name="familyFiles">
+    /// A collection of file paths representing Revit family files (*.rfa).
+    /// </param>
+    /// <param name="descriptionFiles">
+    /// A collection of file paths representing description files (*.yaml).
+    /// </param>
+    /// <returns>
+    /// A list of tuples where each tuple contains the name of the family, the path to the family file,
+    /// and the path to the corresponding description file (if available).
+    /// </returns>
+    /// <remarks>
+    /// This method matches Revit family files with their corresponding description files based on
+    /// their filenames (excluding extensions). If a matching description file is not found for a
+    /// family file, the description file path in the tuple will be <c>null</c>.
+    /// </remarks>
+    private static List<(string Name, string FamilyFile, string? DescriptionFile)> GroupFamiliesAndDescriptions(
+        IEnumerable<string> familyFiles, IEnumerable<string> descriptionFiles)
     {
         // Build a lookup for .fm files by filename without extension
-        var fmLookup = descroptionFiles
+        var fmLookup = descriptionFiles
             .ToDictionary(
                 fm => Path.GetFileNameWithoutExtension(fm)!,
                 fm => fm,
                 StringComparer.OrdinalIgnoreCase);
 
         var set = familyFiles
-            .Select(rfa =>
-            {
-                var name = Path.GetFileNameWithoutExtension(rfa);
-                fmLookup.TryGetValue(name, out var fmFile);
-                return (Name: name, FamilyFile: rfa, DescriptionFile: fmFile);
-            })
-            .ToList();
+                  .Select(rfa =>
+                  {
+                      var name = Path.GetFileNameWithoutExtension(rfa);
+                      fmLookup.TryGetValue(name, out var fmFile);
+                      return (Name: name, FamilyFile: rfa, DescriptionFile: fmFile);
+                  })
+                  .ToList();
 
         return set;
     }
