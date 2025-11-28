@@ -29,9 +29,9 @@ jobs:
       with:
         dotnet-version: 8.0.x        
     - name: Restore dependencies
-      run: dotnet restore ./Source/Bim.FamilyManager.sln
+      run: dotnet restore ./Source/Bim.FamilyManager.slnx
     - name: Build
-      run: dotnet build --no-restore ./Source/Bim.FamilyManager.sln -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
+      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
     - name: Publish
       run: dotnet publish --no-restore --no-build ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj -c Release -o Publish/Bim.FamilyManager 
     - name: Copy .addin file
