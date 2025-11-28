@@ -31,6 +31,17 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ./Source/Bim.FamilyManager.sln
     - name: Build
-      run: dotnet build --no-restore ./Source/Bim.FamilyManager.sln -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:PackageVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
-#    - name: Pack
-#      run: dotnet pack --no-restore --no-build ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:PackageVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
+      run: dotnet build --no-restore ./Source/Bim.FamilyManager.sln -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
+    - name: Publish
+      run: dotnet publish --no-restore --no-build ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj -c Release -o Publish/Bim.FamilyManager 
+    - name: Copy .addin file
+      run: |
+        mkdir -p Publish
+        cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
+    - name: Zip Publish folder
+      run: zip -r "Bim.FamilyManager_v$GITVERSION_SEMVER.zip" Publish
+    - name: Upload Publish zip as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Bim.FamilyManager
+        path: Bim.FamilyManager_v$GITVERSION_SEMVER.zip
