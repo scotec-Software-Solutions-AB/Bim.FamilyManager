@@ -2,7 +2,6 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="../../scotec_ssc/Source/Scotec.Ssc/Scotec.Identity.AzureActiveDirectory/Scotec.Identity.AzureActiveDirectory.csproj" />
   <Project Path="Bim.FamilyManager.Abstractions/Bim.FamilyManager.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
