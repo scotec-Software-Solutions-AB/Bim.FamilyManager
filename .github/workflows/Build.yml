@@ -39,9 +39,9 @@ jobs:
         mkdir -p Publish
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
     - name: Zip Publish folder
-      run: zip -r "Bim.FamilyManager_v$GITVERSION_SEMVER.zip" Publish
+      run: zip -r "Bim.FamilyManager_v${GITVERSION_SEMVER}.zip" Publish
     - name: Upload Publish zip as artifact
       uses: actions/upload-artifact@v4
       with:
         name: Bim.FamilyManager
-        path: Bim.FamilyManager_v$GITVERSION_SEMVER.zip
+        path: Bim.FamilyManager_v${GITVERSION_SEMVER}.zip
