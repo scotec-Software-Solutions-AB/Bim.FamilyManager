@@ -31,9 +31,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ./Source/Bim.FamilyManager.slnx
     - name: Build
-      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release -p:Version=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER -p:CompanyName="scotec Software Solutions AB"
+      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release -p:CompanyName="scotec Software Solutions AB" -p:Version=$GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER
     - name: Publish
-      run: dotnet publish --no-restore --no-build ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj -c Release -o Publish/Bim.FamilyManager 
+      run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release -p:PublishProfile=FolderProfile -p:Platform=x64 -p:Version=$GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$GITVERSION_SEMVER
     - name: Copy .addin file
       run: |
         mkdir -p Publish
