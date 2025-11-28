@@ -1,6 +1,8 @@
-# BIM Family Manager
+# Bim.FamilyManager
 
-**BIM Family Manager** is a powerful tool designed to streamline the management, organization, and deployment of Autodesk® Revit® family files within architectural and engineering workflows. Built on .NET 8, it offers a modern, user-friendly interface for handling Revit families from various sources, including local directories and Azure Storage.
+**Bim.FamilyManager** is a powerful tool designed to streamline the management, organization, and deployment of Autodesk® Revit® family files within architectural and engineering workflows. Built on .NET 8, it offers a modern, user-friendly interface for handling Revit families from various sources, including local directories and Azure Storage.
+
+> **Compatibility:** Bim.FamilyManager is compatible with Autodesk Revit 2025 and 2026.
 
 ## Features
 
@@ -54,12 +56,12 @@ dotnet build
    ```  
 
 **4. Launch Revit**  
-Start Autodesk Revit. The BIM Family Manager add-in will appear in the "scotec" tab.
+Start Autodesk Revit. The Bim.FamilyManager add-in will appear in the "scotec" tab.
 
 **5. Configure & Use**  
-Access BIM Family Manager from the Add-Ins tab and set up your sources and preferences.
+Access Bim.FamilyManager from the Add-Ins tab and set up your sources and preferences.
 
-> **Note:** BIM Family Manager requires Revit 2025 or newer.
+> **Note:** Bim.FamilyManager requires Revit 2025 or newer.
 
 ## Project Structure
 
@@ -90,7 +92,7 @@ Integration for Azure Storage management.
 ## Screenshots
 
 
-![Revit with Bim.FamilyManager](./Documentation/Images/family_manager_revit.png "Revit with Bim.FamilyManager")
+![Revit with Bim.FamilyManager](./Documentation/Images/family_manager_revit.png "Revit with BM.FamilyManager")
 
 ![Bim.FamilyManager](./Documentation/Images/family_manager_modern_view.png "Bim.FamilyManager")
 
@@ -105,33 +107,13 @@ We also offer custom Revit add-in development to fit your specific workflows and
 
 ## Contributing
 
-We welcome contributions to BIM Family Manager! Your input helps improve a tool that benefits the Revit and BIM community.
+We welcome contributions to Bim.FamilyManager!  Your input helps improve a tool that benefits the Revit and BIM community.
+For detailed guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### Why Contribute?
-
-- **Make an Impact:** Help thousands of Revit users optimize their workflows.
-- **Grow Your Skills:** Collaborate, learn, and gain experience with a modern Revit add-in.
-- **Shape the Project:** Suggest features and enhancements that matter to you.
-
-### How to Contribute
-
-- **Report Issues:** Found a bug or have a suggestion? [Open an issue](https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/issues).
-- **Submit Pull Requests:** Fix bugs, add features, or improve documentation.
-- **Enhance Documentation:** Make guides and examples clearer for everyone.
-- **Test & Review:** Try new features, test on different Revit versions, and provide feedback.
-- **Share Ideas:** Propose new features or improvements.
-
-### Getting Started
-
-1. Fork the repository and create your branch from `develop`.
-2. Make changes with clear, descriptive commit messages.
-3. Ensure your code follows the existing style and passes all builds.
-4. Submit a pull request with a description of your changes.
-
-We’re excited to collaborate! Whether you’re experienced or new to open source, your input is valuable. Help us make BIM Family Manager the best it can be!
+We’re excited to collaborate! Whether you’re experienced or new to open source, your input is valuable. Help us make Bim.FamilyManager the best it can be!
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](license.txt) file for details.
 
-*Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc. and/or its subsidiaries and/or affiliates in the USA and/or other countries. BIM Family Manager is an independent open-source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk, Inc. or any of its subsidiaries.*
+*Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc. and/or its subsidiaries and/or affiliates in the USA and/or other countries. Bim.FamilyManager is an independent open-source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk, Inc. or any of its subsidiaries.*
