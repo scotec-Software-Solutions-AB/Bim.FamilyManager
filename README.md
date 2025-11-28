@@ -132,6 +132,6 @@ We’re excited to collaborate! Whether you’re experienced or new to open sour
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](license.txt) file for details.
 
 *Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc. and/or its subsidiaries and/or affiliates in the USA and/or other countries. BIM Family Manager is an independent open-source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk, Inc. or any of its subsidiaries.*
