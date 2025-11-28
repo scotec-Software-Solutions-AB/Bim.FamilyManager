@@ -41,7 +41,7 @@ jobs:
     - name: Zip Publish folder
       run: zip -r "Bim.FamilyManager_v$GITVERSION_SEMVER.zip" Publish
     - name: Upload Publish zip as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Bim.FamilyManager
         path: Bim.FamilyManager_v$GITVERSION_SEMVER.zip
