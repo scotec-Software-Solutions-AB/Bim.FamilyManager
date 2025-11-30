@@ -41,8 +41,11 @@ jobs:
     - name: Copy .addin file
       run: |
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
-    - name: Zip Publish folder
-      run: zip -r "Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip" Publish/
+#    - name: Zip Publish folder
+#      run: zip -r "Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip" Publish/
+    - name: Zip Publish folder contents
+      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.GITVERSION_SEMVER }}.zip"
+      shell: pwsh
     - name: Upload Publish zip as artifact
       uses: actions/upload-artifact@v4
       with:
