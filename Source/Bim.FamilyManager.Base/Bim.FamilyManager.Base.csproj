@@ -8,6 +8,7 @@
 		<Platforms>x64</Platforms>
 		<LangVersion>14.0</LangVersion>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
