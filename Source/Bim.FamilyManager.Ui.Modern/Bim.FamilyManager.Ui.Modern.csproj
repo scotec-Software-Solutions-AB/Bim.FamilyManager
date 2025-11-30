@@ -7,7 +7,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x64</Platforms>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	</PropertyGroup>
 
 	<ItemGroup>
