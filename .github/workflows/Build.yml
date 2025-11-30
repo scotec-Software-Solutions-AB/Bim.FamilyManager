@@ -40,7 +40,6 @@ jobs:
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release -p:PublishProfile=FolderProfile -p:Platform=x64 -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$env:GITVERSION_SEMVER
     - name: Copy .addin file
       run: |
-        mkdir -p Publish
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
     - name: Zip Publish folder
       run: zip -r "Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip" Publish/
