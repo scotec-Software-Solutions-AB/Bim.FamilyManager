@@ -1,8 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Reflection;
-using System.Text.Json;
-using Autodesk.Revit.ApplicationServices;
+﻿using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
@@ -17,6 +13,11 @@ using Microsoft.Extensions.Options;
 using OpenMcdf;
 using Scotec.Extensions.Utilities.Strings;
 using Scotec.Queues;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Version = System.Version;
 
 namespace Bim.FamilyManager.Base.Logic;
@@ -192,7 +193,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     public event EventHandler<EventArgs>? Reloaded;
 
     /// <summary>
-    ///     Searches for Revit families within the specified folder that match the given search pattern.
+    ///     Asynchronously searches for Revit families within the specified folder that match the given search pattern.
     /// </summary>
     /// <param name="folder">
     ///     The folder to search within. This folder may contain subfolders and Revit families.
@@ -201,9 +202,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     The search pattern to filter Revit families by their names. The search is case-insensitive.
     ///     If the search pattern is <see langword="null" /> or empty, no filtering is applied.
     /// </param>
+    /// <param name="cancellationToken">
+    ///     A token to monitor for cancellation requests.
+    /// </param>
     /// <returns>
-    ///     A collection of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> objects
-    ///     that match the specified search pattern. If no families match, an empty collection is returned.
+    ///     An asynchronous stream of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> objects
+    ///     that match the specified search pattern. If no families match, the stream will be empty.
     /// </returns>
     /// <remarks>
     ///     This method retrieves all Revit families from the leaf folders of the specified folder
@@ -212,23 +216,27 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="folder" /> parameter is <see langword="null" />.
     /// </exception>
-    public IEnumerable<IRevitFamily> SearchRevitFamilies(IFolder folder, string searchPattern)
+    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (folder == null)
         {
             throw new ArgumentNullException(nameof(folder));
         }
 
-        if (!string.IsNullOrEmpty(searchPattern))
+        if (string.IsNullOrEmpty(searchPattern))
         {
-            var families = GetAllFamiliesFromLeafFolders(folder);
-            return families
-                .Where(f => f.Name.Contains(searchPattern, StringComparison.OrdinalIgnoreCase));
+            yield break;
         }
 
-        return [];
+        await foreach (var family in GetAllFamiliesFromLeafFoldersAsync(folder, cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (family.Name.Contains(searchPattern, StringComparison.OrdinalIgnoreCase))
+            {
+                yield return family;
+            }
+        }
     }
-
     /// <summary>
     ///     Opens and activates a Revit family for editing in the Revit application.
     /// </summary>
@@ -585,7 +593,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Handles the <see cref="DocumentSavingAsEventArgs" /> event when a document is being saved as a new file.
+    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavingAsEventArgs" /> event when a document is being saved as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document being saved.</param>
@@ -595,7 +603,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Handles the <see cref="DocumentSavedAsEventArgs" /> event when a document has been saved as a new file.
+    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavedAsEventArgs" /> event when a document has been saved as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document that was saved.</param>
@@ -605,7 +613,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Handles the <see cref="DocumentSavingEventArgs" /> event when a document is being saved.
+    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavingEventArgs" /> event when a document is being saved.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document being saved.</param>
@@ -1067,40 +1075,39 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Retrieves all Revit families from the leaf folders of the specified root folder.
+    /// Asynchronously retrieves all Revit families from the leaf folders of the specified root folder.
     /// </summary>
     /// <param name="rootFolder">
-    ///     The root folder from which to retrieve Revit families. This folder may contain subfolders
-    ///     and families.
+    /// The root folder from which to retrieve Revit families. This folder may contain subfolders
+    /// and families.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    ///     An <see cref="IEnumerable{T}" /> of <see cref="IRevitFamily" /> objects representing all families
-    ///     found in the leaf folders of the specified root folder.
+    /// An asynchronous stream of <see cref="IRevitFamily"/> objects representing all families
+    /// found in the leaf folders of the specified root folder.
     /// </returns>
     /// <remarks>
-    ///     This method traverses the folder hierarchy starting from the specified root folder
-    ///     and collects families from all leaf folders. The traversal is performed in parallel
-    ///     to improve performance.
+    /// This method traverses the folder hierarchy starting from the specified root folder
+    /// and collects families from all leaf folders. The traversal is performed asynchronously
+    /// to improve performance.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    ///     Thrown if the <paramref name="rootFolder" /> is <c>null</c>.
+    /// Thrown if the <paramref name="rootFolder"/> is <c>null</c>.
     /// </exception>
-    private static IEnumerable<IRevitFamily> GetAllFamiliesFromLeafFolders(IFolder rootFolder)
+    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesFromLeafFoldersAsync(IFolder rootFolder, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var familiesFromLeafFolders = new List<IEnumerable<IRevitFamily>>();
-        // Use a thread-safe collection for parallel processing
-        var lockObject = new object();
-        // Traverse the folder hierarchy in parallel
-        Parallel.ForEach(GetLeafFolders(rootFolder), leafFolder =>
+        var leafFolders = GetLeafFoldersAsync(rootFolder, cancellationToken);
+        await foreach (var folder in leafFolders)
         {
-            lock (lockObject)
+            cancellationToken.ThrowIfCancellationRequested();
+            await foreach (var family in folder.GetFamiliesAsync(cancellationToken))
             {
-                familiesFromLeafFolders.Add(leafFolder.Families);
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return family;
             }
-        });
-
-        // Flatten the list of lists into a single list
-        return familiesFromLeafFolders.SelectMany(f => f);
+        }
     }
 
     /// <summary>
@@ -1110,8 +1117,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     The root folder from which to retrieve leaf folders. A leaf folder is defined as a folder
     ///     that contains no subfolders.
     /// </param>
+    /// <param name="cancellationToken">
+    ///     A <see cref="CancellationToken" /> to observe while waiting for the asynchronous operation to complete.
+    /// </param>
     /// <returns>
-    ///     An <see cref="IEnumerable{T}" /> of <see cref="IFolder" /> representing all leaf folders
+    ///     An <see cref="IAsyncEnumerable{T}" /> of <see cref="IFolder" /> representing all leaf folders
     ///     within the specified folder hierarchy.
     /// </returns>
     /// <remarks>
@@ -1119,28 +1129,24 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     it is considered a leaf folder and is included in the result. Otherwise, the method continues to traverse
     ///     its subfolders to find leaf folders.
     /// </remarks>
-    private static IEnumerable<IFolder> GetLeafFolders(IFolder folder)
+    private static async IAsyncEnumerable<IFolder> GetLeafFoldersAsync(IFolder folder, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        // If the folder has no subfolders, it's a leaf folder
-        if (!folder.Subfolders.Any())
+        await foreach (var subfolder in folder.GetSubfoldersAsync(cancellationToken))
         {
-            yield return folder;
-        }
-        else
-        {
-            // Recursively traverse subfolders
-            foreach (var subfolder in folder.Subfolders)
+            cancellationToken.ThrowIfCancellationRequested();
+            await foreach (var leaf in GetLeafFoldersAsync(subfolder, cancellationToken))
             {
-                foreach (var leafFolder in GetLeafFolders(subfolder))
-                {
-                    yield return leafFolder;
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return leaf;
             }
+            // Found at least one subfolder, so this is not a leaf folder
+            yield break;
         }
+        // No subfolders found, so this is a leaf folder
+        yield return folder;
     }
-
+    
     /// <summary>
-    ///     Initializes a collection of Revit families by invoking their initialization logic
     ///     and updating their loaded state based on the current document.
     /// </summary>
     /// <param name="families">

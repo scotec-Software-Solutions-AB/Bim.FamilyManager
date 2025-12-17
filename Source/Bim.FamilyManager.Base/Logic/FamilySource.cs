@@ -130,7 +130,7 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     ///     Each folder may contain subfolders and families. The implementation of this property is specific
     ///     to the derived class and determines how the folders are retrieved or constructed.
     /// </remarks>
-    public abstract IEnumerable<IFolder> Folders { get; }
+    public abstract IAsyncEnumerable<IFolder> GetFoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
     ///     Reloads the family source, triggering any necessary updates and notifying subscribers of the reload event.

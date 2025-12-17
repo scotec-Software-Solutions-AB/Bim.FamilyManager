@@ -1,9 +1,11 @@
-﻿using System.Windows.Media;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
+using System.Linq;
+using System.Threading;
+using System.Windows.Media;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
 
@@ -68,16 +70,25 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     {
         get
         {
-            if (_folders is null && IsSelected)
+            if (_folders is null)
             {
-                _folders ??= _familySource.Folders
-                                          .Select(CreateFolderViewModel)
-                                          .OrderBy(folder => folder.Name)
-                                          .ToList();
+                var folders = Task.Run(async () =>
+                {
+                    var folders = new List<IFolder>();
+                    await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
+                    {
+                        folders.Add(folder);
+                    }
 
-                SelectedFolder = _folders.FirstOrDefault();
+                    return folders.OrderBy(f => f.Name)
+                                  .ToList();
+                }).ConfigureAwait(true).GetAwaiter().GetResult();
+
+                _folders = folders.Select(CreateFolderViewModel)
+                                  .ToList();
+
+                SelectedFolder = _folders?.FirstOrDefault();
             }
-
             return _folders;
         }
     }

@@ -24,12 +24,12 @@ public interface IFamilySource
     ///     Gets the collection of folders associated with the Revit family source.
     /// </summary>
     /// <value>
-    ///     An <see cref="IEnumerable{IFolder}" /> representing all top-level folders within the source.
+    ///     An <see cref="IAsyncEnumerable{IFolder}" /> representing all top-level folders within the source.
     /// </value>
     /// <remarks>
     ///     Each folder represents a hierarchical structure that can contain subfolders and Revit families.
     /// </remarks>
-    IEnumerable<IFolder> Folders { get; }
+    IAsyncEnumerable<IFolder> GetFoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
     ///     Gets a stream containing the preview image of the family source.

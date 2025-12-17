@@ -35,34 +35,29 @@ public interface IFamilyManager
     event EventHandler<EventArgs> Reloaded;
 
     /// <summary>
-    ///     Searches for Revit families within the specified folder that match the given search pattern.
+    /// Asynchronously searches for Revit families within the specified folder that match the given search pattern.
     /// </summary>
     /// <param name="folder">
-    ///     The folder in which to search for Revit families. This folder can contain subfolders and families.
+    /// The folder in which to search for Revit families. This folder can include subfolders and families.
     /// </param>
     /// <param name="searchPattern">
-    ///     The search pattern used to filter Revit families. This can include wildcards or specific naming criteria.
+    /// The search pattern used to filter Revit families. This can include wildcards or specific naming criteria.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    ///     A collection of <see cref="IRevitFamily" /> objects that match the search criteria within the specified folder.
+    /// A task that represents the asynchronous operation. The task result contains a collection of 
+    /// <see cref="IRevitFamily" /> objects that match the search criteria within the specified folder.
     /// </returns>
     /// <remarks>
-    ///     This method allows for efficient searching of Revit families based on a folder hierarchy and a search pattern.
-    ///     It is commonly used to locate specific families in large datasets.
+    /// This method allows for efficient searching of Revit families based on a folder hierarchy and a search pattern.
+    /// It is commonly used to locate specific families in large datasets.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    ///     Thrown if the <paramref name="folder" /> or <paramref name="searchPattern" /> is <c>null</c>.
+    /// Thrown if the <paramref name="folder" /> or <paramref name="searchPattern" /> is <c>null</c>.
     /// </exception>
-    /// <example>
-    ///     <code>
-    /// var families = familyManager.SearchRevitFamilies(folder, "*.rfa");
-    /// foreach (var family in families)
-    /// {
-    ///     Console.WriteLine(family.Name);
-    /// }
-    /// </code>
-    /// </example>
-    IEnumerable<IRevitFamily> SearchRevitFamilies(IFolder folder, string searchPattern);
+    IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Opens the specified Revit family for editing.

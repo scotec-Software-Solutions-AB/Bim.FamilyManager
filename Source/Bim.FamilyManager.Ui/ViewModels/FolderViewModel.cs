@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Windows.Documents;
+using System.Windows.Media;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
@@ -18,7 +19,7 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     where TLayoutOptions : LayoutOptions
 {
     private IEnumerable<IFamilyViewModel>? _families;
-    private IEnumerable<IFolderViewModel>? _folders;
+    private IEnumerable<IFolderViewModel>? _subfolders;
     private bool _isExpanded;
 
     /// <summary>
@@ -91,13 +92,37 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     /// <remarks>
     ///     This property retrieves subfolder data from the underlying <see cref="IFolder" /> abstraction
     ///     and creates corresponding <see cref="FolderViewModel{TLayoutOptions}" /> instances using the provided factory.
-    ///     Subfolders are loaded only when the folder is expanded or selected for performance reasons.
+    ///     GetSubfoldersAsync are loaded only when the folder is expanded or selected for performance reasons.
     /// </remarks>
-    public IEnumerable<IFolderViewModel>? Subfolders =>
-        // Performance: Do not load the subfolders if the folder is not expanded.
-        IsExpanded || IsSelected
-            ? _folders ??= Folder.Subfolders.Select(CreateSubfolderViewModel).ToList()
-            : null;
+    public IEnumerable<IFolderViewModel>? Subfolders
+    {
+        get
+        {
+            if (IsExpanded || IsSelected)
+            {
+                if (_subfolders is null)
+                {
+                    var subfolders = Task.Run(async () =>
+                    {
+                        var subfolders = new List<IFolder>();
+                        await foreach(var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+                        {
+                            subfolders.Add(subfolder);
+                        }
+                        
+                        return subfolders.OrderBy(f => f.Name)
+                                         .ToList();
+                    }).ConfigureAwait(true).GetAwaiter().GetResult();
+                    
+                    _subfolders = subfolders.Select(CreateSubfolderViewModel)
+                                            .ToList();
+                }
+                return _subfolders;
+            }
+            return null;
+        }
+    }
+        // Performance: Do not load the families if the folder is not expanded.
 
     /// <summary>
     ///     Gets the collection of families associated with the folder represented by this view model.
@@ -111,11 +136,33 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     not expanded,
     ///     the property returns <c>null</c>. The families are represented as instances of <see cref="IFamilyViewModel" />.
     /// </remarks>
-    public IEnumerable<IFamilyViewModel>? Families =>
-        // Performance: Do not load the families if the folder is not expanded.
-        IsExpanded || IsSelected
-            ? _families ??= Folder.Families.Select(CreateFamilyViewModel).ToList()
-            : null;
+    public IEnumerable<IFamilyViewModel>? Families
+    {
+        get
+        {
+            // Performance: Do not load the families if the folder is not expanded.
+            if (IsExpanded || IsSelected)
+            {
+                if (_families is null)
+                {
+                    var families = Task.Run(async () =>
+                    {
+                        var families = new List<IRevitFamily>();
+                        await foreach (var family in Folder.GetFamiliesAsync(CancellationToken.None))
+                        {
+                            families.Add(family);
+                        }
+                        return families.OrderBy(f => f.Name)
+                                       .ToList();
+                    }).ConfigureAwait(true).GetAwaiter().GetResult();
+                    _families = families.Select(CreateFamilyViewModel)
+                                        .ToList();
+                }
+            }
+
+            return _families;
+        }
+    }
 
     /// <summary>
     ///     Gets or sets a value indicating whether the folder is expanded in the UI.

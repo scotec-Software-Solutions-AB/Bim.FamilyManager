@@ -311,12 +311,24 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         var folder = SelectedFamilySource?.SelectedFolder;
         if (!string.IsNullOrWhiteSpace(searchPattern) && folder is not null)
         {
-            SearchResult = _searchPattern.Length >= 3
-                ? _familyManager.SearchRevitFamilies(folder.Folder, searchPattern)
-                                .Select(family => (IFamilyViewModel)_familyFactory(family))
-                                .ToList()
-                : [];
             IsActiveSearch = true;
+            var searchResult = Task.Run(async () =>
+            {
+                if (_searchPattern.Length >= 3)
+                {
+                    var families = new List<IRevitFamily>();
+                    await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
+                    {
+                        families.Add(family);
+                    }
+                    return families.OrderBy(f => f.Name)
+                                   .ToList();
+                }
+                return [];
+            }).ConfigureAwait(true).GetAwaiter().GetResult();
+
+            SearchResult = searchResult.Select(family => (IFamilyViewModel)_familyFactory(family))
+                                       .ToList();
         }
         else
         {

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Autodesk.Internal.InfoCenter;
 using Autodesk.Windows;
@@ -96,9 +97,27 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// <remarks>
     ///     This property lazily initializes the collection of folders by scanning the root directory
     ///     specified during the creation of the <see cref="DirectorySource" /> instance. The folders
-    ///     are retrieved using the <c>GetFolders</c> method.
+    ///     are retrieved using the <c>GetFoldersAsync</c> method.
     /// </remarks>
-    public override IEnumerable<IFolder> Folders => _folders ??= GetFolders(_rootPath);
+    public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        _folders ??= await Task.Run(async () =>
+        {
+            var folders = new List<IFolder>();
+            await foreach(var folder in GetFoldersAsync(_rootPath, cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                folders.Add(folder);
+            }
+            return folders;
+        }, cancellationToken);
+
+        foreach (var folder in _folders)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return folder;
+        }
+    }
 
     /// <summary>
     ///     Gets a stream that provides a preview of the Revit family data.
@@ -158,6 +177,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// <param name="directory">
     ///     The path of the directory to search for subfolders.
     /// </param>
+    /// <param name="cancellationToken"></param>
     /// <returns>
     ///     An enumerable collection of <see cref="Bim.FamilyManager.Abstractions.IFolder" /> objects
     ///     representing the subfolders within the specified directory.
@@ -173,10 +193,19 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// <exception cref="System.UnauthorizedAccessException">
     ///     Thrown if the application does not have the required permissions to access the directory.
     /// </exception>
-    private IEnumerable<IFolder> GetFolders(string directory)
+    private async IAsyncEnumerable<IFolder> GetFoldersAsync(string directory, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        return System.IO.Directory.GetDirectories(directory, "", SearchOption.TopDirectoryOnly)
-                     .Select(IFolder (d) => new Folder(Path.GetFileName(d), () => GetFolders(d), () => GetFamilies(d)));
+        var folders = await Task.Run(() =>
+        {
+            return System.IO.Directory.GetDirectories(directory, "", SearchOption.TopDirectoryOnly)
+                 .Select(IFolder (d) => new Folder(Path.GetFileName(d), c => GetFoldersAsync(d, c), c => GetFamiliesAsync(d, c)));
+        }, cancellationToken).ConfigureAwait(false);
+
+        foreach (var folder in folders)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return folder;
+        }
     }
 
     /// <summary>
@@ -238,48 +267,69 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     }
 
     /// <summary>
-    ///     Retrieves a list of Revit families from the specified directory.
+    /// Asynchronously retrieves a collection of Revit families from the specified directory.
     /// </summary>
     /// <param name="directory">The directory path to search for Revit family files.</param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
+    /// </param>
     /// <returns>
-    ///     A list of <see cref="IRevitFamily" /> objects representing the Revit families found in the directory.
+    /// An asynchronous stream of <see cref="IRevitFamily" /> objects representing the Revit families found in the directory.
     /// </returns>
     /// <remarks>
-    ///     This method searches for Revit family files (*.rfa) in the specified directory, excluding backup files
-    ///     that match the predefined backup file naming pattern. If a family is already managed by the
-    ///     <see cref="Bim.FamilyManager.Abstractions.IFamilyManager" />, it is reused; otherwise, a new
-    ///     family is created and initialized.
+    /// This method searches for Revit family files (*.rfa) in the specified directory, excluding backup files
+    /// that match the predefined backup file naming pattern. It also associates family files with their corresponding
+    /// description files (*.yaml) if available. If a family is already managed by the
+    /// <see cref="Bim.FamilyManager.Abstractions.IFamilyManager" />, it is reused; otherwise, a new family is created
+    /// and initialized.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    ///     Thrown if the <paramref name="directory" /> is null.
+    /// Thrown if the <paramref name="directory" /> is null.
     /// </exception>
     /// <exception cref="System.IO.DirectoryNotFoundException">
-    ///     Thrown if the specified <paramref name="directory" /> does not exist.
+    /// Thrown if the specified <paramref name="directory" /> does not exist.
     /// </exception>
-    private List<IRevitFamily> GetFamilies(string directory)
+    /// <exception cref="System.OperationCanceledException">
+    /// Thrown if the operation is canceled via the <paramref name="cancellationToken" />.
+    /// </exception>
+    private async IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(string directory, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var familyFiles = System.IO.Directory.GetFiles(directory, "*.rfa", SearchOption.TopDirectoryOnly)
-                                .Where(filePath => !BackupRegex.IsMatch(filePath))
-                                .Select(filePath => filePath)
-                                .ToList();
-        var descriptionFiles = System.IO.Directory.GetFiles(directory, "*.yaml", SearchOption.TopDirectoryOnly);
+        var families = await Task.Run(() =>
+        {
+            var familyFiles = System.IO.Directory.GetFiles(directory, "*.rfa", SearchOption.TopDirectoryOnly)
+                                    .Where(filePath => !BackupRegex.IsMatch(filePath))
+                                    .Select(filePath => filePath)
+                                    .ToList();
+            cancellationToken.ThrowIfCancellationRequested();
 
-        var sets = GroupFamiliesAndDescriptions(familyFiles, descriptionFiles);
+            var descriptionFiles = System.IO.Directory.GetFiles(directory, "*.yaml", SearchOption.TopDirectoryOnly);
+            cancellationToken.ThrowIfCancellationRequested();
 
-        var families = sets.Select(set =>
-                           {
-                               var familyName = set.Name;
-                               if (FamilyManager.TryGetRevitFamily(familyName, out var family))
-                               {
-                                   return family;
-                               }
+            var sets = GroupFamiliesAndDescriptions(familyFiles, descriptionFiles);
+            cancellationToken.ThrowIfCancellationRequested();
 
-                               return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
-                                   (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
-                           })
-                           .ToList();
+            var families = sets.Select(set =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-        return families;
+                var familyName = set.Name;
+                if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+                {
+                    return family;
+                }
+
+                return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+            });
+
+            return families;
+        }, cancellationToken);
+
+        foreach (var family in families)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return family;
+        }
     }
 
     /// <summary>
@@ -379,10 +429,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     {
         // Build a lookup for .fm files by filename without extension
         var fmLookup = descriptionFiles
-            .ToDictionary(
-                fm => Path.GetFileNameWithoutExtension(fm)!,
-                fm => fm,
-                StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(fm => Path.GetFileNameWithoutExtension(fm), fm => fm, StringComparer.OrdinalIgnoreCase);
 
         var set = familyFiles
                   .Select(rfa =>

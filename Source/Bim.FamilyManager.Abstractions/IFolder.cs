@@ -6,7 +6,7 @@ namespace Bim.FamilyManager.Abstractions;
 ///     Defines the contract for a folder in the Bim.FamilyManager hierarchy.
 /// </summary>
 /// <remarks>
-///     Provides access to the folder's name, path, subfolders, families, and preview image. Folders are used to organize
+///     Provides access to the folder's name, path, subfolders, families, and preview image. GetFoldersAsync are used to organize
 ///     Revit families in a hierarchical structure.
 /// </remarks>
 public interface IFolder
@@ -23,27 +23,35 @@ public interface IFolder
     string Name { get; }
 
     /// <summary>
-    ///     Gets the collection of subfolders contained within this folder.
+    /// Asynchronously retrieves the collection of subfolders contained within this folder.
     /// </summary>
-    /// <value>
-    ///     An <see cref="IEnumerable{IFolder}" /> representing the subfolders.
-    /// </value>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> that can be used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains an 
+    /// <see cref="IEnumerable{IFolder}"/> representing the subfolders.
+    /// </returns>
     /// <remarks>
-    ///     Provides access to the hierarchical structure of folders. Each subfolder can contain additional subfolders and
-    ///     families.
+    /// This method provides access to the hierarchical structure of folders. Each subfolder can 
+    /// contain additional subfolders and families, enabling recursive traversal of the folder hierarchy.
     /// </remarks>
-    IEnumerable<IFolder> Subfolders { get; }
+    IAsyncEnumerable<IFolder> GetSubfoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Gets the collection of Revit families contained within this folder.
+    ///     Asynchronously retrieves the collection of Revit families contained within this folder.
     /// </summary>
-    /// <value>
-    ///     An <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families in the folder.
-    /// </value>
+    /// <param name="cancellationToken">
+    ///     A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    ///     A task that represents the asynchronous operation. The task result contains an 
+    ///     <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families in the folder.
+    /// </returns>
     /// <remarks>
-    ///     Provides access to all Revit families directly stored in the folder, including their metadata and symbols.
+    ///     This method provides access to all Revit families directly stored in the folder, including their metadata and symbols.
     /// </remarks>
-    IEnumerable<IRevitFamily> Families { get; }
+    IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(CancellationToken cancellationToken);
 
     /// <summary>
     ///     Gets a stream containing the preview image of the folder.

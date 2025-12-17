@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
 using Bim.FamilyManager.Abstractions;
@@ -75,7 +76,28 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <summary>
     ///     Gets the collection of folders from Azure Blob Storage.
     /// </summary>
-    public override IEnumerable<IFolder> Folders => _folders ??= GetFolders(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/");
+    public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_folders is null)
+        {
+            var folders = new List<IFolder>();
+
+            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                folders.Add(folder);
+            }
+
+            _folders = folders;
+        }
+
+        foreach (var folder in _folders)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return folder;
+        }
+
+    }
 
     /// <summary>
     ///     Gets the preview image stream for the Azure storage source.
@@ -246,7 +268,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <summary>
     ///     Establishes a connection to Azure Blob Storage using the current session.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the session is null.</exception>
+    /// <exception cref="System.InvalidOperationException">Thrown if the session is null.</exception>
     private void Connect()
     {
         if (Session is null)
@@ -312,73 +334,76 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Retrieves folders from Azure Blob Storage under the specified prefix.
     /// </summary>
     /// <param name="prefix">The blob prefix to search for folders.</param>
-    /// <returns>A collection of <see cref="IFolder" /> instances representing folders.</returns>
-    private IEnumerable<IFolder> GetFolders(string prefix)
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>An async enumerable of <see cref="IFolder" /> instances representing folders.</returns>
+    private async IAsyncEnumerable<IFolder> GetFoldersAsync(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
         {
-            return [];
+            yield break;
         }
 
-        var result = new List<IFolder>();
-        try
+        await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(prefix: prefix, delimiter: "/", cancellationToken: cancellationToken))
         {
-            foreach (var item in _blobContainerClient.GetBlobsByHierarchy(prefix: prefix, delimiter: "/"))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (item.IsPrefix)
             {
-                if (item.IsPrefix)
-                {
-                    var itemPrefix = item.Prefix;
-                    result.Add(new Folder(
-                        Path.GetFileName(itemPrefix.Trim('/')),
-                        () => GetFolders(itemPrefix), // Recursively get subfolders
-                        () => GetFamilies(itemPrefix)
-                    ));
-                }
+                var itemPrefix = item.Prefix;
+                yield return new Folder(
+                    Path.GetFileName(itemPrefix.Trim('/')),
+                    c => GetFoldersAsync(itemPrefix, c), // Recursively get subfolders
+                    c => GetFamilies(itemPrefix, c)
+                );
             }
         }
-        catch (Exception)
-        {
-            result.Clear();
-        }
-
-        return result;
     }
 
     /// <summary>
-    ///     Retrieves Revit families from Azure Blob Storage under the specified prefix.
+    /// Retrieves Revit families from Azure Blob Storage under the specified prefix.
     /// </summary>
-    /// <param name="prefix">The blob prefix to search for family files.</param>
-    /// <returns>A list of <see cref="IRevitFamily" /> instances.</returns>
-    private List<IRevitFamily> GetFamilies(string prefix)
+    /// <param name="prefix">The blob prefix used to filter family files in the storage.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
+    /// </returns>
+    /// <remarks>
+    /// This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit family files
+    /// (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
+    /// If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and returned.
+    /// </remarks>
+    private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
         {
-            return [];
+            yield break;
         }
 
-        var families = new List<IRevitFamily>();
-        var blobs = _blobContainerClient.GetBlobs(prefix: prefix)
-                                        .Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
-                                        .ToList();
+        var blobs = _blobContainerClient.GetBlobsAsync(prefix: prefix, cancellationToken: cancellationToken);
+            //.Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            //.ToList();
 
-        foreach (var blobItem in blobs)
+        await foreach (var blobItem in blobs)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (BackupRegex.IsMatch(blobItem.Name) || !blobItem.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            
             var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {
-                families.Add(family);
+                yield return family;
             }
             else
             {
-                families.Add(CreateRevitFamily(
+                yield return CreateRevitFamily(
                     familyName,
                     CreateFamilyInfo(blobItem.Name),
                     (revitFamily, stream) => SaveFamily(revitFamily, stream, blobItem.Name)
-                ));
+                );
             }
         }
-
-        return families;
     }
 
     /// <summary>
@@ -414,7 +439,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <param name="family">The Revit family to save.</param>
     /// <param name="stream">The stream containing the family data.</param>
     /// <param name="blobName">The name of the blob to save to.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
+    /// <exception cref="System.InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
     private void SaveFamily(IRevitFamily family, Stream stream, string blobName)
     {
         if (_blobContainerClient is null)

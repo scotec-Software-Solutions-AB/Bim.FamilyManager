@@ -5,6 +5,34 @@ using Bim.FamilyManager.Abstractions;
 namespace Bim.FamilyManager.Base.Logic;
 
 /// <summary>
+/// Represents a delegate for asynchronously retrieving subfolders in the Revit Family Manager hierarchy.
+/// </summary>
+/// <param name="cancellationToken">
+/// A token to monitor for cancellation requests.
+/// </param>
+/// <returns>
+/// An asynchronous stream of <see cref="IFolder"/> objects representing the subfolders.
+/// </returns>
+/// <remarks>
+/// This delegate is used to enable lazy-loading of subfolders, allowing efficient access to hierarchical data.
+/// </remarks>
+public delegate IAsyncEnumerable<IFolder> GetSubfoldersAsyncDelegate(CancellationToken cancellationToken);
+
+/// <summary>
+/// Represents a delegate for asynchronously retrieving families in the Revit Family Manager hierarchy.
+/// </summary>
+/// <param name="cancellationToken">
+/// A token to monitor for cancellation requests.
+/// </param>
+/// <returns>
+/// An asynchronous stream of <see cref="IRevitFamily"/> objects representing the families.
+/// </returns>
+/// <remarks>
+/// This delegate is used to enable lazy-loading of families, allowing efficient access to hierarchical data.
+/// </remarks>
+public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(CancellationToken cancellationToken);
+
+/// <summary>
 ///     Represents a folder in the Revit Family Manager hierarchy.
 /// </summary>
 /// <remarks>
@@ -15,8 +43,8 @@ namespace Bim.FamilyManager.Base.Logic;
 public class Folder : IFolder
 {
     private static readonly Stream PreviewStream;
-    private readonly Func<IEnumerable<IRevitFamily>> _families;
-    private readonly Func<IEnumerable<IFolder>> _subFolders;
+    private readonly GetFamiliesAsyncDelegate _families;
+    private readonly GetSubfoldersAsyncDelegate _subFolders;
 
     /// <summary>
     ///     Initializes static members of the <see cref="Folder" /> class.
@@ -54,7 +82,7 @@ public class Folder : IFolder
     ///     This constructor enables the creation of a folder instance with lazy-loading capabilities,
     ///     allowing efficient access to hierarchical data such as subfolders and families.
     /// </remarks>
-    public Folder(string name, Func<IEnumerable<IFolder>> subFolders, Func<IEnumerable<IRevitFamily>> families)
+    public Folder(string name, GetSubfoldersAsyncDelegate subFolders, GetFamiliesAsyncDelegate families)
     {
         _subFolders = subFolders;
         _families = families;
@@ -70,20 +98,33 @@ public class Folder : IFolder
     public string Name { get; }
 
     /// <summary>
-    ///     Gets the collection of subfolders contained within this folder.
+    /// Asynchronously retrieves the collection of subfolders contained within the current folder.
     /// </summary>
-    /// <value>
-    ///     An <see cref="IEnumerable{IFolder}" /> representing the subfolders.
-    /// </value>
-    public IEnumerable<IFolder> Subfolders => _subFolders();
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IAsyncEnumerable{T}" /> of <see cref="IFolder" /> representing the subfolders.
+    /// </returns>
+    /// <remarks>
+    /// This method provides an asynchronous way to enumerate through the subfolders of the current folder.
+    /// </remarks>
+    public IAsyncEnumerable<IFolder> GetSubfoldersAsync(CancellationToken cancellationToken) => _subFolders(cancellationToken);
 
     /// <summary>
-    ///     Gets the collection of Revit families contained within this folder.
+    /// Asynchronously retrieves the collection of Revit families contained within this folder.
     /// </summary>
-    /// <value>
-    ///     An <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families.
-    /// </value>
-    public IEnumerable<IRevitFamily> Families => _families();
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IAsyncEnumerable{IRevitFamily}" /> representing the Revit families in the folder.
+    /// </returns>
+    /// <remarks>
+    /// This method provides an asynchronous way to access the Revit families stored in the folder, 
+    /// allowing for efficient enumeration and cancellation support.
+    /// </remarks>
+    public IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(CancellationToken cancellationToken) => _families(cancellationToken);
 
     /// <summary>
     ///     Gets the preview image stream associated with this folder.
