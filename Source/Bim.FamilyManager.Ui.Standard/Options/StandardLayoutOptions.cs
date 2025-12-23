@@ -1,6 +1,6 @@
 ﻿using Bim.FamilyManager.Base.Options;
 
-namespace Bim.FamilyManager.Ui.Standard.Options;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.Options;
 
 /// <summary>
 ///     Represents the standard layout options for configuring the appearance or behavior of a layout

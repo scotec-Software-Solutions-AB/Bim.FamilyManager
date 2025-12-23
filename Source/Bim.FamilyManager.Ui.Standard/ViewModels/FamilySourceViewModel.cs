@@ -1,10 +1,10 @@
 ﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Ui.Standard.Options;
+using Bim.FamilyManager.Ui.FamilyExplorer.Options;
 using Bim.FamilyManager.Ui.ViewModels;
 using Microsoft.Extensions.Options;
 
-namespace Bim.FamilyManager.Ui.Standard.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 
 /// <summary>
 ///     Represents the view model for a family source in the Revit Family Manager with standard layout options.

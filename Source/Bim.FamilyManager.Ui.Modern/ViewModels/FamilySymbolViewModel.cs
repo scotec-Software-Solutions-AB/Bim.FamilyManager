@@ -1,7 +1,7 @@
 ﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Modern.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
 ///     Represents the view model for a Revit family symbol in the standard UI layer.

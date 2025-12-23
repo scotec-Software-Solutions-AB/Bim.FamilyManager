@@ -1,6 +1,6 @@
 ﻿using Bim.FamilyManager.Base.Options;
 
-namespace Bim.FamilyManager.Ui.Modern.Options;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.Options;
 
 /// <summary>
 ///     Represents the layout options specific to the modern UI of the Revit Family Manager.

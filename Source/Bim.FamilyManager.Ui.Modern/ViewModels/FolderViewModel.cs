@@ -1,10 +1,10 @@
 ﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Ui.Modern.Options;
+using Bim.FamilyManager.Ui.FamilyNavigator.Options;
 using Bim.FamilyManager.Ui.ViewModels;
 using Microsoft.Extensions.Options;
 
-namespace Bim.FamilyManager.Ui.Modern.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
 ///     Provides a view model for a folder, enabling interaction with folder data, subfolders, and families using standard

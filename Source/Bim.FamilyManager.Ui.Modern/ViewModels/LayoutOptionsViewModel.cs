@@ -1,10 +1,9 @@
 ﻿using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using Bim.FamilyManager.Ui.Modern.Options;
-using Bim.FamilyManager.Ui.Modern.Resources;
+using Bim.FamilyManager.Ui.FamilyNavigator.Options;
 using Scotec.Wpf.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Modern.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
 ///     Represents the view model for layout options in the Family Manager application.

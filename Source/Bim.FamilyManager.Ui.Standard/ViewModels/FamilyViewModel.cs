@@ -1,12 +1,12 @@
 ﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Ui.Standard.Options;
+using Bim.FamilyManager.Ui.FamilyExplorer.Options;
 using Bim.FamilyManager.Ui.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scotec.Revit;
 
-namespace Bim.FamilyManager.Ui.Standard.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 
 /// <summary>
 ///     Provides a view model for a Revit family, enabling interaction with family data, symbols, and related commands.

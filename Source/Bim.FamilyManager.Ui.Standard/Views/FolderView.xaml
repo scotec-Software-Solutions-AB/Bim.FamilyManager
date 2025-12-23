@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Bim.FamilyManager.Ui.Standard.Views.FolderView"
+﻿<UserControl x:Class="Bim.FamilyManager.Ui.FamilyExplorer.Views.FolderView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

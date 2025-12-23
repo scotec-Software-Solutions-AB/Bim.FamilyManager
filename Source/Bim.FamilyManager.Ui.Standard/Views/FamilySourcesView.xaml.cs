@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Bim.FamilyManager.Ui.Standard.Views;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.Views;
 
 /// <summary>
 ///     Represents the view for displaying and interacting with family sources in the Revit Family Manager.

@@ -1,11 +1,11 @@
 ﻿using System.Windows.Media;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Ui.Modern.Options;
+using Bim.FamilyManager.Ui.FamilyNavigator.Options;
 using Bim.FamilyManager.Ui.ViewModels;
 using Microsoft.Extensions.Options;
 
-namespace Bim.FamilyManager.Ui.Modern.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
 ///     View model for a family source in the Revit Family Manager, providing access to its folders, preview image, and

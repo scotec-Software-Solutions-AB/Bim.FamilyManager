@@ -1,14 +1,14 @@
 ﻿using Autofac;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using Bim.FamilyManager.Ui.Standard.Options;
-using Bim.FamilyManager.Ui.Standard.ViewModels;
-using Bim.FamilyManager.Ui.Standard.Views;
+using Bim.FamilyManager.Ui.FamilyExplorer.Options;
+using Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
+using Bim.FamilyManager.Ui.FamilyExplorer.Views;
 using Bim.FamilyManager.Ui.Views;
 using Scotec.Wpf.ViewModels;
 using Module = Autofac.Module;
 
-namespace Bim.FamilyManager.Ui.Standard.Modules;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.Modules;
 
 /// <summary>
 ///     Represents a module for registering dependencies and services related to the Family Manager functionality

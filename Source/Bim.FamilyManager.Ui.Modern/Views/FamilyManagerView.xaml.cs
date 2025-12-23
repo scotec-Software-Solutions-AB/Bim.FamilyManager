@@ -2,9 +2,9 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Ui.Modern.ViewModels;
+using Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Modern.Views;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.Views;
 
 /// <summary>
 ///     Represents the view for managing Revit families within the application.

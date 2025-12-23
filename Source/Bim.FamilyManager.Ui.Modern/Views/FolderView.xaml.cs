@@ -1,7 +1,7 @@
 ﻿using System.Windows.Controls;
-using Bim.FamilyManager.Ui.Modern.ViewModels;
+using Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Modern.Views;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.Views;
 
 /// <summary>
 ///     Represents the view for displaying and interacting with folders in the Family Manager application.

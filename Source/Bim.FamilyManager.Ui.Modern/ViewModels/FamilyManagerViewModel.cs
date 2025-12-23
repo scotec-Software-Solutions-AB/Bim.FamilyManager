@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Modern.ViewModels;
+namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
 ///     Represents the view model for managing Revit families within the application.

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Bim.FamilyManager.Ui.Standard.Views;
+namespace Bim.FamilyManager.Ui.FamilyExplorer.Views;
 
 /// <summary>
 ///     Represents the view for configuring display settings in the application.
