@@ -1140,7 +1140,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 yield return leaf;
             }
             // Found at least one subfolder, so this is not a leaf folder
-            yield break;
+            continue;
         }
         // No subfolders found, so this is a leaf folder
         yield return folder;
