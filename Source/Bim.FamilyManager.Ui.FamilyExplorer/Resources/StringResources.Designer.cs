@@ -133,7 +133,7 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Standard.
+        ///   Looks up a localized string similar to Family Explorer.
         /// </summary>
         public static string LayoutSettings_LayoutName {
             get {

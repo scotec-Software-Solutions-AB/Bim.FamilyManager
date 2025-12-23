@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
-             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Modern.Resources"
+             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.FamilyNavigator.Resources"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="400"
              d:DataContext="{d:DesignInstance viewModels:FamilyManagerViewModel, IsDesignTimeCreatable=false}">

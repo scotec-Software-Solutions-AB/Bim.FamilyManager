@@ -36,8 +36,8 @@
 		<ProjectReference Include="..\Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.AzureStorage\Bim.FamilyManager.Source.AzureStorage.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.Directory\Bim.FamilyManager.Source.Directory.csproj" />
-		<ProjectReference Include="..\Bim.FamilyManager.Ui.Modern\Bim.FamilyManager.Ui.FamilyNavigator.csproj" />
-		<ProjectReference Include="..\Bim.FamilyManager.Ui.Standard\Bim.FamilyManager.Ui.FamilyExplorer.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyExplorer\Bim.FamilyManager.Ui.FamilyExplorer.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyNavigator\Bim.FamilyManager.Ui.FamilyNavigator.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
 	</ItemGroup>
 

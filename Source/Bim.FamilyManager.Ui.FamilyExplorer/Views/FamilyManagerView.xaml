@@ -6,7 +6,7 @@
              xmlns:controls="clr-namespace:Scotec.Wpf.Controls;assembly=Scotec.Wpf.Controls"
              xmlns:converter="clr-namespace:Scotec.Wpf.Converter;assembly=Scotec.Wpf.Controls"
              xmlns:controls1="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
-             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Standard.Resources"
+             xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.FamilyExplorer.Resources"
              xmlns:viewModels1="clr-namespace:Bim.FamilyManager.Abstractions.ViewModels;assembly=Bim.FamilyManager.Abstractions"
              xmlns:views1="clr-namespace:Bim.FamilyManager.Ui.Views;assembly=Bim.FamilyManager.Ui"
              xmlns:views="clr-namespace:Bim.FamilyManager.Ui.FamilyExplorer.Views"

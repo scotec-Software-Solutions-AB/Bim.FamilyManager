@@ -21,7 +21,7 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.Modules;
 /// </remarks>
 public class RegistrationModule : Module
 {
-    private const string LayoutName = "ModernLayout";
+    private const string LayoutName = "FamilyNavigatorLayout";
 
     /// <summary>
     ///     Registers various components, view models, views, and services into the dependency injection container.
@@ -52,7 +52,7 @@ public class RegistrationModule : Module
                .As<IViewModelDescriptor>()
                .SingleInstance();
 
-        builder.Register(context => typeof(ModernLayoutOptions))
+        builder.Register(context => typeof(FamilyNavigatorLayoutOptions))
                .Keyed<Type>(LayoutName)
                .SingleInstance();
 

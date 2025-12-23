@@ -145,7 +145,7 @@
     <value>Open Family Manager settings.</value>
   </data>
   <data name="LayoutSettings.LayoutName" xml:space="preserve">
-    <value>Modern</value>
+    <value>Family Navigator</value>
   </data>
   <data name="LayoutSettings.Text.ShowImage" xml:space="preserve">
     <value>Show family preview</value>

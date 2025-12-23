@@ -1,6 +1,7 @@
 ﻿using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Ui.FamilyNavigator.Options;
+using Bim.FamilyManager.Ui.FamilyNavigator.Resources;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
@@ -15,7 +16,7 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 /// </remarks>
 public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
 {
-    private readonly ModernLayoutOptions _options;
+    private readonly FamilyNavigatorLayoutOptions _options;
     private int _contentHeight;
     private bool _showItemName;
     private bool _showPreviewImage;
@@ -27,7 +28,7 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     /// <remarks>
     ///     The constructor sets the initial values for the view model properties based on the provided options.
     /// </remarks>
-    public LayoutOptionsViewModel(ModernLayoutOptions options)
+    public LayoutOptionsViewModel(FamilyNavigatorLayoutOptions options)
     {
         _options = options;
 
@@ -92,7 +93,7 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     public int ContentMaxHeight => 128;
 
     /// <summary>
-    ///     Retrieves the current layout options as a new <see cref="ModernLayoutOptions" /> instance.
+    ///     Retrieves the current layout options as a new <see cref="FamilyNavigatorLayoutOptions" /> instance.
     /// </summary>
     /// <returns>
     ///     An instance of <see cref="ILayoutOptions" /> representing the current configuration.
@@ -102,7 +103,7 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     /// </remarks>
     public ILayoutOptions GetOptions()
     {
-        return new ModernLayoutOptions
+        return new FamilyNavigatorLayoutOptions
         {
             ShowItemName = ShowItemName,
             ShowPreviewImage = ShowPreviewImage,

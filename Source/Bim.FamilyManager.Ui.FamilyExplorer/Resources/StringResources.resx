@@ -142,7 +142,7 @@
     <value>Search Revit families...</value>
   </data>
   <data name="LayoutSettings.LayoutName" xml:space="preserve">
-    <value>Standard</value>
+    <value>Family Explorer</value>
   </data>
   <data name="LayoutSettings.Text.ShowImage" xml:space="preserve">
     <value>Show family preview</value>

@@ -7,16 +7,16 @@ using Microsoft.Extensions.Options;
 namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 
 /// <summary>
-///     Represents the view model for a family source in the Revit Family Manager with standard layout options.
+///     Represents the view model for a family source in the Revit Family Manager with family explorer layout options.
 /// </summary>
 /// <remarks>
 ///     This class provides functionality to manage and interact with a family source, including its folders and selection
 ///     state,
-///     using standard layout options. It extends <see cref="FamilySourceViewModel{StandardLayoutOptions}" /> and
+///     using family explorer layout options. It extends <see cref="FamilySourceViewModel{FamilyExplorerLayoutOptions}" /> and
 ///     customizes
 ///     folder view model creation.
 /// </remarks>
-public class FamilySourceViewModel : FamilySourceViewModel<StandardLayoutOptions>
+public class FamilySourceViewModel : FamilySourceViewModel<FamilyExplorerLayoutOptions>
 {
     /// <summary>
     ///     Factory delegate for creating instances of <see cref="FamilySourceViewModel" />.
@@ -37,7 +37,7 @@ public class FamilySourceViewModel : FamilySourceViewModel<StandardLayoutOptions
     /// <param name="folderFactory">A factory delegate for creating <see cref="FolderViewModel" /> instances.</param>
     /// <param name="panelFactory">A factory delegate for creating <see cref="IFamilySourcePanelViewModel" /> instances.</param>
     /// <param name="layoutOptions">
-    ///     An <see cref="IOptionsMonitor{StandardLayoutOptions}" /> providing the current and updated
+    ///     An <see cref="IOptionsMonitor{FamilyExplorerLayoutOptions}" /> providing the current and updated
     ///     layout options.
     /// </param>
     /// <remarks>
@@ -49,7 +49,7 @@ public class FamilySourceViewModel : FamilySourceViewModel<StandardLayoutOptions
         IFamilySource familySource,
         FolderViewModel.Factory folderFactory,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<StandardLayoutOptions> layoutOptions)
+        IOptionsMonitor<FamilyExplorerLayoutOptions> layoutOptions)
         : base(familySource, panelFactory, layoutOptions)
     {
         _folderFactory = folderFactory;

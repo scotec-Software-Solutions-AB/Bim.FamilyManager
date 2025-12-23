@@ -1,6 +1,7 @@
 ﻿using Bim.FamilyManager.Abstractions.Options;
 using Bim.FamilyManager.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Ui.FamilyExplorer.Options;
+using Bim.FamilyManager.Ui.FamilyExplorer.Resources;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
@@ -15,7 +16,7 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 /// </remarks>
 public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
 {
-    private readonly StandardLayoutOptions _options;
+    private readonly FamilyExplorerLayoutOptions _options;
     private int _contentHeight;
     private bool _showItemName;
     private bool _showPreviewImage;
@@ -27,7 +28,7 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     /// <remarks>
     ///     The constructor sets the initial values for the view model properties based on the provided options.
     /// </remarks>
-    public LayoutOptionsViewModel(StandardLayoutOptions options)
+    public LayoutOptionsViewModel(FamilyExplorerLayoutOptions options)
     {
         _options = options;
 
@@ -126,14 +127,14 @@ public class LayoutOptionsViewModel : ViewModel, ILayoutOptionsViewModel
     ///     Retrieves the current layout options as a <see cref="ILayoutOptions" /> instance.
     /// </summary>
     /// <returns>
-    ///     A <see cref="StandardLayoutOptions" /> object representing the current configuration.
+    ///     A <see cref="FamilyExplorerLayoutOptions" /> object representing the current configuration.
     /// </returns>
     /// <remarks>
     ///     This method is used to obtain the current state of the layout options for persistence or further processing.
     /// </remarks>
     public ILayoutOptions GetOptions()
     {
-        return new StandardLayoutOptions
+        return new FamilyExplorerLayoutOptions
         {
             ShowItemName = ShowItemName,
             ShowPreviewImage = ShowPreviewImage,

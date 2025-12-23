@@ -4,7 +4,7 @@ using Bim.FamilyManager.Abstractions.ViewModels;
 namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 
 /// <summary>
-///     Represents the view model for a Revit family symbol in the standard UI layer.
+///     Represents the view model for a Revit family symbol in the family explorer UI layer.
 /// </summary>
 /// <remarks>
 ///     This class extends <see cref="Ui.ViewModels.FamilySymbolViewModel" /> and implements

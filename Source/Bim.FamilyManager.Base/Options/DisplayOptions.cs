@@ -32,11 +32,11 @@ public class DisplayOptions
     /// </summary>
     /// <value>
     ///     A <see cref="string" /> that specifies the key of the selected layout configuration.
-    ///     The default value is "StandardLayout".
+    ///     The default value is "FamilyExplorerLayout".
     /// </value>
     /// <remarks>
     ///     This property is used to determine the layout configuration for the Family Manager.
     ///     It is typically set based on user preferences or application settings.
     /// </remarks>
-    public string FamilyManagerLayout { get; set; } = "StandardLayout";
+    public string FamilyManagerLayout { get; set; } = "FamilyExplorerLayout";
 }

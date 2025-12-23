@@ -100,7 +100,7 @@ public class DisplaySettingsViewModel : SettingsBaseViewModel
     {
         return new DisplayOptions
         {
-            FamilyManagerLayout = SelectedLayoutOptions?.Key ?? "StandardLayout",
+            FamilyManagerLayout = SelectedLayoutOptions?.Key ?? "FamilyExplorerLayout",
             Layouts = LayoutOptions.Select(o => o.GetOptions()).ToList()
         };
     }

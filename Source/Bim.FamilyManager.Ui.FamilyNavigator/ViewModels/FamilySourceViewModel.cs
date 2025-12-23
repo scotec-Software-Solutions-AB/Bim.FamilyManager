@@ -15,7 +15,7 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 ///     This class manages the interaction with a family source, including its folders and preview image, and supports UI
 ///     binding.
 /// </remarks>
-public class FamilySourceViewModel : FamilySourceViewModel<ModernLayoutOptions>
+public class FamilySourceViewModel : FamilySourceViewModel<FamilyNavigatorLayoutOptions>
 {
     /// <summary>
     ///     Factory delegate for creating <see cref="FamilySourceViewModel" /> instances.
@@ -46,7 +46,7 @@ public class FamilySourceViewModel : FamilySourceViewModel<ModernLayoutOptions>
         IFamilySource familySource,
         FolderViewModel.Factory folderFactory,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<ModernLayoutOptions> layoutOptions)
+        IOptionsMonitor<FamilyNavigatorLayoutOptions> layoutOptions)
         : base(familySource, panelFactory, layoutOptions)
     {
         _familySource = familySource;

@@ -21,7 +21,7 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.Modules;
 /// </remarks>
 public class RegistrationModule : Module
 {
-    private const string LayoutName = "StandardLayout";
+    private const string LayoutName = "FamilyExplorerLayout";
 
     /// <summary>
     ///     Registers various components, view models, views, and services into the dependency injection container.
@@ -70,7 +70,7 @@ public class RegistrationModule : Module
                .As<IViewModelDescriptor>()
                .SingleInstance();
 
-        builder.Register(context => typeof(StandardLayoutOptions))
+        builder.Register(context => typeof(FamilyExplorerLayoutOptions))
                .Keyed<Type>(LayoutName)
                .SingleInstance();
     }

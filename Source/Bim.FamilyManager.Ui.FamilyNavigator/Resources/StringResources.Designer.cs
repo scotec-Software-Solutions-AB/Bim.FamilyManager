@@ -142,7 +142,7 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Modern.
+        ///   Looks up a localized string similar to Family Navigator.
         /// </summary>
         public static string LayoutSettings_LayoutName {
             get {

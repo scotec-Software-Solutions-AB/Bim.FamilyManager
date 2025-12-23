@@ -14,10 +14,10 @@
   <Project Path="Bim.FamilyManager.Source.Directory/Bim.FamilyManager.Source.Directory.csproj">
     <Platform Project="x64" />
   </Project>
-  <Project Path="Bim.FamilyManager.Ui.Modern/Bim.FamilyManager.Ui.FamilyNavigator.csproj">
+  <Project Path="Bim.FamilyManager.Ui.FamilyExplorer/Bim.FamilyManager.Ui.FamilyExplorer.csproj">
     <Platform Project="x64" />
   </Project>
-  <Project Path="Bim.FamilyManager.Ui.Standard/Bim.FamilyManager.Ui.FamilyExplorer.csproj">
+  <Project Path="Bim.FamilyManager.Ui.FamilyNavigator/Bim.FamilyManager.Ui.FamilyNavigator.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Bim.FamilyManager.Ui/Bim.FamilyManager.Ui.csproj">
