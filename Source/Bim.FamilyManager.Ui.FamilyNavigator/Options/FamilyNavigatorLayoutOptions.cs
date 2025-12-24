@@ -12,7 +12,7 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.Options;
 ///     to specify the associated options name as "FamilyNavigatorLayout".
 ///     This class provides configuration for family navigator layout settings used in the UI.
 /// </remarks>
-[LayoutOptions(OptionsName = "FamilyNavigatorLayout")]
+[LayoutOptions(OptionsName = "FamilyNavigator")]
 public class FamilyNavigatorLayoutOptions : LayoutOptions
 {
 }
