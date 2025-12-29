@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup>
-    <Version>$env:GITVERSION_SEMVER</Version>
+    <Version>$(GITVERSION_SEMVER)</Version>
   </PropertyGroup>
 </Project>
