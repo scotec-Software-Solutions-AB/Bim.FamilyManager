@@ -41,7 +41,7 @@ jobs:
     - name: Install CycloneDX SBOM Tool
       run: dotnet tool install --global CycloneDX
     - name: Generate SBOM
-      run: dotnet CycloneDX ./Source/Bim.FamilyManager.slnx --set-version $env:GITVERSION_SEMVER --output sbom --filename bom.json --output-format Json
+      run: dotnet CycloneDX ./Source/Bim.FamilyManager.slnx --exclude-dev --include-project-references --set-version $env:GITVERSION_SEMVER --output sbom --filename bom.json --output-format Json
     - name: Copy SBOM to Publish folder
       run: |
         cp sbom/* Publish/
