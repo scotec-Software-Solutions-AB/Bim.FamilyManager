@@ -32,6 +32,8 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 10.0.x        
+    - name: Install SBOM Tool
+      run: dotnet tool install --global microsoft.sbomtool
     - name: Restore dependencies
       run: dotnet restore ./Source/Bim.FamilyManager.slnx
     - name: Build
