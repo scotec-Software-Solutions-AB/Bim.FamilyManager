@@ -1,0 +1,71 @@
+name: "Improvement"
+description: "Suggest an improvement to an existing feature or workflow"
+title: "[Improvement]: "
+labels: ["improvement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for improving existing behavior (not brand-new features).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Current pain / problem
+      description: What’s the current behavior and why is it a problem?
+      placeholder: "Today..., which causes..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: What should change?
+      placeholder: "Change ... so that ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know this is done?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you considered (and why not)
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who benefits and how much? Any measurable gains?
+      placeholder: "e.g. reduces manual steps, improves UX, saves time..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks / compatibility concerns
+      description: Breaking changes, migration needs, edge cases, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and didn’t find a duplicate
+          required: true
