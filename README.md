@@ -101,7 +101,7 @@ Integration for Azure Storage management.
 
 ## Professional Support & Custom Solutions
 
-Need assistance or custom features? Visit our [homepage](https://www.scotec-software.com/revitaddins) for professional support, tailored solutions, and consulting services.
+Need assistance or custom features? Visit our [homepage](https://www.scotec.com/en/bimfamilymanager) for professional support, tailored solutions, and consulting services.
 
 We also offer custom Revit add-in development to fit your specific workflows and integration needs.
 
