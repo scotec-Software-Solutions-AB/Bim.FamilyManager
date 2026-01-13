@@ -8,7 +8,7 @@ namespace Bim.FamilyManager.Base.Logic.EStorage;
 /// </summary>
 public static class EStorageExtensions
 {
-    private static readonly SerializableEStorage SerializableEStorage = new();
+    //private static readonly FamilyMetadataEStorage SerializableEStorage = new();
 
     /// <summary>
     ///     Declares extension methods for the <see cref="Autodesk.Revit.DB.Element" /> type, enabling EStorage operations such
