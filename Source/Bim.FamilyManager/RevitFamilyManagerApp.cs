@@ -259,8 +259,8 @@ public class RevitFamilyManagerApp : RevitApp
 
     private static PushButtonData CreatePreviewImageButtonData()
     {
-        var smallImageSource = BuildImageResourcePath("SettingsPrimary_16x16.png");
-        var largeImageSource = BuildImageResourcePath("SettingsPrimary_32x32.png");
+        var smallImageSource = BuildImageResourcePath("CreatePreview_16x16.png");
+        var largeImageSource = BuildImageResourcePath("CreatePreview_32x32.png");
 
         var pushButtonData = RevitControlFactory.CreateButtonData("FamilyManager.CreatePreviewImage"
             , StringResources.Command_CreatePreviewImage_Text

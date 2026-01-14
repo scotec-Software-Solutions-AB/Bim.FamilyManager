@@ -61,7 +61,7 @@ namespace Bim.FamilyManager.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create a preview image from the current view..
+        ///   Looks up a localized string similar to Creates a new preview image from the current view..
         /// </summary>
         public static string Command_CreatePreviewImage_Description {
             get {
@@ -70,7 +70,7 @@ namespace Bim.FamilyManager.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create preview image.
+        ///   Looks up a localized string similar to Update preview.
         /// </summary>
         public static string Command_CreatePreviewImage_Name {
             get {
@@ -79,7 +79,8 @@ namespace Bim.FamilyManager.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create preview image.
+        ///   Looks up a localized string similar to Update
+        ///preview.
         /// </summary>
         public static string Command_CreatePreviewImage_Text {
             get {

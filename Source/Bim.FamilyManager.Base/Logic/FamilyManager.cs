@@ -402,17 +402,17 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         }
 
         var viewId = view.Id;
-        var settings = document.GetDocumentPreviewSettings();
-        settings.PreviewViewId = viewId;
-        settings.ForceViewUpdate(true);
-
+        
+        var previewImage = ViewImageExporter.ExportViewPng(document, view);
         if (!view.IsTemplate)
         {
-            var previewImage = ViewImageExporter.ExportViewPng(document, view);
             using (var t = new Transaction(document, "Attach preview to family"))
             {
                 t.Start();
-                
+
+                var settings = document.GetDocumentPreviewSettings();
+                settings.PreviewViewId = viewId;
+
                 // TODO: Probably modify background to transparent or any other user defined color.
                 //var pathName = GetFamilyAsStream(document, out var memoryStream);
                 previewImage.Position = 0;
