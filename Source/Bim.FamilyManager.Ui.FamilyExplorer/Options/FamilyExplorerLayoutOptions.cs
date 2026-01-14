@@ -11,7 +11,7 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.Options;
 ///     layout configuration options identified by the "FamilyExplorerLayout" key. It can be extended to
 ///     include additional properties or behaviors specific to the family explorer layout.
 /// </remarks>
-[LayoutOptions(OptionsName = "FamilyExplorer")]
+[LayoutOptions(OptionsName = "FamilyExplorerLayout")]
 public class FamilyExplorerLayoutOptions : LayoutOptions
 {
 }
