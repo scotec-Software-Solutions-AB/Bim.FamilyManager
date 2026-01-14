@@ -176,7 +176,17 @@ public sealed class RevitFamily : IRevitFamily
     ///     The preview image provides a visual representation of the Revit family.
     ///     It can be used for display purposes in user interfaces or for other visualization needs.
     /// </remarks>
-    public Stream? Preview => _familyInfo.Preview;
+    public Stream? Preview
+    {
+        get
+        {
+            if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
+            {
+                return previewStream;
+            }
+            return _familyInfo.Preview;
+        }
+    }
 
     /// <summary>
     ///     Gets the collection of family symbols associated with this Revit family.

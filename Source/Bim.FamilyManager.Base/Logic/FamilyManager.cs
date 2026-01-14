@@ -45,6 +45,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private List<IFamilySourceOptions> _familySourceOptions;
     private IEnumerable<IFamilySource>? _familySources;
     private HashSet<string> _loadedFamilies = [];
+    private readonly FamilyMetadataEStorage _familyMetadataEStorage = new ();
+    private readonly PreviewImageEStorage _previewImageEStorage = new ();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManager" /> class.
@@ -390,6 +392,37 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         transaction.Commit();
     }
 
+    public void CreatePreviewImage(UIApplication application, View view)
+    {
+        var document = view.Document;
+        // Only handle family documents.
+        if (!document.IsFamilyDocument)
+        {
+            return;
+        }
+
+        var viewId = view.Id;
+        
+        var previewImage = ViewImageExporter.ExportViewPng(document, view);
+        if (!view.IsTemplate)
+        {
+            using (var t = new Transaction(document, "Attach preview to family"))
+            {
+                t.Start();
+
+                var settings = document.GetDocumentPreviewSettings();
+                settings.PreviewViewId = viewId;
+
+                // TODO: Probably modify background to transparent or any other user defined color.
+                //var pathName = GetFamilyAsStream(document, out var memoryStream);
+                previewImage.Position = 0;
+                _previewImageEStorage.Attach(document.OwnerFamily, previewImage);
+
+                t.Commit();
+            }
+        }
+    }
+
     /// <summary>
     ///     Loads a Revit family into the specified document.
     /// </summary>
@@ -443,13 +476,13 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 }
 
                 // Attach the family info to the newly loaded family.
-                family.AttachData(familyMetadata);
+                _familyMetadataEStorage.Attach(family, familyMetadata);
             }
             else
             {
                 // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
                 // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-                if (!family.TryGetData<FamilyMetadata>(out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+                if (!_familyMetadataEStorage.TryGet(family, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
                 {
                     if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out family))
                     {
@@ -457,7 +490,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                     }
 
                     // Only attach the new data if the family was updated.
-                    family.AttachData(familyMetadata);
+                    _familyMetadataEStorage.Attach(family, familyMetadata);
                 }
             }
 
@@ -622,6 +655,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         OnDocumentSaving(e.Document);
     }
 
+    private bool _inHideMode;
+
     /// <summary>
     ///     Updates the family metadata when a document is being saved.
     /// </summary>
@@ -634,8 +669,21 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             return;
         }
 
+        var familyInfo = CreateFamilyMetadata(document);
+
+        using var transaction = new Transaction(document, "Add family info");
+        transaction.Start();
+
+        _familyMetadataEStorage.Attach(document.OwnerFamily, familyInfo);
+
+        transaction.Commit();
+    }
+
+
+    private FamilyMetadata CreateFamilyMetadata(Document document)
+    {
         var userName = GetUserName(document);
-        if (document.OwnerFamily.TryGetData<FamilyMetadata>(out var familyInfo))
+        if (_familyMetadataEStorage.TryGet(document.OwnerFamily, out var familyInfo))
         {
             var version = familyInfo.Version;
             familyInfo.Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision);
@@ -652,10 +700,32 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             };
         }
 
-        using var transaction = new Transaction(document, "My Transaction Name");
+        return familyInfo;
+    }
+
+
+
+    private Stream? _previewImage;
+    public static void TemporarilyHideAllFamilyConnectors(Document doc, View view)
+    {
+        // Collect all connector elements in a FAMILY document
+        var connectorIds = new FilteredElementCollector(doc)
+                           .OfClass(typeof(ConnectorElement))
+                           .WhereElementIsNotElementType()
+                           .Select(e => e.Id)
+                           .ToList();
+
+        if (connectorIds.Count == 0) return;
+
+        using var transaction = new Transaction(doc, "Temp-hide connectors");
         transaction.Start();
 
-        document.OwnerFamily.AttachData(familyInfo);
+        // Optional: reset previous temporary hide/isolate in this view
+        if (view.IsTemporaryHideIsolateActive())
+            view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);
+
+        // Temporary hide (same as HH / sunglasses)
+        view.HideElementsTemporary(connectorIds);
 
         transaction.Commit();
     }
@@ -683,19 +753,29 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
     private void OnDocumentSaved(Document document)
     {
-        // TODO: We should consider setting a "dirty" flag when the document is saved.
-        // Saving the document to the family source could then occur during the document close event.
-        // This approach would help avoid multiple writes to the source, which might otherwise occur with invalid states.
-
         // Only handle family documents.
         if (!document.IsFamilyDocument)
         {
             return;
         }
 
-        var pathName = document.PathName;
+        var pathName = GetFamilyAsStream(document, out var memoryStream);
 
-        var memoryStream = new MemoryStream();
+        // Add the family info to the currently saved family file.
+        UpdateFamilyInfo(document, memoryStream);
+        UpdatePreviewImage(document, memoryStream);
+        //TODO: Show message to ask if the user wants to save the family in original location. Alternatively add an option in the settings to control this behavior.
+        var familyName = Path.GetFileNameWithoutExtension(pathName);
+        if (_familyCache.TryGetFamily(familyName, out var family))
+        {
+            family.SaveToSource(memoryStream);
+        }
+    }
+
+    private static string GetFamilyAsStream(Document document, out MemoryStream memoryStream)
+    {
+        var pathName = document.PathName;
+        memoryStream = new MemoryStream();
 
         using (var fileStream = new FileStream(pathName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
@@ -703,16 +783,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         }
 
         memoryStream.Position = 0;
-
-        // Add the family info to the currently saved family file.
-        UpdateFamilyInfo(document, memoryStream);
-
-        //TODO: Show message to ask if the user wants to save the family in original location. Alternatively add an option in the settings to control this behavior.
-        var familyName = Path.GetFileNameWithoutExtension(pathName);
-        if (_familyCache.TryGetFamily(familyName, out var family))
-        {
-            family.SaveToSource(memoryStream);
-        }
+        return pathName;
     }
 
     /// <summary>
@@ -743,7 +814,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
         //family.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyInfo);
         var userName = GetUserName(document);
-        if (document.OwnerFamily.TryGetData<FamilyMetadata>(out var familyInfo))
+        if (_familyMetadataEStorage.TryGet(document.OwnerFamily, out var familyInfo))
         {
             var version = familyInfo.Version;
             familyInfo.Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision);
@@ -777,6 +848,34 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
             root.Flush(true);
         }
+
+        stream.Position = 0;
+    }
+    
+    private void UpdatePreviewImage(Document document, MemoryStream stream)
+    {
+        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStream))
+        {
+            ViewImageWriter.WritePreviewImage(stream, previewStream);
+        }
+
+        //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))
+        //{
+        //    if (!root.TryOpenStorage("BIM.FamilyManager", out var infoStorage))
+        //    {
+        //        infoStorage = root.CreateStorage("BIM.FamilyManager");
+        //    }
+
+        //    // Delete current family info if it exists.
+        //    infoStorage.Delete("FamilyMetadata");
+
+        //    // Add the new family info.
+        //    var newFamilyStream = infoStorage.CreateStream("FamilyMetadata");
+        //    JsonSerializer.Serialize(newFamilyStream, familyInfo);
+        //    newFamilyStream.Flush();
+
+        //    root.Flush(true);
+        //}
 
         stream.Position = 0;
     }
@@ -1459,7 +1558,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             } while (unusedElementIds.Count > 0);
 
             transaction.Commit();
-            document.Close(true);
         }
         catch (Exception e)
         {
@@ -1467,6 +1565,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             transaction.RollBack();
             document.Close(false);
         }
+        document.Close(true);
     }
 
     /// <summary>

@@ -96,6 +96,7 @@ public class RevitFamilyManagerApp : RevitApp
         var panel = RevitTabManager.GetPanel(Application, StringResources.Panel_Name, StringResources.Tab_Name);
         panel.AddItem(CreateFamilyManagerButtonData());
         panel.AddItem(CreateSettingsButtonData());
+        panel.AddItem(CreatePreviewImageButtonData());
 
         _pane = Services.GetRequiredService<FamilyManagerPane>();
 
@@ -252,6 +253,22 @@ public class RevitFamilyManagerApp : RevitApp
             , largeImageSource
             , typeof(OpenFamilyManagerSettingsCommandFactory)
             , typeof(OpenFamilyManagerSettingsCommandAvailabilityFactory));
+
+        return pushButtonData;
+    }
+
+    private static PushButtonData CreatePreviewImageButtonData()
+    {
+        var smallImageSource = BuildImageResourcePath("CreatePreview_16x16.png");
+        var largeImageSource = BuildImageResourcePath("CreatePreview_32x32.png");
+
+        var pushButtonData = RevitControlFactory.CreateButtonData("FamilyManager.CreatePreviewImage"
+            , StringResources.Command_CreatePreviewImage_Text
+            , StringResources.Command_CreatePreviewImage_Description    
+            , smallImageSource
+            , largeImageSource
+            , typeof(CreatePreviewImageCommandFactory)
+            , typeof(CreatePreviewImageCommandAvailabilityFactory));
 
         return pushButtonData;
     }

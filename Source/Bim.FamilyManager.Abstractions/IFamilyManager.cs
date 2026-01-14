@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 
 namespace Bim.FamilyManager.Abstractions;
 
@@ -172,4 +173,6 @@ public interface IFamilyManager
     ///     Thrown when the specified family is not loaded in the active document.
     /// </exception>
     void RemoveFamilyFromActiveDocument(IRevitFamily family);
+
+    void CreatePreviewImage(UIApplication application, View view);
 }
