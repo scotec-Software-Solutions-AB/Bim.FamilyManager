@@ -91,9 +91,24 @@ public abstract class EStorageSchema
         schemaBuilder.SetWriteAccessLevel(AccessLevel.Public);
         schemaBuilder.SetVendorId(_vendorId);
         schemaBuilder.SetSchemaName(_schemaName);
+        
         foreach (var field in _fields)
         {
-            schemaBuilder.AddArrayField(field.Key, field.Value);
+            var fieldName = field.Key;
+            var type = field.Value;
+            if (type.IsArray)
+            {
+                schemaBuilder.AddArrayField(fieldName, type.GetElementType());
+            }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                var elemType = type.GetGenericArguments()[0];
+                schemaBuilder.AddArrayField(fieldName, elemType);   // IList<byte> -> byte
+            }
+            else
+            {
+                schemaBuilder.AddSimpleField(fieldName, type);
+            }
         }
         schemaBuilder.SetApplicationGUID(Constants.ApplicationId);
 

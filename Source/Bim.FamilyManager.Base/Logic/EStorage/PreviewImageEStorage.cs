@@ -13,7 +13,7 @@ public class PreviewImageEStorage : EStorageSchema
     protected const string PreviewImageFieldName = "PreviewImage";
 
 
-    private const string SchemaName = "EStorage.Bim.FamilyManager.PreviewImage";
+    private const string SchemaName = "Bim_FamilyManager_PreviewImage_V1";
 
     /// <summary>
     ///     The vendor identifier for the schema.
@@ -23,11 +23,11 @@ public class PreviewImageEStorage : EStorageSchema
     /// <summary>
     ///     The unique identifier for the schema.
     /// </summary>
-    private static readonly Guid SchemaId = new("2C9DA88A-E3F7-4224-8358-208A70DBA79B");
+    private static readonly Guid SchemaId = new("7D08197B-14B3-4DBA-9EC9-3CA7C223EC06");
 
     public PreviewImageEStorage() : base(SchemaId, VendorId, SchemaName, new Dictionary<string, Type>
                                         {
-                                            { PreviewImageFieldName, typeof(byte[]) }
+                                            { PreviewImageFieldName, typeof(IList<byte>) }
                                         })
     {
     }
@@ -37,7 +37,7 @@ public class PreviewImageEStorage : EStorageSchema
         var memoryStream = new MemoryStream();
         data.CopyTo(memoryStream);
 
-        base.Attach(element, PreviewImageFieldName, memoryStream.ToArray());
+        base.Attach(element, PreviewImageFieldName, (IList<byte>)memoryStream.ToArray());
     }
 
     public virtual void Detach(Element element)
@@ -48,9 +48,9 @@ public class PreviewImageEStorage : EStorageSchema
 
     public bool TryGet(Element element, [NotNullWhen(true)] out MemoryStream? data)
     {
-        base.TryGet(element, PreviewImageFieldName, out byte[]? binaryData);
+        base.TryGet(element, PreviewImageFieldName, out IList<byte>? binaryData);
 
-        data = binaryData != null ? new MemoryStream(binaryData) : null;
+        data = binaryData != null ? new MemoryStream(binaryData.ToArray()) : null;
 
         return data != null;
     }

@@ -12,7 +12,7 @@ public class FamilyMetadataEStorage : EStorageSchema
 {
     protected const string FamilyMetadataFieldName = "FamilyMetadata";
     
-    private const string SchemaName = "EStorage.Bim.FamilyManager.FamilyMetadata";
+    private const string SchemaName = "Bim_FamilyManager_FamilyMetadata_V1";
 
     /// <summary>
     ///     The vendor identifier for the schema.
@@ -22,7 +22,7 @@ public class FamilyMetadataEStorage : EStorageSchema
     /// <summary>
     ///     The unique identifier for the schema.
     /// </summary>
-    private static readonly Guid SchemaId = new("9D245BBE-229B-41DA-88CC-F052FC7DB891");
+    private static readonly Guid SchemaId = new("7DAED877-211A-41B8-BEF4-2CEE567D0C01");
 
     /// <summary>
     ///     The name of the schema.
@@ -32,7 +32,7 @@ public class FamilyMetadataEStorage : EStorageSchema
     /// </summary>
     public FamilyMetadataEStorage() : base(SchemaId, VendorId, SchemaName, new Dictionary<string, Type>
                                         {
-                                            { FamilyMetadataFieldName, typeof(byte[]) }
+                                            { FamilyMetadataFieldName, typeof(IList<byte>) }
                                         })
     {
     }
@@ -41,7 +41,7 @@ public class FamilyMetadataEStorage : EStorageSchema
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(data);
 
-        base.Attach(element, FamilyMetadataFieldName, bytes);
+        base.Attach(element, FamilyMetadataFieldName, (IList<byte>)bytes);
     }
 
     public virtual void Detach(Element element)
@@ -52,8 +52,8 @@ public class FamilyMetadataEStorage : EStorageSchema
 
     public bool TryGet(Element element, [NotNullWhen(true)] out FamilyMetadata? data)
     {
-        base.TryGet(element, FamilyMetadataFieldName, out byte[]? binaryData);
-        data = binaryData != null ? JsonSerializer.Deserialize<FamilyMetadata>(new ReadOnlySpan<byte>(binaryData)) : null;
+        base.TryGet(element, FamilyMetadataFieldName, out IList<byte>? binaryData);
+        data = binaryData != null ? JsonSerializer.Deserialize<FamilyMetadata>(binaryData.ToArray()) : null;
         
         return data != null;
     }

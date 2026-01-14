@@ -409,15 +409,18 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         if (!view.IsTemplate)
         {
             var previewImage = ViewImageExporter.ExportViewPng(document, view);
+            using (var t = new Transaction(document, "Attach preview to family"))
+            {
+                t.Start();
+                
+                // TODO: Probably modify background to transparent or any other user defined color.
+                //var pathName = GetFamilyAsStream(document, out var memoryStream);
+                previewImage.Position = 0;
+                _previewImageEStorage.Attach(document.OwnerFamily, previewImage);
 
-            // TODO: Probably modify background to transparent or any other user defined color.
-            //var pathName = GetFamilyAsStream(document, out var memoryStream);
-            previewImage.Position = 0;
-            _previewImageEStorage.Attach(document.OwnerFamily, previewImage);
-
-            //ViewImageWriter.WritePreviewImage(memoryStream, previewImage);
+                t.Commit();
+            }
         }
-
     }
 
     /// <summary>
@@ -760,7 +763,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
         // Add the family info to the currently saved family file.
         UpdateFamilyInfo(document, memoryStream);
-
+        UpdatePreviewImage(document, memoryStream);
         //TODO: Show message to ask if the user wants to save the family in original location. Alternatively add an option in the settings to control this behavior.
         var familyName = Path.GetFileNameWithoutExtension(pathName);
         if (_familyCache.TryGetFamily(familyName, out var family))
@@ -845,6 +848,34 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
             root.Flush(true);
         }
+
+        stream.Position = 0;
+    }
+    
+    private void UpdatePreviewImage(Document document, MemoryStream stream)
+    {
+        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStream))
+        {
+            ViewImageWriter.WritePreviewImage(stream, previewStream);
+        }
+
+        //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))
+        //{
+        //    if (!root.TryOpenStorage("BIM.FamilyManager", out var infoStorage))
+        //    {
+        //        infoStorage = root.CreateStorage("BIM.FamilyManager");
+        //    }
+
+        //    // Delete current family info if it exists.
+        //    infoStorage.Delete("FamilyMetadata");
+
+        //    // Add the new family info.
+        //    var newFamilyStream = infoStorage.CreateStream("FamilyMetadata");
+        //    JsonSerializer.Serialize(newFamilyStream, familyInfo);
+        //    newFamilyStream.Flush();
+
+        //    root.Flush(true);
+        //}
 
         stream.Position = 0;
     }
