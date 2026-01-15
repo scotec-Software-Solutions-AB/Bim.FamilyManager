@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -14,6 +16,8 @@ namespace Bim.FamilyManager.Abstractions;
 /// </remarks>
 public interface IFamilyManager
 {
+    void LoadFamilySymbols(Application application, Stream familyStream);
+    
     /// <summary>
     ///     Gets a collection of family sources that provide access to Revit families.
     /// </summary>

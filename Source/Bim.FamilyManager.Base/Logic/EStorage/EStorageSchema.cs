@@ -100,6 +100,12 @@ public abstract class EStorageSchema
             {
                 schemaBuilder.AddArrayField(fieldName, type.GetElementType());
             }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            {
+                var keyType = type.GetGenericArguments()[0];
+                var valueType = type.GetGenericArguments()[1];
+                schemaBuilder.AddMapField(fieldName, keyType, valueType);
+            }
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 var elemType = type.GetGenericArguments()[0];

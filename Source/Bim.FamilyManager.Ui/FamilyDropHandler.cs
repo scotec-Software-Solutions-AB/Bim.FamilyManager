@@ -77,6 +77,8 @@ public class FamilyDropHandler : IControllableDropHandler
         {
             return;
         }
+        
+        _familyManager.LoadFamilySymbols(uiDocument.Application.Application, familyViewModel.Family.Family);
 
         Interop.GetMousePosition(out var position);
         _logger.LogDebug($"Mouse position: X={position.X}, Y={position.Y}");

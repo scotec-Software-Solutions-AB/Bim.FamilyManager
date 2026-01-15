@@ -14,10 +14,13 @@ using OpenMcdf;
 using Scotec.Extensions.Utilities.Strings;
 using Scotec.Queues;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Xml.Linq;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 using Version = System.Version;
 
 namespace Bim.FamilyManager.Base.Logic;
@@ -134,6 +137,27 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         _revitApplication.ControlledApplication.DocumentSaving -= OnDocumentSaving;
         _revitApplication.ControlledApplication.DocumentSavedAs -= OnDocumentSavedAs;
         _revitApplication.ControlledApplication.DocumentSavingAs -= OnDocumentSavingAs;
+    }
+
+    public void LoadFamilySymbols(Application application, Stream familyStream)
+    {
+        //var tempFileName = Path.Combine(Path.GetTempPath(), "TempFamily" + ".rfa");
+
+        //using (var tempFile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+        //{
+        //    familyStream.CopyTo(tempFile);
+        //}
+        
+        //var document = application.OpenDocumentFile(tempFileName);
+        //try
+        //{
+
+        //    if (!document.IsFamilyDocument)
+        //        throw new InvalidOperationException("The opened document is not a family document (.rfa).");
+
+        //    var fm = document.FamilyManager;
+        //    var types = document.FamilyManager.Types.Cast<FamilyType>().ToList();
+        //}
     }
 
     /// <summary>
@@ -402,24 +426,42 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         }
 
         var viewId = view.Id;
-        
-        var previewImage = ViewImageExporter.ExportViewPng(document, view);
-        if (!view.IsTemplate)
+
+        var familyManager = document.FamilyManager;
+        var currentType = familyManager.CurrentType;
+
+        var previewImages = new Dictionary<string, Stream>();
+        foreach (var familyType in familyManager.Types.Cast<FamilyType>())
         {
-            using (var t = new Transaction(document, "Attach preview to family"))
-            {
-                t.Start();
+            SetCurrentFamilyType(familyType);
+            var previewImage = ViewImageExporter.ExportViewPng(document, view);
+            
+            //using var t = new Transaction(document, "Attach preview to family");
+            //t.Start();
 
-                var settings = document.GetDocumentPreviewSettings();
-                settings.PreviewViewId = viewId;
+            //var settings = document.GetDocumentPreviewSettings();
+            //settings.PreviewViewId = viewId;
 
-                // TODO: Probably modify background to transparent or any other user defined color.
-                //var pathName = GetFamilyAsStream(document, out var memoryStream);
-                previewImage.Position = 0;
-                _previewImageEStorage.Attach(document.OwnerFamily, previewImage);
+            // TODO: Probably modify background to transparent or any other user defined color.
+            //var pathName = GetFamilyAsStream(document, out var memoryStream);
+            previewImage.Position = 0;
 
-                t.Commit();
-            }
+            previewImages[familyType.Name] = previewImage;
+            
+        }
+        SetCurrentFamilyType(currentType);
+        
+        using var transaction = new Transaction(document, "Add previews");
+        transaction.Start();
+        _previewImageEStorage.Attach(document.OwnerFamily, previewImages);
+        transaction.Commit();
+
+        void SetCurrentFamilyType(FamilyType familyType)
+        {
+            using var transaction = new Transaction(document, "Set current family type");
+            transaction.Start();
+            familyManager.CurrentType = familyType;
+            transaction.Commit();
         }
     }
 
@@ -655,8 +697,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         OnDocumentSaving(e.Document);
     }
 
-    private bool _inHideMode;
-
     /// <summary>
     ///     Updates the family metadata when a document is being saved.
     /// </summary>
@@ -705,7 +745,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
 
 
-    private Stream? _previewImage;
     public static void TemporarilyHideAllFamilyConnectors(Document doc, View view)
     {
         // Collect all connector elements in a FAMILY document
@@ -854,9 +893,18 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     
     private void UpdatePreviewImage(Document document, MemoryStream stream)
     {
-        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStream))
+        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStreams))
         {
-            ViewImageWriter.WritePreviewImage(stream, previewStream);
+            var familyType = document.FamilyManager.CurrentType.Name;
+            //if (previewStreams.TryGetValue(" ", out var previewStream))
+            //{
+            //    ViewImageWriter.WritePreviewImage(stream, previewStream);
+            //}
+            //else 
+            if (previewStreams.TryGetValue(familyType, out var previewStream))
+            {
+                ViewImageWriter.WritePreviewImage(stream, previewStream);
+            }
         }
 
         //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))
