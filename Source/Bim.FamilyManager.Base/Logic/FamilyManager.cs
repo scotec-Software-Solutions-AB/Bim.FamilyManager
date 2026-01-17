@@ -140,10 +140,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         _revitApplication.ControlledApplication.DocumentSavingAs -= OnDocumentSavingAs;
     }
 
-    public void LoadFamilySymbols(Application application, Stream familyStream)
-    {
-    }
-
     /// <summary>
     ///     Gets the collection of family sources available for managing Revit families.
     /// </summary>
@@ -490,11 +486,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             }
 
             // Check if the family is already loaded.
-            var family = FindFamily(document, revitFamily);
-            if (family is null)
+            var loadedFamily = FindFamily(document, revitFamily);
+            if (loadedFamily is null)
             {
                 // Load the family into the Revit document
-                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out family))
+                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
                 {
                     const string message = "Failed to load the family.";
                     _logger.LogError(message);
@@ -502,25 +498,30 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 }
 
                 // Attach the family info to the newly loaded family.
-                _familyMetadataEStorage.Attach(family, familyMetadata);
+                _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
             }
             else
             {
                 // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
                 // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-                if (!_familyMetadataEStorage.TryGet(family, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+                
+                
+                
+                //TODO: 
+                
+                if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out family))
+                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out loadedFamily))
                     {
                         throw new InvalidOperationException("Failed to load the family.");
                     }
 
                     // Only attach the new data if the family was updated.
-                    _familyMetadataEStorage.Attach(family, familyMetadata);
+                    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
                 }
             }
 
-            return family;
+            return loadedFamily;
         }
         finally
         {
@@ -1572,6 +1573,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         _logger.LogInformation($"Delete unused assets for family '{Path.GetFileName(familyFileName)}'.");
 
         var document = application.OpenDocumentFile(familyFileName);
+
+        // TODO: Get the revit version from the family (e.g. 2025) and only do this newer.
+        // If a family in Revit 2025 format is loaded into a project with Revit 2025 we don't need to remove unused assets.
         using var transaction = new Transaction(document, "Delete unused assets");
         transaction.Start();
 
@@ -1719,14 +1723,14 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
             td.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink1,
-                "Use the family from the file",
-                "Reloads the shared family from disk, but keeps the current type parameter values in the project."
+                "Use the family from the family manager",
+                "Reloads the shared family from the family manager source, but keeps the current type parameter values in the project."
             );
 
             td.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink2,
-                "Use the family from the file and overwrite parameter values",
-                "Reloads the shared family from disk and overwrites the type parameter values in the project with values from the file."
+                "Use the family from the family manager and overwrite parameter values",
+                "Reloads the shared family from the family manager source and overwrites the type parameter values in the project with values from the reloaded family"
             );
 
             td.AddCommandLink(
