@@ -5,7 +5,7 @@ namespace Bim.FamilyManager.Base.Logic;
 
 public static class ViewImageExporter
 {
-    public static Stream ExportViewPng(Document document, View view, int pixelSize = 1024)
+    public static Stream ExportViewPng(Document document, View view, int pixelSize = 128)
     {
         // Use a transaction group to temporarily hide elements and then roll it back.
         // Within the transaction group, a transaction is used to perform the temporary hiding.

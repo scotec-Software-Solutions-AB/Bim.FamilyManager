@@ -19,6 +19,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Windows;
 using System.Xml.Linq;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 using Version = System.Version;
@@ -141,23 +142,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
     public void LoadFamilySymbols(Application application, Stream familyStream)
     {
-        //var tempFileName = Path.Combine(Path.GetTempPath(), "TempFamily" + ".rfa");
-
-        //using (var tempFile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-        //{
-        //    familyStream.CopyTo(tempFile);
-        //}
-        
-        //var document = application.OpenDocumentFile(tempFileName);
-        //try
-        //{
-
-        //    if (!document.IsFamilyDocument)
-        //        throw new InvalidOperationException("The opened document is not a family document (.rfa).");
-
-        //    var fm = document.FamilyManager;
-        //    var types = document.FamilyManager.Types.Cast<FamilyType>().ToList();
-        //}
     }
 
     /// <summary>
@@ -526,7 +510,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
                 if (!_familyMetadataEStorage.TryGet(family, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out family))
+                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out family))
                     {
                         throw new InvalidOperationException("Failed to load the family.");
                     }
@@ -1647,8 +1631,47 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         /// </remarks>
         public bool OnFamilyFound(bool familyInUse, /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {
-            overwriteParameterValues = true;
-            return true;
+            //TODO: Add strings to resource files.
+            var td = new TaskDialog("Family Already Exists")
+            {
+                MainInstruction = "The family already exists in the project.",
+                MainContent = familyInUse
+                    ? "This family is currently in use. Choose how you want to proceed."
+                    : "Choose how you want to proceed.",
+                AllowCancellation = true
+            };
+
+            td.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink1,
+                "Overwrite the existing version",
+                "Reloads the family definition (geometry), but keeps type parameter values already set in the project."
+            );
+
+            td.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink2,
+                "Overwrite the existing version and its parameter values",
+                "Reloads the family definition and overwrites the type parameter values in the project with values from the loaded family."
+            );
+
+            td.CommonButtons = TaskDialogCommonButtons.Cancel;
+            td.DefaultButton = TaskDialogResult.CommandLink1;
+
+            var result = td.Show();
+
+            switch (result)
+            {
+                case TaskDialogResult.CommandLink1:
+                    overwriteParameterValues = false;
+                    return true;
+
+                case TaskDialogResult.CommandLink2:
+                    overwriteParameterValues = true;
+                    return true;
+
+                default:
+                    overwriteParameterValues = false;
+                    return false; // Cancel
+            }
         }
 
         /// <summary>
@@ -1677,13 +1700,68 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         ///     and is used to customize the behavior of shared family loading operations, such as deciding whether
         ///     to overwrite existing shared families, their source, and their parameter values.
         /// </remarks>
-        public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+        ///
+        public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, /*[UnscopedRef]*/ out FamilySource source,
+                                        /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {
-            source = FamilySource.Project; // Assume the shared family is from the project by default.
-            overwriteParameterValues = true; // Allow overwriting parameter values.
+            //TODO: Add strings to resource files.
 
-            // If the family is in use, decide whether to overwrite it or not.
-            return true; // Indicate that the shared family should be overwritten.
+            var familyName = sharedFamily.Name;
+
+            var td = new TaskDialog("Shared Family Already Exists")
+            {
+                MainInstruction = $"A shared family already exists in the project: {familyName}",
+                MainContent = familyInUse
+                    ? "This shared family is currently in use. Choose which version to keep."
+                    : "Choose which version to keep.",
+                AllowCancellation = true
+            };
+
+            td.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink1,
+                "Use the family from the file",
+                "Reloads the shared family from disk, but keeps the current type parameter values in the project."
+            );
+
+            td.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink2,
+                "Use the family from the file and overwrite parameter values",
+                "Reloads the shared family from disk and overwrites the type parameter values in the project with values from the file."
+            );
+
+            td.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink3,
+                "Use the family from the project",
+                "Keeps the existing shared family already loaded in the project."
+            );
+
+            td.CommonButtons = TaskDialogCommonButtons.Cancel;
+            td.DefaultButton = TaskDialogResult.CommandLink1;
+
+            var result = td.Show();
+
+            switch (result)
+            {
+                case TaskDialogResult.CommandLink1:
+                    source = FamilySource.Family; // take from file
+                    overwriteParameterValues = false; // keep existing param values
+                    return true;
+
+                case TaskDialogResult.CommandLink2:
+                    source = FamilySource.Family; // take from file
+                    overwriteParameterValues = true; // overwrite param values
+                    return true;
+
+                case TaskDialogResult.CommandLink3:
+                    source = FamilySource.Project; // keep project version
+                    overwriteParameterValues = false; // irrelevant here, but set safely
+                    return true;
+
+                default:
+                    source = FamilySource.Project;
+                    overwriteParameterValues = false;
+                    return false; // Cancel
+            }
         }
     }
 }

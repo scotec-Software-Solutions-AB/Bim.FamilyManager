@@ -1,4 +1,5 @@
-﻿using Bim.FamilyManager.Abstractions;
+﻿using System.Windows.Media;
+using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Scotec.Wpf.ViewModels;
 
@@ -52,4 +53,6 @@ public abstract class FamilySymbolViewModel : ViewModel, IFamilySymbolViewModel
     ///     <see cref="IRevitFamilySymbol" /> instance, providing a user-friendly identifier for the family symbol.
     /// </remarks>
     public string Name => FamilySymbol.Name;
+
+    public ImageSource? Preview { get; }
 }
