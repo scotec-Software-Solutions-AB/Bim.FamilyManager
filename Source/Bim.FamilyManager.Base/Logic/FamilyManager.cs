@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 using Version = System.Version;
@@ -405,32 +406,41 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             return;
         }
 
-        var viewId = view.Id;
-
         var familyManager = document.FamilyManager;
-        var currentType = familyManager.CurrentType;
 
         var previewImages = new Dictionary<string, Stream>();
-        foreach (var familyType in familyManager.Types.Cast<FamilyType>())
+
+        // The `TransactionGroup` is used here to group multiple transactions into a single logical unit.
+        // This ensures that all changes made within the group can be rolled back together,
+        // maintaining the integrity of the document. In this code, it allows iterating through family types,
+        // setting the current family type, and generating preview images while providing the ability to undo
+        // all changes at the end of the process. This approach ensures that no partial or
+        // inconsistent changes are left in the document.
+
+        using var transactionGroup = new TransactionGroup(document, "Create preview images");
         {
-            SetCurrentFamilyType(familyType);
-            var previewImage = ViewImageExporter.ExportViewPng(document, view);
-            
-            //using var t = new Transaction(document, "Attach preview to family");
-            //t.Start();
+            transactionGroup.Start();
+            foreach (var familyType in familyManager.Types.Cast<FamilyType>())
+            {
+                SetCurrentFamilyType(familyType);
+                var previewImage = ViewImageExporter.ExportViewPng(document, view);
 
-            //var settings = document.GetDocumentPreviewSettings();
-            //settings.PreviewViewId = viewId;
+                //using var t = new Transaction(document, "Attach preview to family");
+                //t.Start();
 
-            // TODO: Probably modify background to transparent or any other user defined color.
-            //var pathName = GetFamilyAsStream(document, out var memoryStream);
-            previewImage.Position = 0;
+                //var settings = document.GetDocumentPreviewSettings();
+                //settings.PreviewViewId = viewId;
 
-            previewImages[familyType.Name] = previewImage;
-            
+                // TODO: Probably modify background to transparent or any other user defined color.
+                //var pathName = GetFamilyAsStream(document, out var memoryStream);
+                previewImage.Position = 0;
+
+                previewImages[familyType.Name] = previewImage;
+
+            }
+
+            transactionGroup.RollBack();
         }
-        SetCurrentFamilyType(currentType);
-        
         using var transaction = new Transaction(document, "Add previews");
         transaction.Start();
         _previewImageEStorage.Attach(document.OwnerFamily, previewImages);
@@ -438,10 +448,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
         void SetCurrentFamilyType(FamilyType familyType)
         {
-            using var transaction = new Transaction(document, "Set current family type");
-            transaction.Start();
+            // This transaction is part of a transaction group and will be rolled back at the end, even if it is committed individually.
+            using var familyTypeTransaction = new Transaction(document, "Set current family type");
+            familyTypeTransaction.Start();
             familyManager.CurrentType = familyType;
-            transaction.Commit();
+            familyTypeTransaction.Commit();
         }
     }
 
@@ -1636,7 +1647,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         public bool OnFamilyFound(bool familyInUse, /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {
             //TODO: Add strings to resource files.
-            var td = new TaskDialog("Family Already Exists")
+            var dialog = new TaskDialog("Family Already Exists")
             {
                 MainInstruction = "The family already exists in the project.",
                 MainContent = familyInUse
@@ -1645,22 +1656,22 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 AllowCancellation = true
             };
 
-            td.AddCommandLink(
+            dialog.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink1,
                 "Overwrite the existing version",
                 "Reloads the family definition (geometry), but keeps type parameter values already set in the project."
             );
 
-            td.AddCommandLink(
+            dialog.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink2,
                 "Overwrite the existing version and its parameter values",
                 "Reloads the family definition and overwrites the type parameter values in the project with values from the loaded family."
             );
 
-            td.CommonButtons = TaskDialogCommonButtons.Cancel;
-            td.DefaultButton = TaskDialogResult.CommandLink1;
+            dialog.CommonButtons = TaskDialogCommonButtons.Cancel;
+            dialog.DefaultButton = TaskDialogResult.CommandLink1;
 
-            var result = td.Show();
+            var result = dialog.Show();
 
             switch (result)
             {
@@ -1712,7 +1723,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
             var familyName = sharedFamily.Name;
 
-            var td = new TaskDialog("Shared Family Already Exists")
+            var dialog = new TaskDialog("Shared Family Already Exists")
             {
                 MainInstruction = $"A shared family already exists in the project: {familyName}",
                 MainContent = familyInUse
@@ -1721,28 +1732,28 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 AllowCancellation = true
             };
 
-            td.AddCommandLink(
+            dialog.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink1,
                 "Use the family from the family manager",
                 "Reloads the shared family from the family manager source, but keeps the current type parameter values in the project."
             );
 
-            td.AddCommandLink(
+            dialog.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink2,
                 "Use the family from the family manager and overwrite parameter values",
                 "Reloads the shared family from the family manager source and overwrites the type parameter values in the project with values from the reloaded family"
             );
 
-            td.AddCommandLink(
+            dialog.AddCommandLink(
                 TaskDialogCommandLinkId.CommandLink3,
                 "Use the family from the project",
                 "Keeps the existing shared family already loaded in the project."
             );
 
-            td.CommonButtons = TaskDialogCommonButtons.Cancel;
-            td.DefaultButton = TaskDialogResult.CommandLink1;
+            dialog.CommonButtons = TaskDialogCommonButtons.Cancel;
+            dialog.DefaultButton = TaskDialogResult.CommandLink1;
 
-            var result = td.Show();
+            var result = dialog.Show();
 
             switch (result)
             {
