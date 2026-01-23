@@ -3,7 +3,7 @@ using Autodesk.Revit.UI;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
 
-namespace Bim.FamilyManager.Commands;
+namespace Bim.FamilyManager.Ui.Commands;
 
 [RevitCommandAvailabilityIsolation(ContextName = "Bim.FamilyManager")]
 public class CreatePreviewImageCommandAvailability : RevitCommandAvailability

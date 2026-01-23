@@ -180,7 +180,8 @@ public sealed class RevitFamily : IRevitFamily
     {
         get
         {
-            if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
+            //if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
+            if(_familyInfo.TryGetStream("Bim.FamilyManager/PreviewImages/FamilyPreviewImage", out var previewStream))
             {
                 return previewStream;
             }

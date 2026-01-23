@@ -10,10 +10,11 @@ namespace Bim.FamilyManager.Base.Logic.EStorage;
 /// </summary>
 public class PreviewImageEStorage : EStorageSchema
 {
-    protected const string PreviewImageFieldName = "PreviewImage";
+    protected const string FieldNameFamilyPreviewImageName = "FamilyPreviewImageName";
+    protected const string FieldNameTypePreviewImages = "TypePreviewImages";
 
 
-    private const string SchemaName = "Bim_FamilyManager_PreviewImage_V1";
+    private const string SchemaName = "Bim_FamilyManager_PreviewImages_V1";
 
     /// <summary>
     ///     The vendor identifier for the schema.
@@ -23,37 +24,50 @@ public class PreviewImageEStorage : EStorageSchema
     /// <summary>
     ///     The unique identifier for the schema.
     /// </summary>
-    private static readonly Guid SchemaId = new("E179ABFC-840A-4AC2-B9F9-47DF6BE6E1EF");
+    private static readonly Guid SchemaId = new("1F9E97BA-765D-43B8-9100-6FDE3FE3114A");
 
     public PreviewImageEStorage() : base(SchemaId, VendorId, SchemaName, new Dictionary<string, Type>
                                         {
-                                            { PreviewImageFieldName, typeof(IDictionary<string, string>) }
+                                            { FieldNameFamilyPreviewImageName, typeof(string) },
+                                            { FieldNameTypePreviewImages, typeof(IDictionary<string, string>) }
                                         })
     {
     }
 
-    public void Attach(Element element, IDictionary<string, Stream> data)
+    public void Attach(Element element, string familyPreviewImageName, IDictionary<string, Stream> typePreviews)
     {
-        var base64Data = data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ConvertStreamToBase64());
-        
-        base.Attach(element, PreviewImageFieldName, (IDictionary<string, string>)base64Data);
-    }
+        var base64Data = typePreviews.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ConvertStreamToBase64());
 
-    public virtual void Detach(Element element)
-    {
-        base.Detach(element, PreviewImageFieldName);
-    }
-
-
-    public bool TryGet(Element element, [NotNullWhen(true)] out IDictionary<string, Stream>? data)
-    {
-        if (base.TryGet(element, PreviewImageFieldName, out IDictionary<string, string>? base64Data))
+        var dataDictionary = new Dictionary<string, object>
         {
-            data = base64Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ConvertBase64ToStream());
-            return true;
+            { FieldNameFamilyPreviewImageName, familyPreviewImageName },
+            { FieldNameTypePreviewImages, base64Data }
+        };
+        
+        Attach(element, dataDictionary);
+    }
+
+    public override void Detach(Element element)
+    {
+        base.Detach(element);
+    }
+
+
+    public bool TryGet(Element element, [NotNullWhen(true)] out string? familyPreviewImageName, [NotNullWhen(true)] out IDictionary<string, Stream>? typePreviews)
+    {
+        if (base.TryGet(element, out IDictionary<string, object>? dataDictionary))
+        {
+            if (dataDictionary.TryGetValue(FieldNameFamilyPreviewImageName, out var familyPreviewNameImageObject) && familyPreviewNameImageObject is string familyPreviewImageNameValue
+                && dataDictionary.TryGetValue(FieldNameTypePreviewImages, out var base64DataObject) && base64DataObject is IDictionary<string, string> base64Data)
+            {
+                familyPreviewImageName = familyPreviewImageNameValue;
+                typePreviews = base64Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ConvertBase64ToStream());
+                return true;
+            }
         }
 
-        data = null;
+        familyPreviewImageName = null;
+        typePreviews = null;
         return false;
     }
 

@@ -14,15 +14,14 @@ using OpenMcdf;
 using Scotec.Extensions.Utilities.Strings;
 using Scotec.Queues;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Windows;
-using System.Windows.Controls;
-using System.Xml.Linq;
 using Application = Autodesk.Revit.ApplicationServices.Application;
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+using TaskDialogCommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons;
+using TaskDialogResult = Autodesk.Revit.UI.TaskDialogResult;
 using Version = System.Version;
 
 namespace Bim.FamilyManager.Base.Logic;
@@ -443,7 +442,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         }
         using var transaction = new Transaction(document, "Add previews");
         transaction.Start();
-        _previewImageEStorage.Attach(document.OwnerFamily, previewImages);
+        _previewImageEStorage.Attach(document.OwnerFamily, familyManager.CurrentType.Name, previewImages);
         transaction.Commit();
 
         void SetCurrentFamilyType(FamilyType familyType)
@@ -889,18 +888,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     
     private void UpdatePreviewImage(Document document, MemoryStream stream)
     {
-        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStreams))
+        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var familyPreviewImageName, out var previewStreams))
         {
-            var familyType = document.FamilyManager.CurrentType.Name;
-            //if (previewStreams.TryGetValue(" ", out var previewStream))
-            //{
-            //    ViewImageWriter.WritePreviewImage(stream, previewStream);
-            //}
-            //else 
-            if (previewStreams.TryGetValue(familyType, out var previewStream))
-            {
-                ViewImageWriter.WritePreviewImage(stream, previewStream);
-            }
+                ViewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
         }
 
         //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))

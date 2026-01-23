@@ -61,6 +61,24 @@ namespace Bim.FamilyManager.Ui.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create preview images.
+        /// </summary>
+        public static string Command_CreatePreviewImages_Name {
+            get {
+                return ResourceManager.GetString("Command.CreatePreviewImages.Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preview images for the family were generated successfully..
+        /// </summary>
+        public static string Command_CreatePreviewImages_Notification_Success {
+            get {
+                return ResourceManager.GetString("Command.CreatePreviewImages.Notification.Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not save the family to the family source. Please ensure the destination is accessible and writable..
         /// </summary>
         public static string DirectorySource_Message_Save_Error {

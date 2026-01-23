@@ -8,6 +8,7 @@ using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;
 using Bim.FamilyManager.Resources;
+using Bim.FamilyManager.Ui.Commands;
 using Bim.FamilyManager.Ui.Views;
 using log4net;
 using Microsoft.Extensions.Configuration;
