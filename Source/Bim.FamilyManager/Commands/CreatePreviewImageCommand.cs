@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
 
-namespace Bim.FamilyManager.Ui.Commands;
+namespace Bim.FamilyManager.Commands;
 
 [RevitCommandIsolation(ContextName = "Bim.FamilyManager")]
 [Transaction(TransactionMode.Manual)]
