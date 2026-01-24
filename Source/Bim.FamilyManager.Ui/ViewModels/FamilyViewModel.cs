@@ -100,6 +100,10 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
                 OnPropertyChanged(nameof(Product));
                 OnPropertyChanged(nameof(ProductVersion));
                 OnPropertyChanged(nameof(Updated));
+
+                // Invalidate symbols cache on reinitialization to ensure they are recreated.
+                _symbols = null;
+                OnPropertyChanged(nameof(Symbols));
             });
 
         StaticWeakEventManager.AddWeakHandler(family, nameof(IRevitFamily.LoadedInDocumentChanged),
@@ -180,7 +184,7 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     ///     The collection is lazily initialized and ordered by symbol name.
     /// </remarks>
     public IList<IFamilySymbolViewModel> Symbols => _symbols ??= Family.FamilySymbols
-                                                                       .Select(symbol => CreateSymbolViewModel(symbol))
+                                                                       .Select(CreateSymbolViewModel)
                                                                        .OrderBy(symbol => symbol.Name)
                                                                        .ToList();
 
