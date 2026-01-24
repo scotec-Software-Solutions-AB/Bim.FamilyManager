@@ -201,4 +201,10 @@
   <data name="Family.Icon.NotImported" xml:space="preserve">
     <value>The family is not present in the active document.</value>
   </data>
+  <data name="Command.CreatePreviewImages.Name" xml:space="preserve">
+    <value>Create preview images</value>
+  </data>
+  <data name="Command.CreatePreviewImages.Notification.Success" xml:space="preserve">
+    <value>Preview images for the family were generated successfully.</value>
+  </data>
 </root>

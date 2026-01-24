@@ -41,20 +41,29 @@ public class FamilyMetadataEStorage : EStorageSchema
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(data);
 
-        base.Attach(element, FamilyMetadataFieldName, (IList<byte>)bytes);
+        Attach(element, new Dictionary<string, object>
+        {
+            { FamilyMetadataFieldName, bytes }
+        });
     }
 
-    public virtual void Detach(Element element)
+    public override void Detach(Element element)
     {
-        base.Detach(element, FamilyMetadataFieldName);
+        base.Detach(element);
     }
 
 
     public bool TryGet(Element element, [NotNullWhen(true)] out FamilyMetadata? data)
     {
-        base.TryGet(element, FamilyMetadataFieldName, out IList<byte>? binaryData);
-        data = binaryData != null ? JsonSerializer.Deserialize<FamilyMetadata>(binaryData.ToArray()) : null;
-        
+        data = null;
+        if (base.TryGet(element, out IDictionary<string, object>? dataDictionary))
+        {
+            if (dataDictionary.TryGetValue(FamilyMetadataFieldName, out var value) && value is IList<byte> binaryData)
+            {
+                data = JsonSerializer.Deserialize<FamilyMetadata>(binaryData.ToArray());
+            }
+        }
+
         return data != null;
     }
 }

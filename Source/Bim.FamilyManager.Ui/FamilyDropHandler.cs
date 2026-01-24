@@ -77,7 +77,7 @@ public class FamilyDropHandler : IControllableDropHandler
         {
             return;
         }
-
+        
         Interop.GetMousePosition(out var position);
         _logger.LogDebug($"Mouse position: X={position.X}, Y={position.Y}");
 

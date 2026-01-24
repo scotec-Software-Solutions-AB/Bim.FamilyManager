@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Wpf.ViewModels;
@@ -163,54 +164,9 @@ public abstract class FamilyManagerItemViewModel<TLayoutOptions> : ViewModel, IF
             return null;
         }
 
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.StreamSource = preview;
-        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.EndInit();
-        bitmap.Freeze(); // Freeze the bitmap for thread safety
-
-        if (transparentColor is null)
-        {
-            return bitmap;
-        }
-
-        // Create a WriteableBitmap to modify the pixels
-        var writeableBitmap = new WriteableBitmap(bitmap);
-
-        // Get the pixel data
-        var width = writeableBitmap.PixelWidth;
-        var height = writeableBitmap.PixelHeight;
-        var stride = width * (writeableBitmap.Format.BitsPerPixel / 8);
-        var pixels = new byte[height * stride];
-        writeableBitmap.CopyPixels(pixels, stride, 0);
-
-        // Iterate through the pixels and make the white background transparent
-        for (var i = 0; i < pixels.Length; i += 4)
-        {
-            var blue = pixels[i];
-            var green = pixels[i + 1];
-            var red = pixels[i + 2];
-            var alpha = pixels[i + 3];
-
-            // Check if the pixel matches the transparent color
-            if (red == transparentColor.Value.R && green == transparentColor.Value.G && blue == transparentColor.Value.B)
-            {
-                // Set alpha to 0 (transparent)
-                pixels[i + 3] = 0;
-            }
-        }
-
-        // Write the modified pixels back to the WriteableBitmap
-        writeableBitmap.WritePixels(
-            new Int32Rect(0, 0, width, height),
-            pixels,
-            stride,
-            0);
-
-        writeableBitmap.Freeze();
-        return writeableBitmap;
+        return Helper.CreateBitmapFromStream(preview, transparentColor);
     }
+
 
     /// <summary>
     ///     Applies the specified layout options to the view model's display-related properties.

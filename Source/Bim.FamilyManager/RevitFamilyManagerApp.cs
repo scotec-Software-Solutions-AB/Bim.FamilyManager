@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Scotec.Extensions.Linq;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
@@ -90,10 +91,25 @@ public class RevitFamilyManagerApp : RevitApp
         _logger = Services.GetRequiredService<ILogger<RevitFamilyManagerApp>>();
         _logger.LogInformation("Running startup for family manager add-in.");
 
+        var options = Services.GetRequiredService<IOptions<FamilyManagerOptions>>().Value;
+        var tabName = options.RevitOptions?.TabName;
+        var panelName = options.RevitOptions?.PanelName ?? "Bim.FamilyManager";
+        
         // Create tabs, panels ond buttons
-        RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), StringResources.Tab_Name);
+        //RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), StringResources.Tab_Name);
 
-        var panel = RevitTabManager.GetPanel(Application, StringResources.Panel_Name, StringResources.Tab_Name);
+        RibbonPanel panel;
+        if (string.IsNullOrEmpty(tabName))
+        {
+            panel = RevitTabManager.GetPanel(Application, panelName, Tab.AddIns);
+            
+        }
+        else
+        {
+            RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), tabName);
+            panel = RevitTabManager.GetPanel(Application, panelName, tabName);
+        }
+        
         panel.AddItem(CreateFamilyManagerButtonData());
         panel.AddItem(CreateSettingsButtonData());
         panel.AddItem(CreatePreviewImageButtonData());

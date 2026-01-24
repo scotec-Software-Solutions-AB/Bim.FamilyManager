@@ -1,5 +1,7 @@
-﻿using Bim.FamilyManager.Abstractions;
+﻿using System.Windows.Media;
+using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Base.Logic;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
@@ -52,4 +54,25 @@ public abstract class FamilySymbolViewModel : ViewModel, IFamilySymbolViewModel
     ///     <see cref="IRevitFamilySymbol" /> instance, providing a user-friendly identifier for the family symbol.
     /// </remarks>
     public string Name => FamilySymbol.Name;
+
+    /// <summary>
+    ///     Gets the preview image for the Revit family symbol.
+    /// </summary>
+    /// <value>
+    ///     An <see cref="ImageSource" /> representing the preview image for this symbol, or <c>null</c> if unavailable.
+    /// </value>
+    /// <remarks>
+    ///     The preview image is created from the symbol's preview stream, if available. The returned image is suitable for display in WPF UI.
+    /// </remarks>
+    public ImageSource? Preview
+    {
+        get
+        {
+            var previewStream = FamilySymbol.Preview;
+
+            return previewStream is null
+                ? null
+                : Helper.CreateBitmapFromStream(previewStream, Color.FromRgb(255, 255, 255));
+        }
+    }
 }

@@ -18,6 +18,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Application = Autodesk.Revit.ApplicationServices.Application;
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+using TaskDialogCommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons;
+using TaskDialogResult = Autodesk.Revit.UI.TaskDialogResult;
 using Version = System.Version;
 
 namespace Bim.FamilyManager.Base.Logic;
@@ -401,25 +405,53 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             return;
         }
 
-        var viewId = view.Id;
-        
-        var previewImage = ViewImageExporter.ExportViewPng(document, view);
-        if (!view.IsTemplate)
-        {
-            using (var t = new Transaction(document, "Attach preview to family"))
-            {
-                t.Start();
+        var familyManager = document.FamilyManager;
 
-                var settings = document.GetDocumentPreviewSettings();
-                settings.PreviewViewId = viewId;
+        var previewImages = new Dictionary<string, Stream>();
+
+        // The `TransactionGroup` is used here to group multiple transactions into a single logical unit.
+        // This ensures that all changes made within the group can be rolled back together,
+        // maintaining the integrity of the document. In this code, it allows iterating through family types,
+        // setting the current family type, and generating preview images while providing the ability to undo
+        // all changes at the end of the process. This approach ensures that no partial or
+        // inconsistent changes are left in the document.
+
+        using var transactionGroup = new TransactionGroup(document, "Create preview images");
+        {
+            transactionGroup.Start();
+            foreach (var familyType in familyManager.Types.Cast<FamilyType>())
+            {
+                SetCurrentFamilyType(familyType);
+                var previewImage = ViewImageExporter.ExportViewPng(document, view);
+
+                //using var t = new Transaction(document, "Attach preview to family");
+                //t.Start();
+
+                //var settings = document.GetDocumentPreviewSettings();
+                //settings.PreviewViewId = viewId;
 
                 // TODO: Probably modify background to transparent or any other user defined color.
                 //var pathName = GetFamilyAsStream(document, out var memoryStream);
                 previewImage.Position = 0;
-                _previewImageEStorage.Attach(document.OwnerFamily, previewImage);
 
-                t.Commit();
+                previewImages[familyType.Name] = previewImage;
+
             }
+
+            transactionGroup.RollBack();
+        }
+        using var transaction = new Transaction(document, "Add previews");
+        transaction.Start();
+        _previewImageEStorage.Attach(document.OwnerFamily, familyManager.CurrentType.Name, previewImages);
+        transaction.Commit();
+
+        void SetCurrentFamilyType(FamilyType familyType)
+        {
+            // This transaction is part of a transaction group and will be rolled back at the end, even if it is committed individually.
+            using var familyTypeTransaction = new Transaction(document, "Set current family type");
+            familyTypeTransaction.Start();
+            familyManager.CurrentType = familyType;
+            familyTypeTransaction.Commit();
         }
     }
 
@@ -464,11 +496,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             }
 
             // Check if the family is already loaded.
-            var family = FindFamily(document, revitFamily);
-            if (family is null)
+            var loadedFamily = FindFamily(document, revitFamily);
+            if (loadedFamily is null)
             {
                 // Load the family into the Revit document
-                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out family))
+                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
                 {
                     const string message = "Failed to load the family.";
                     _logger.LogError(message);
@@ -476,25 +508,30 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 }
 
                 // Attach the family info to the newly loaded family.
-                _familyMetadataEStorage.Attach(family, familyMetadata);
+                _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
             }
             else
             {
                 // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
                 // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-                if (!_familyMetadataEStorage.TryGet(family, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+                
+                
+                
+                //TODO: 
+                
+                if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out family))
+                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out loadedFamily))
                     {
                         throw new InvalidOperationException("Failed to load the family.");
                     }
 
                     // Only attach the new data if the family was updated.
-                    _familyMetadataEStorage.Attach(family, familyMetadata);
+                    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
                 }
             }
 
-            return family;
+            return loadedFamily;
         }
         finally
         {
@@ -655,8 +692,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         OnDocumentSaving(e.Document);
     }
 
-    private bool _inHideMode;
-
     /// <summary>
     ///     Updates the family metadata when a document is being saved.
     /// </summary>
@@ -705,7 +740,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
 
 
-    private Stream? _previewImage;
     public static void TemporarilyHideAllFamilyConnectors(Document doc, View view)
     {
         // Collect all connector elements in a FAMILY document
@@ -854,9 +888,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     
     private void UpdatePreviewImage(Document document, MemoryStream stream)
     {
-        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var previewStream))
+        if (_previewImageEStorage.TryGet(document.OwnerFamily, out var familyPreviewImageName, out var previewStreams))
         {
-            ViewImageWriter.WritePreviewImage(stream, previewStream);
+                ViewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
         }
 
         //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))
@@ -1540,6 +1574,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         _logger.LogInformation($"Delete unused assets for family '{Path.GetFileName(familyFileName)}'.");
 
         var document = application.OpenDocumentFile(familyFileName);
+
+        // TODO: Get the revit version from the family (e.g. 2025) and only do this newer.
+        // If a family in Revit 2025 format is loaded into a project with Revit 2025 we don't need to remove unused assets.
         using var transaction = new Transaction(document, "Delete unused assets");
         transaction.Start();
 
@@ -1599,8 +1636,47 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         /// </remarks>
         public bool OnFamilyFound(bool familyInUse, /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {
-            overwriteParameterValues = true;
-            return true;
+            //TODO: Add strings to resource files.
+            var dialog = new TaskDialog("Family Already Exists")
+            {
+                MainInstruction = "The family already exists in the project.",
+                MainContent = familyInUse
+                    ? "This family is currently in use. Choose how you want to proceed."
+                    : "Choose how you want to proceed.",
+                AllowCancellation = true
+            };
+
+            dialog.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink1,
+                "Overwrite the existing version",
+                "Reloads the family definition (geometry), but keeps type parameter values already set in the project."
+            );
+
+            dialog.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink2,
+                "Overwrite the existing version and its parameter values",
+                "Reloads the family definition and overwrites the type parameter values in the project with values from the loaded family."
+            );
+
+            dialog.CommonButtons = TaskDialogCommonButtons.Cancel;
+            dialog.DefaultButton = TaskDialogResult.CommandLink1;
+
+            var result = dialog.Show();
+
+            switch (result)
+            {
+                case TaskDialogResult.CommandLink1:
+                    overwriteParameterValues = false;
+                    return true;
+
+                case TaskDialogResult.CommandLink2:
+                    overwriteParameterValues = true;
+                    return true;
+
+                default:
+                    overwriteParameterValues = false;
+                    return false; // Cancel
+            }
         }
 
         /// <summary>
@@ -1629,13 +1705,68 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         ///     and is used to customize the behavior of shared family loading operations, such as deciding whether
         ///     to overwrite existing shared families, their source, and their parameter values.
         /// </remarks>
-        public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+        ///
+        public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, /*[UnscopedRef]*/ out FamilySource source,
+                                        /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {
-            source = FamilySource.Project; // Assume the shared family is from the project by default.
-            overwriteParameterValues = true; // Allow overwriting parameter values.
+            //TODO: Add strings to resource files.
 
-            // If the family is in use, decide whether to overwrite it or not.
-            return true; // Indicate that the shared family should be overwritten.
+            var familyName = sharedFamily.Name;
+
+            var dialog = new TaskDialog("Shared Family Already Exists")
+            {
+                MainInstruction = $"A shared family already exists in the project: {familyName}",
+                MainContent = familyInUse
+                    ? "This shared family is currently in use. Choose which version to keep."
+                    : "Choose which version to keep.",
+                AllowCancellation = true
+            };
+
+            dialog.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink1,
+                "Use the family from the family manager",
+                "Reloads the shared family from the family manager source, but keeps the current type parameter values in the project."
+            );
+
+            dialog.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink2,
+                "Use the family from the family manager and overwrite parameter values",
+                "Reloads the shared family from the family manager source and overwrites the type parameter values in the project with values from the reloaded family"
+            );
+
+            dialog.AddCommandLink(
+                TaskDialogCommandLinkId.CommandLink3,
+                "Use the family from the project",
+                "Keeps the existing shared family already loaded in the project."
+            );
+
+            dialog.CommonButtons = TaskDialogCommonButtons.Cancel;
+            dialog.DefaultButton = TaskDialogResult.CommandLink1;
+
+            var result = dialog.Show();
+
+            switch (result)
+            {
+                case TaskDialogResult.CommandLink1:
+                    source = FamilySource.Family; // take from file
+                    overwriteParameterValues = false; // keep existing param values
+                    return true;
+
+                case TaskDialogResult.CommandLink2:
+                    source = FamilySource.Family; // take from file
+                    overwriteParameterValues = true; // overwrite param values
+                    return true;
+
+                case TaskDialogResult.CommandLink3:
+                    source = FamilySource.Project; // keep project version
+                    overwriteParameterValues = false; // irrelevant here, but set safely
+                    return true;
+
+                default:
+                    source = FamilySource.Project;
+                    overwriteParameterValues = false;
+                    return false; // Cancel
+            }
         }
     }
 }

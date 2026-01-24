@@ -180,10 +180,12 @@ public sealed class RevitFamily : IRevitFamily
     {
         get
         {
-            if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
+            //if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
+            if (_familyInfo.TryGetStream("Bim.FamilyManager/PreviewImages/FamilyPreviewImage", out var previewStream))
             {
                 return previewStream;
             }
+
             return _familyInfo.Preview;
         }
     }
@@ -283,6 +285,35 @@ public sealed class RevitFamily : IRevitFamily
         }
 
         Initialize();
+    }
+
+    /// <summary>
+    ///     Gets a stream containing the preview image for a specific family type (symbol) within the Revit family.
+    /// </summary>
+    /// <param name="typeName">
+    ///     The name of the family type (symbol) for which to retrieve the preview image.
+    /// </param>
+    /// <returns>
+    ///     A <see cref="Stream" /> containing the preview image for the specified type, or <c>null</c> if no preview is
+    ///     available.
+    /// </returns>
+    /// <remarks>
+    ///     The returned stream is positioned at the beginning and represents a copy of the preview image data for the
+    ///     requested type.
+    ///     If a type-specific preview is not available, a general family preview may be returned instead.
+    ///     The caller is responsible for disposing the returned stream.
+    /// </remarks>
+    public Stream? GetTypePreview(string typeName)
+    {
+        var path = "Bim.FamilyManager/PreviewImages/" + typeName;
+
+        if (!_familyInfo.TryGetStream(path, out var previewStream))
+        {
+            previewStream = _familyInfo.Preview;
+        }
+
+        previewStream?.Position = 0;
+        return previewStream;
     }
 
     /// <summary>

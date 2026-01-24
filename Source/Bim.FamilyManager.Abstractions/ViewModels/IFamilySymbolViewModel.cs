@@ -1,4 +1,6 @@
-﻿using Scotec.Wpf.ViewModels;
+﻿using Autodesk.Revit.DB;
+using Scotec.Wpf.ViewModels;
+using System.Windows.Media;
 
 namespace Bim.FamilyManager.Abstractions.ViewModels;
 
@@ -33,4 +35,15 @@ public interface IFamilySymbolViewModel : IViewModel
     ///     Used as a user-friendly identifier for display and sorting within collections of symbols.
     /// </remarks>
     string Name { get; }
+
+    /// <summary>
+    ///     Gets the preview image of the Revit family symbol.
+    /// </summary>
+    /// <remarks>
+    ///     The preview image provides a visual representation of the Revit family symbol, 
+    ///     which can be used in the user interface for better identification and selection.
+    ///     This property may return <see langword="null" /> if no preview image is available.
+    /// </remarks>
+    public ImageSource? Preview { get; }
+
 }
