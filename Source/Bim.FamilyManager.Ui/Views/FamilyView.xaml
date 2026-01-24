@@ -26,6 +26,22 @@
                                                     TrueVisibility="Collapsed" />
             <converters:RectConverter x:Key="RectConverter" />
 
+            <DataTemplate x:Key="ListBoxItemTemplate" DataType="{x:Type viewModels:IFamilyViewModel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border BorderThickness="0" Background="White" Grid.Column="0">
+                        <Image Height="48" Width="48" Stretch="Uniform" Margin="2,2,4,2" Source="{Binding Path=Preview}"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                               Margin="3,0,3,0"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </DataTemplate>
+
+
             <Style TargetType="material:MaterialIcon">
                 <Setter Property="ToolTipService.BetweenShowDelay" Value="0" />
                 <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
@@ -113,9 +129,11 @@
                                         <Border BorderThickness="0,0,0,1"
                                                 BorderBrush="{StaticResource PrimaryBrush}" />
                                         <ListBox BorderThickness="0"
-                                                 ItemsSource="{Binding Symbols}"
-                                                 DisplayMemberPath="Name"
-                                                 Background="{StaticResource PrimaryBackgroundBrush}" />
+                                                 Background="{StaticResource BackgroundBrush}"
+                                                 ItemContainerStyle="{StaticResource SymbolListBoxItemStyle}"
+                                                 ItemTemplate="{StaticResource ListBoxItemTemplate}"
+                                                 ItemsSource="{Binding Symbols}" />
+
                                     </StackPanel>
                                 </ToolTip>
                             </material:MaterialIcon.ToolTip>

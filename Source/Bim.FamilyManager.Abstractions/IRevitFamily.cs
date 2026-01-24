@@ -153,4 +153,22 @@ public interface IRevitFamily
     ///     Thrown if <paramref name="familyInfo" /> is <c>null</c>.
     /// </exception>
     void ApplyUpdate(RevitFamilyInfo familyInfo);
+
+    /// <summary>
+    ///     Gets a stream containing the preview image for a specific family type (symbol) within the Revit family.
+    /// </summary>
+    /// <param name="typeName">
+    ///     The name of the family type (symbol) for which to retrieve the preview image.
+    /// </param>
+    /// <returns>
+    ///     A <see cref="Stream" /> containing the preview image for the specified type, or <c>null</c> if no preview is
+    ///     available.
+    /// </returns>
+    /// <remarks>
+    ///     The returned stream is positioned at the beginning and represents a copy of the preview image data for the
+    ///     requested type.
+    ///     If a type-specific preview is not available, a general family preview may be returned instead.
+    ///     The caller is responsible for disposing the returned stream.
+    /// </remarks>
+    Stream? GetTypePreview(string typeName);
 }
