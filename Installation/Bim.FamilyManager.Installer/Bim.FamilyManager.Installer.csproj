@@ -2,15 +2,14 @@
 
   <PropertyGroup>
 	  <OutputType></OutputType>
-	  <TargetFramework>net48</TargetFramework>
+	  <TargetFramework>net4.7.2</TargetFramework>
+	  <UseWpf>true</UseWpf>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="wix" Version="3.14.1" />
-    <PackageReference Include="WixSharp" Version="1.26.0" />
-    <PackageReference Include="WixSharp.bin" Version="1.26.0" />
-    <PackageReference Include="WixSharp.wix.bin" Version="3.14.1" />
+    <PackageReference Include="WixSharp-wix4.WPF" Version="2.12.1" />
+    <PackageReference Include="WixSharp_wix4" Version="2.12.1" />
   </ItemGroup>
 
 </Project>

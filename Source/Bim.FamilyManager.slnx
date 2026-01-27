@@ -2,6 +2,9 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/Installation/">
+    <Project Path="../Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj" />
+  </Folder>
   <Project Path="Bim.FamilyManager.Abstractions/Bim.FamilyManager.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
