@@ -34,13 +34,13 @@ jobs:
         $pkg  = "$base$($env:GitVersion_PreReleaseTagWithDash)"
         $revitConst = "REVIT${{ matrix.revitYear }}"
          
-        "PKG_VERSION=$pkg"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "PkgVersion=$pkg"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         "REVIT_CONST=$revitConst"| Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
     
-        Write-Host "Computed PKG_VERSION: $pkg"
+        Write-Host "Computed PkgVersion: $pkg"
         Write-Host "DefineConstants: $revitConst"
         Write-Host "GitVersion_SemVer: $($env:GitVersion_SemVer)"
-        Write-Host "GitVersion_NuGetVersion: $($env:GitVersion_NuGetVersion)"1
+        Write-Host "GitVersion_NuGetVersion: $($env:GitVersion_NuGetVersion)"
 
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
@@ -62,18 +62,18 @@ jobs:
         -p:CompanyName="scotec Software Solutions AB" 
         -p:RevitYear="${{ matrix.revitYear }}"
         -p:DefineConstants="$REVIT_CONST"
-        -p:Version="$PKG_VERSION"
-        -p:PackageVersion="$PKG_VERSION"
-        -p:InformationalVersion="$PKG_VERSION+$GITVERSION_SHA"
+        -p:Version="$PkgVersion"
+        -p:PackageVersion="$PkgVersion"
+        -p:InformationalVersion="$PkgVersion+$GitVersion_Sha"
 
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
         -p:PublishProfile=FolderProfile -p:Platform=x64 
         -p:RevitYear="${{ matrix.revitYear }}"
         -p:DefineConstants="$REVIT_CONST"
-        -p:Version="$PKG_VERSION"
-        -p:PackageVersion="$PKG_VERSION"
-        -p:InformationalVersion="$PKG_VERSION+$GITVERSION_SHA"
+        -p:Version="$PkgVersion"
+        -p:PackageVersion="$PkgVersion"
+        -p:InformationalVersion="$PkgVersion+$GitVersion_Sha"
 
 #    - name: Install CycloneDX SBOM Tool
 #      run: dotnet tool install --global CycloneDX
@@ -88,11 +88,11 @@ jobs:
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
 
     - name: Zip Publish folder contents
-      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.GITVERSION_SEMVER }}.zip"
+      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.PkgVersion }}.zip"
       shell: pwsh
 
     - name: Upload Publish zip as artifact
       uses: actions/upload-artifact@v4
       with:
         name: Bim.FamilyManager-${{ matrix.revitYear }}
-        path: Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip
+        path: Bim.FamilyManager_v${{env.PkgVersion}}.zip
