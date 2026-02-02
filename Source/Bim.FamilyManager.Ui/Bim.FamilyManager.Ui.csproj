@@ -10,11 +10,11 @@
   </ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="[2025.1.1,2026.0.0)" />
+		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.2.0-dev.12" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="[2026.1.1,2027.0.0)" />
+		<PackageReference Include="Scotec.Revit.Wpf" Version="2026.2.0-dev.12" />
 	</ItemGroup>
 
 
