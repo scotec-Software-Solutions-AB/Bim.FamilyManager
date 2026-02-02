@@ -28,19 +28,19 @@ jobs:
         configFilePath: GitVersion.yml
 
     - name: Compute package version (incl prerelease)
-      shell: bash
+      shell: pwsh
       run: |
-        BASE_VERSION="${{ matrix.revitYear }}.${GITVERSION_MINOR}.${GITVERSION_PATCH}"
-        PKG_VERSION="${BASE_VERSION}${GITVERSION_PRERELEASETAGWITHDASH}"
+        $base = "${{ matrix.revitYear }}.$($env:GitVersion_Minor).$($env:GitVersion_Patch)"
+        $pkg  = "$base$($env:GitVersion_PreReleaseTagWithDash)"
+        $revitConst = "REVIT${{ matrix.revitYear }}"
+         
+        "PKG_VERSION=$pkg"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "REVIT_CONST=$revitConst"| Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
     
-        REVIT_CONST="REVIT${{ matrix.revitYear }}"
-    
-        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
-        echo "REVIT_CONST=$REVIT_CONST" >> $GITHUB_ENV
-    
-        echo "Computed PKG_VERSION: $PKG_VERSION"
-        echo "DefineConstants: $REVIT_CONST"
-        echo "SemVer (GitVersion): $GITVERSION_SEMVER"
+        Write-Host "Computed PKG_VERSION: $pkg"
+        Write-Host "DefineConstants: $revitConst"
+        Write-Host "GitVersion_SemVer: $($env:GitVersion_SemVer)"
+        Write-Host "GitVersion_NuGetVersion: $($env:GitVersion_NuGetVersion)"1
 
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
