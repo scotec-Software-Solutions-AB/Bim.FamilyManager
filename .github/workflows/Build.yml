@@ -21,6 +21,12 @@ jobs:
       with:
         versionSpec: '5.12.x'
 
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v0.10.2
+      with:
+        useConfigFile: true
+        configFilePath: GitVersion.yml
+
     - name: Compute package version (incl prerelease)
       shell: bash
       run: |
@@ -35,12 +41,6 @@ jobs:
         echo "Computed PKG_VERSION: $PKG_VERSION"
         echo "DefineConstants: $REVIT_CONST"
         echo "SemVer (GitVersion): $GITVERSION_SEMVER"
-
-    - name: Determine Version
-      uses: gittools/actions/gitversion/execute@v0.10.2
-      with:
-        useConfigFile: true
-        configFilePath: GitVersion.yml
 
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
