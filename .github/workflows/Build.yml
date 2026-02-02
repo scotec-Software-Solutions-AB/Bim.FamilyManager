@@ -24,8 +24,8 @@ jobs:
     - name: Compute package version (incl prerelease)
       shell: bash
       run: |
-        BASE="${{ matrix.revitYear }}.${GITVERSION_MINOR}.${GITVERSION_PATCH}"
-        PKG_VERSION="${BASE}${GITVERSION_PRERELEASETAGWITHDASH}"
+        BASE_VERSION="${{ matrix.revitYear }}.${GITVERSION_MINOR}.${GITVERSION_PATCH}"
+        PKG_VERSION="${BASE_VERSION}${GITVERSION_PRERELEASETAGWITHDASH}"
     
         REVIT_CONST="REVIT${{ matrix.revitYear }}"
     
@@ -60,22 +60,20 @@ jobs:
     - name: Build
       run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release 
         -p:CompanyName="scotec Software Solutions AB" 
-        -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER 
-        -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER 
-        -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER 
-        -p:InformationalVersion=$env:GITVERSION_SEMVER
         -p:RevitYear="${{ matrix.revitYear }}"
         -p:DefineConstants="$REVIT_CONST"
+        -p:Version="$PKG_VERSION"
+        -p:PackageVersion="$PKG_VERSION"
+        -p:InformationalVersion="$PKG_VERSION+$GITVERSION_SHA"
 
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
         -p:PublishProfile=FolderProfile -p:Platform=x64 
-        -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER 
-        -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER 
-        -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER 
-        -p:InformationalVersion=$env:GITVERSION_SEMVER
         -p:RevitYear="${{ matrix.revitYear }}"
         -p:DefineConstants="$REVIT_CONST"
+        -p:Version="$PKG_VERSION"
+        -p:PackageVersion="$PKG_VERSION"
+        -p:InformationalVersion="$PKG_VERSION+$GITVERSION_SHA"
 
 #    - name: Install CycloneDX SBOM Tool
 #      run: dotnet tool install --global CycloneDX
