@@ -16,8 +16,16 @@ namespace Bim.FamilyManager.Installer
         public static void Main(string[] args)
         {
             var project = new ManagedProject("Bim.FamilyManager",
-                new Dir(@"%ProgramFiles%\Bim.FamilyManager", new Files(@"..\..\..\..\Source\Bim.FamilyManager\bin\x64\Debug\net8.0-windows\*.*")));
-
+                // Root install directory, can be set at runtime
+                new Dir(new Id("INSTALLDIR"), @"%ProgramFiles%\Bim.FamilyManager",
+                    // Special file in the root of INSTALLDIR
+                    new File(@"..\..\..\..\Source\Bim.FamilyManager\Bim.FamilyManager.addin"),
+                    // Subfolder for all other files
+                    new Dir("Bim.FamilyManager",
+                        new Files(@"..\..\..\..\Source\Bim.FamilyManager\bin\x64\Debug\net8.0-windows\*.*")
+                    )
+                )
+            );
             project.UpgradeCode = new Guid("6B4E2EEC-E9E3-4AC1-9A1F-83F605B543BE");
             //project.GUID = new Guid("91E63B96-01C1-481E-9334-50EF5C48DEDF");
             project.GUID =Guid.NewGuid();
@@ -29,7 +37,7 @@ namespace Bim.FamilyManager.Installer
 
             var ui = project.ManagedUI = new ManagedUI();
             ui.InstallDialogs.Add<WelcomeDialog>()
-                .Add<InstallDirDialog>()
+                //.Add<InstallDirDialog>()
                 .Add<CustomDialogWith<InstallScopeDialog>>()
                 .Add<ProgressDialog>()
                 .Add<ExitDialog>();

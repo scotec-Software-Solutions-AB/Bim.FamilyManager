@@ -5,12 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Bim.FamilyManager.Installer"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance local:ScopeViewModel, IsDesignTimeCreatable=false}">
     <Grid>
         <StackPanel>
             <TextBlock Text="Choose installation scope:" Margin="0,0,0,10"/>
-            <RadioButton x:Name="AllUsersRadioButton" Content="All Users (requires admin)" IsChecked="True"/>
-            <RadioButton x:Name="SingleUserRadioButton" Content="Only for me"/>
+            <RadioButton x:Name="MachineScopeRadioButton" Content="All Users (requires admin)" IsChecked="{Binding Path=IsMachineScope}"/>
+            <RadioButton x:Name="UserScopeRadioButton" Content="Only for me" IsChecked="{Binding Path=IsUserScope}"/>
         </StackPanel>
     </Grid>
 </UserControl>
