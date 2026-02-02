@@ -55,25 +55,28 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ./Source/Bim.FamilyManager.slnx
         -p:RevitYear="${{ matrix.revitYear }}"
-        -p:DefineConstants="$REVIT_CONST"
+        -p:DefineConstants="$env:REVIT_CONST"
+        -p:Version="$env:PkgVersion"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
 
     - name: Build
       run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release 
         -p:CompanyName="scotec Software Solutions AB" 
         -p:RevitYear="${{ matrix.revitYear }}"
-        -p:DefineConstants="$REVIT_CONST"
-        -p:Version="$PkgVersion"
-        -p:PackageVersion="$PkgVersion"
-        -p:InformationalVersion="$PkgVersion+$GitVersion_Sha"
+        -p:DefineConstants="$env:REVIT_CONST"
+        -p:Version="$env:PkgVersion"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
 
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
         -p:PublishProfile=FolderProfile -p:Platform=x64 
         -p:RevitYear="${{ matrix.revitYear }}"
-        -p:DefineConstants="$REVIT_CONST"
+        -p:DefineConstants="$env:REVIT_CONST"
         -p:Version="$PkgVersion"
-        -p:PackageVersion="$PkgVersion"
-        -p:InformationalVersion="$PkgVersion+$GitVersion_Sha"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
 
 #    - name: Install CycloneDX SBOM Tool
 #      run: dotnet tool install --global CycloneDX
