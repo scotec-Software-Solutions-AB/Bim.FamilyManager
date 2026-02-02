@@ -5,9 +5,10 @@ on: [workflow_dispatch]
 jobs:
   build:
 
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     strategy:
+    max-parallel: 1
       matrix:
         revitYear: [2025, 2026]
 
