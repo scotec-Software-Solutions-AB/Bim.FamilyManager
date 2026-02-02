@@ -42,13 +42,13 @@ jobs:
       run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release -p:CompanyName="scotec Software Solutions AB" -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$env:GITVERSION_SEMVER
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release -p:PublishProfile=FolderProfile -p:Platform=x64 -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$env:GITVERSION_SEMVER
-    - name: Install CycloneDX SBOM Tool
-      run: dotnet tool install --global CycloneDX
-    - name: Generate SBOM
-      run: dotnet CycloneDX ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --exclude-dev --recursive --include-project-references --output sbom --filename bom.json --output-format Json
-    - name: Copy SBOM to Publish folder
-      run: |
-        cp sbom/* Publish/
+#    - name: Install CycloneDX SBOM Tool
+#      run: dotnet tool install --global CycloneDX
+#    - name: Generate SBOM
+#      run: dotnet CycloneDX ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --exclude-dev --recursive --include-project-references --output sbom --filename bom.json --output-format Json
+#    - name: Copy SBOM to Publish folder
+#      run: |
+#        cp sbom/* Publish/
     - name: Copy .addin file
       run: |
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
@@ -60,5 +60,5 @@ jobs:
     - name: Upload Publish zip as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Bim.FamilyManager
+        name: Bim.FamilyManager-${{ matrix.revitYear }}
         path: Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip
