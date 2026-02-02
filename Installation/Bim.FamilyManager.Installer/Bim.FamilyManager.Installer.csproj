@@ -7,7 +7,7 @@
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <PackageReference Include="WixSharp-wix4.WPF" Version="2.12.1" />
     <PackageReference Include="WixSharp_wix4" Version="2.12.1" />
   </ItemGroup>
