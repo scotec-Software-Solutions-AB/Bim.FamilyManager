@@ -7,6 +7,10 @@ jobs:
 
     runs-on: windows-2022
 
+    strategy:
+      matrix:
+        revitYear: [2025, 2026]
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
