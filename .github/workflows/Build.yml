@@ -20,28 +20,63 @@ jobs:
       uses: gittools/actions/gitversion/setup@v0.10.2
       with:
         versionSpec: '5.12.x'
+
+    - name: Compute package version (incl prerelease)
+      shell: bash
+      run: |
+        BASE="${{ matrix.revitYear }}.${GITVERSION_MINOR}.${GITVERSION_PATCH}"
+        PKG_VERSION="${BASE}${GITVERSION_PRERELEASETAGWITHDASH}"
+    
+        REVIT_CONST="REVIT${{ matrix.revitYear }}"
+    
+        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+        echo "REVIT_CONST=$REVIT_CONST" >> $GITHUB_ENV
+    
+        echo "Computed PKG_VERSION: $PKG_VERSION"
+        echo "DefineConstants: $REVIT_CONST"
+        echo "SemVer (GitVersion): $GITVERSION_SEMVER"
+
     - name: Determine Version
       uses: gittools/actions/gitversion/execute@v0.10.2
       with:
         useConfigFile: true
         configFilePath: GitVersion.yml
-    - name: Display SemVer
-      run: |
-        echo "SemVer: $env:GITVERSION_SEMVER"  
+
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x        
+
     - name: Setup .NET 10.0
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 10.0.x        
+
     - name: Restore dependencies
       run: dotnet restore ./Source/Bim.FamilyManager.slnx
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$REVIT_CONST"
+
     - name: Build
-      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release -p:CompanyName="scotec Software Solutions AB" -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$env:GITVERSION_SEMVER
+      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release 
+        -p:CompanyName="scotec Software Solutions AB" 
+        -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER 
+        -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER 
+        -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER 
+        -p:InformationalVersion=$env:GITVERSION_SEMVER
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$REVIT_CONST"
+
     - name: Publish
-      run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release -p:PublishProfile=FolderProfile -p:Platform=x64 -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER -p:InformationalVersion=$env:GITVERSION_SEMVER
+      run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
+        -p:PublishProfile=FolderProfile -p:Platform=x64 
+        -p:Version=$env:GITVERSION_ASSEMBLYSEMFILEVER 
+        -p:FileVersion=$env:GITVERSION_ASSEMBLYSEMFILEVER 
+        -p:AssemblyVersion=$env:GITVERSION_ASSEMBLYSEMVER 
+        -p:InformationalVersion=$env:GITVERSION_SEMVER
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$REVIT_CONST"
+
 #    - name: Install CycloneDX SBOM Tool
 #      run: dotnet tool install --global CycloneDX
 #    - name: Generate SBOM
@@ -49,14 +84,15 @@ jobs:
 #    - name: Copy SBOM to Publish folder
 #      run: |
 #        cp sbom/* Publish/
+
     - name: Copy .addin file
       run: |
         cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
-#    - name: Zip Publish folder
-#      run: zip -r "Bim.FamilyManager_v${{env.GITVERSION_SEMVER}}.zip" Publish/
+
     - name: Zip Publish folder contents
       run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.GITVERSION_SEMVER }}.zip"
       shell: pwsh
+
     - name: Upload Publish zip as artifact
       uses: actions/upload-artifact@v4
       with:
