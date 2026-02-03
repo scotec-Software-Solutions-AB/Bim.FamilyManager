@@ -18,6 +18,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Autofac.Features.ResolveAnything;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 using TaskDialogCommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons;
@@ -327,23 +328,27 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Loads a Revit family into the currently active document.
+    ///     Attempts to load a Revit family into the currently active document.
     /// </summary>
     /// <param name="revitFamily">
     ///     An instance of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> representing the Revit family to
     ///     be loaded.
     /// </param>
+    /// <param name="family">
+    ///     When this method returns, contains the loaded <see cref="Autodesk.Revit.DB.Family" /> instance if the operation
+    ///     succeeds; otherwise, <c>null</c>. This parameter is passed uninitialized.
+    /// </param>
     /// <returns>
-    ///     An instance of <see cref="Autodesk.Revit.DB.Family" /> representing the loaded family.
+    ///     <c>true</c> if the Revit family was successfully loaded into the active document; otherwise, <c>false</c>.
     /// </returns>
     /// <exception cref="System.InvalidOperationException">
     ///     Thrown when the active document is <c>null</c>. Ensure that an active document is set before invoking this method.
     /// </exception>
     /// <remarks>
-    ///     This method requires an active Revit document to function correctly. It utilizes the provided Revit family instance
-    ///     and loads it into the active document.
+    ///     This method requires an active Revit document to function correctly. It starts a transaction to load the provided
+    ///     Revit family instance into the active document. If the operation fails, the transaction is rolled back.
     /// </remarks>
-    public Family LoadFamilyIntoActiveDocument(IRevitFamily revitFamily)
+    public bool TryLoadFamilyIntoActiveDocument(IRevitFamily revitFamily, [NotNullWhen(true)] out Family? family)
     {
         if (_activeDocument is null)
         {
@@ -355,11 +360,14 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         using var transaction = new Transaction(_activeDocument, "Load Family");
         transaction.Start();
 
-        var family = LoadFamily(revitFamily, _activeDocument);
+        if(TryLoadFamily(revitFamily, _activeDocument, out family))
+        {
+            transaction.Commit();
+            return true;
+        }
 
-        transaction.Commit();
-
-        return family;
+        transaction.RollBack();
+        return false;
     }
 
     /// <summary>
@@ -465,6 +473,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <param name="document">
     ///     The <see cref="Autodesk.Revit.DB.Document" /> into which the family will be loaded.
     /// </param>
+    /// <param name="family"></param>
     /// <returns>
     ///     The loaded <see cref="Autodesk.Revit.DB.Family" /> instance.
     /// </returns>
@@ -477,95 +486,61 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     attached
     ///     after loading. Temporary files created during the process are cleaned up automatically.
     /// </remarks>
-    public Family LoadFamily(IRevitFamily revitFamily, Document document)
+    public bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family)
     {
+        family = null;
         var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
 
         // Loading the family does not work as expected.
         // If the family is not already loaded, both the family and all its symbols are loaded.
-        // When attempting to load a family that already exists in the document, it is not reloaded because a call to document.LoadFamily() fails.
+        // When attempting to load a family that already exists in the document, a call to document.LoadFamily() fails and it is not reloaded.
         // If the family is already loaded but some of its symbols are missing, calling document.LoadFamily() also fails, and the missing symbols are not loaded.
         // To load all missing symbols, each symbol must be loaded individually.
-        // However, if the family has been modified, all symbols are reloaded, replacing the existing ones and adding the missing ones.
         // This behavior must be handled correctly to ensure that families and their symbols are loaded as intended.
         // In the context of the family manager, we aim to load all symbols of a family when the family is loaded or reloaded (e.g., when the "Load family" button in the family view is clicked),
         // even if the family has not been modified.
 
-
-
-        // TODO: 
-        // - check if family is already loaded.
-        //   - if not, load family (all symbols are loaded automatically).
-        //   - if yes, try to load the family. This will fail if the family is already loaded. In that case load all missing symbols individually.
-        //     if the family has been modified, loading the family will replace the old family and load all symbols.
-        // - Remove the cersion check in the FamilyMetadata. I need to thing whether saving the version is useful at all.
-
         try
         {
-            // Load the family info from the local family file.
-            if (!revitFamily.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyMetadata))
+            var overwriteOptions = new OverwriteFamilyOption();
+            var currentlyLoadedFamily = FindFamily(document, revitFamily);
+            if (!document.LoadFamily(tempFilePath, overwriteOptions, out var loadedFamily))
             {
-                //Create a new family info and get the data from the IRevitFamily.
-                familyMetadata = new FamilyMetadata
+                if (overwriteOptions.IsCancelled)
                 {
-                    Version = new Version(0, 0, 0, 0),
-                    LastModified = revitFamily.Updated,
-                    ModifiedBy = GetUserName(document)
-                };
-            }
-
-            // Check if the family is already loaded.
-            var loadedFamily = FindFamily(document, revitFamily);
-            if (loadedFamily is null)
-            {
-                // Load the family into the Revit document
-                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
-                {
-                    const string message = "Failed to load the family.";
-                    _logger.LogError(message);
-                    throw new InvalidOperationException(message);
+                    // The user attempted to load a different version of the family but canceled the operation.
+                    // There is nothing further to do.
+                    return false;
                 }
 
-                // Attach the family info to the newly loaded family.
-                _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+                if (currentlyLoadedFamily is not null)
+                {
+                    // If the family is already loaded, calling document.LoadFamily will fail if the family being loaded has the same version.
+                    // However, it is necessary to ensure that all symbols are loaded.
+
+                    LoadMissingSymbols(revitFamily, document, currentlyLoadedFamily, tempFilePath);
+
+                    family = currentlyLoadedFamily;
+                    return true;
+                }
+
+                return false;
             }
             else
             {
-                // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
-                // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-
-
-
-                //TODO: 
-
-                if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+                family = loadedFamily;
+                // If currentLyLoadedFamily is null, the family has been loaded for the first time.
+                // No further actions are necessary. Otherwise, load any missing symbols if they exist.
+                if (currentlyLoadedFamily is not null)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption() { }, out loadedFamily))
-                    {
-                        throw new InvalidOperationException("Failed to load the family.");
-                    }
-
-                    // Only attach the new data if the family was updated.
-                    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+                    // The family was successfully loaded and replaced the existing one.
+                    // However, it is necessary to ensure that all symbols are loaded.
+                    // The variable `currentlyLoadedFamily` is not null here but is invalid because the family was replaced.
+                    // Therefore, do not use it in this context.
+                    LoadMissingSymbols(revitFamily, document, loadedFamily, tempFilePath);
                 }
             }
 
-            return loadedFamily;
-        }
-        finally
-        {
-            // Clean up the temporary file
-            RemoveFamilyLocalFile(tempFilePath);
-        }
-    }
-
-    public bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol)
-    {
-        var revitFamily = revitFamilySymbol.Family;
-        var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
-
-        try
-        {
             // Load the family info from the local family file.
             //if (!revitFamily.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyMetadata))
             //{
@@ -578,39 +553,38 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             //    };
             //}
 
-            // Check if the family is already loaded.
-            //var loadedFamily = FindFamily(document, revitFamily);
-            //if (loadedFamily is null)
-            //{
-            //    // Load the family into the Revit document
-            //    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
-            //    {
-            //        const string message = "Failed to load the family.";
-            //        _logger.LogError(message);
-            //        throw new InvalidOperationException(message);
-            //    }
+            return family is not null;
+        }
+        finally
+        {
+            // Clean up the temporary file
+            RemoveFamilyLocalFile(tempFilePath);
+        }
+    }
 
-            //    // Attach the family info to the newly loaded family.
-            //    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
-            //}
-            //else
-            //{
-            //    // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
-            //    // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-            //    //TODO: 
+    private void LoadMissingSymbols(IRevitFamily revitFamily, Document document, Family family, string familyFilePath)
+    {
+        var familySymbols = family.GetFamilySymbolIds()
+                                                 .Select(id => document.GetElement(id) as FamilySymbol)
+                                                 .Where(symbol => symbol != null)
+                                                 .ToHashSet();
 
-            //    if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
-            //    {
-            //        if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption() { }, out loadedFamily))
-            //        {
-            //            throw new InvalidOperationException("Failed to load the family.");
-            //        }
+        foreach (var symbol in revitFamily.FamilySymbols)
+        {
+            if (familySymbols.All(existingSymbol => existingSymbol!.Name != symbol.Name))
+            {
+                document.LoadFamilySymbol(familyFilePath, symbol.Name, new OverwriteFamilyOption() { }, out var familySymbol);
+            }
+        }
+    }
 
-            //        // Only attach the new data if the family was updated.
-            //        _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
-            //    }
-            //}
+    public bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol)
+    {
+        var revitFamily = revitFamilySymbol.Family;
+        var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
 
+        try
+        {
             if(document.LoadFamilySymbol(tempFilePath, revitFamilySymbol.Name, new OverwriteFamilyOption() { }, out familySymbol))
             {
                 return true;
@@ -1706,6 +1680,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// </remarks>
     private class OverwriteFamilyOption : IFamilyLoadOptions
     {
+        public bool IsCancelled { get; private set; }
         /// <summary>
         ///     Handles the event when a family is found during the loading process in Revit.
         /// </summary>
@@ -1756,16 +1731,23 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             switch (result)
             {
                 case TaskDialogResult.CommandLink1:
+                {
                     overwriteParameterValues = false;
                     return true;
+                };
 
                 case TaskDialogResult.CommandLink2:
+                {
                     overwriteParameterValues = true;
                     return true;
+                }
 
                 default:
+                {
                     overwriteParameterValues = false;
+                    IsCancelled = true;
                     return false; // Cancel
+                }
             }
         }
 

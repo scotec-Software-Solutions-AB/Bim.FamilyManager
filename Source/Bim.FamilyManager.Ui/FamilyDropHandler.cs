@@ -1,6 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
@@ -8,6 +6,9 @@ using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Ui.Views;
 using Microsoft.Extensions.Logging;
 using ScaleHQ.DotScreen;
+using System.Diagnostics.CodeAnalysis;
+using System.Windows;
+using System.Windows.Media;
 using Point = System.Drawing.Point;
 
 namespace Bim.FamilyManager.Ui;
@@ -189,7 +190,7 @@ public class FamilyDropHandler : IControllableDropHandler
     ///     The view model representing the Revit family symbol to be processed during the drop action.
     /// </param>
     /// <param name="uiDocument">
-    ///     The <see cref="UIDocument" /> representing the current Revit document where the drop action is performed.
+    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document where the drop action is performed.
     /// </param>
     /// <remarks>
     ///     This method is responsible for closing the drop window, initiating a transaction to load the family,
@@ -211,7 +212,9 @@ public class FamilyDropHandler : IControllableDropHandler
         //var family = LoadFamily(symbolViewModel.FamilySymbol.Family, uiDocument.Document);
         //var symbol = FindFamilySymbol(family, symbolViewModel.FamilySymbol.Name);
 
-        if(!_familyManager.TryLoadFamilySymbol(symbolViewModel.FamilySymbol, uiDocument.Document, out var familySymbol))
+        //TODO: Family may not have symbols. In that case, we need to add the family.
+
+        if (!_familyManager.TryLoadFamilySymbol(symbolViewModel.FamilySymbol, uiDocument.Document, out var familySymbol))
         {
             transaction.RollBack();
             return;
@@ -244,7 +247,7 @@ public class FamilyDropHandler : IControllableDropHandler
     ///     to be instantiated.
     /// </param>
     /// <param name="uiDocument">
-    ///     The <see cref="UIDocument" /> representing the current Revit document context in which the symbol will be placed.
+    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document context in which the symbol will be placed.
     /// </param>
     /// <remarks>
     ///     This method posts a request to Revit to place the specified family symbol in the active view.
@@ -261,7 +264,7 @@ public class FamilyDropHandler : IControllableDropHandler
     }
 
     /// <summary>
-    ///     Loads a Revit family into the specified document.
+    ///     Attempts to load a Revit family into the specified document.
     /// </summary>
     /// <param name="revitFamily">
     ///     The <see cref="IRevitFamily" /> instance representing the Revit family to be loaded.
@@ -269,13 +272,16 @@ public class FamilyDropHandler : IControllableDropHandler
     /// <param name="document">
     ///     The <see cref="Document" /> instance representing the Revit document where the family will be loaded.
     /// </param>
+    /// <param name="family">
+    ///     When this method returns, contains the loaded <see cref="Autodesk.Revit.DB.Family" /> object if the operation
+    ///     succeeded; otherwise, <c>null</c>.
+    /// </param>
     /// <returns>
-    ///     The loaded <see cref="Autodesk.Revit.DB.Family" /> object.
+    ///     <c>true</c> if the family was successfully loaded into the document; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    ///     This method utilizes the <see cref="IFamilyManager" /> to load the specified Revit family into the provided
-    ///     document.
-    ///     It ensures that the family is properly integrated into the Revit environment.
+    ///     This method delegates the loading operation to the <see cref="IFamilyManager" />.
+    ///     It ensures that the family is properly integrated into the Revit environment, if possible.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if <paramref name="revitFamily" /> or <paramref name="document" /> is <c>null</c>.
@@ -283,9 +289,9 @@ public class FamilyDropHandler : IControllableDropHandler
     /// <exception cref="Autodesk.Revit.Exceptions.InvalidOperationException">
     ///     Thrown if the family cannot be loaded into the specified document.
     /// </exception>
-    private Family LoadFamily(IRevitFamily revitFamily, Document document)
+    private bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family )
     {
-        return _familyManager.LoadFamily(revitFamily, document);
+        return _familyManager.TryLoadFamily(revitFamily, document, out family);
     }
 
     /// <summary>
