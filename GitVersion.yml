@@ -5,16 +5,16 @@ tag-prefix: '[vV]?'
 branches:
   main:
     increment: Minor
-    tag: ''
+    label: ''
 
   develop:
     mode: ContinuousDeployment
     increment: Minor
-    tag: dev
+    label: dev
 
   feature:
     mode: ContinuousDelivery
-    tag: '{BranchName}'
+    label: '{BranchName}'
     increment: Inherit
     track-merge-message: true
     regex: ^feature(s)?[\/-](?<BranchName>.+)$ 
@@ -30,7 +30,7 @@ branches:
 
   hotfix:
     mode: ContinuousDelivery
-    tag: beta
+    label: beta
     increment: Patch
     prevent-increment:
       when-current-commit-tagged: true
