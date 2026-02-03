@@ -208,21 +208,27 @@ public class FamilyDropHandler : IControllableDropHandler
         using var transaction = new Transaction(uiDocument.Document, "Load Family");
         transaction.Start();
 
-        var family = LoadFamily(symbolViewModel.FamilySymbol.Family, uiDocument.Document);
-        var symbol = FindFamilySymbol(family, symbolViewModel.FamilySymbol.Name);
+        //var family = LoadFamily(symbolViewModel.FamilySymbol.Family, uiDocument.Document);
+        //var symbol = FindFamilySymbol(family, symbolViewModel.FamilySymbol.Name);
+
+        if(!_familyManager.TryLoadFamilySymbol(symbolViewModel.FamilySymbol, uiDocument.Document, out var familySymbol))
+        {
+            transaction.RollBack();
+            return;
+        }
 
         transaction.Commit();
 
-        if (!uiDocument.CanPlaceElementType(symbol))
+        if (!uiDocument.CanPlaceElementType(familySymbol))
         {
             TaskDialog.Show("Error", "The selected symbol cannot be placed in the current view.");
         }
         //var placementTypes = uiDocument.GetPlacementTypes(symbol, uiDocument.Document.ActiveView);
 
-        if (uiDocument.CanPlaceElementType(symbol))
+        if (uiDocument.CanPlaceElementType(familySymbol))
         {
             //var placementTypes = uiDocument.GetPlacementTypes(symbol, uiDocument.Document.ActiveView);
-            PlaceSymbol(symbol, uiDocument);
+            PlaceSymbol(familySymbol, uiDocument);
         }
         else
         {

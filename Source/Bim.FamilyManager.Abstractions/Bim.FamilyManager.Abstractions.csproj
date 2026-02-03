@@ -4,7 +4,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Scotec.Revit" Version="2025.2.0-dev.25" />
+		<PackageReference Include="Scotec.Revit" Version="2026.2.0-dev.27" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.17" />
 		<PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
 

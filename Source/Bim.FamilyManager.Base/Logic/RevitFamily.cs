@@ -148,7 +148,6 @@ public sealed class RevitFamily : IRevitFamily
         info = null;
         if (_familyInfo.TryGetInfoDataStream(name, out var stream))
         {
-            stream.Position = 0;
             info = JsonSerializer.Deserialize<TInfo>(stream);
         }
 

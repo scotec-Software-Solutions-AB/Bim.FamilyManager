@@ -139,6 +139,7 @@ public interface IFamilyManager
     ///     Thrown if the family cannot be loaded into the document due to an invalid state or other constraints.
     /// </exception>
     Family LoadFamily(IRevitFamily revitFamily, Document document);
+    bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol);
 
     /// <summary>
     ///     Loads the specified Revit family into the currently active document.

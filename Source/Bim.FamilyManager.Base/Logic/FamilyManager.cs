@@ -481,6 +481,25 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     {
         var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
 
+        // Loading the family does not work as expected.
+        // If the family is not already loaded, both the family and all its symbols are loaded.
+        // When attempting to load a family that already exists in the document, it is not reloaded because a call to document.LoadFamily() fails.
+        // If the family is already loaded but some of its symbols are missing, calling document.LoadFamily() also fails, and the missing symbols are not loaded.
+        // To load all missing symbols, each symbol must be loaded individually.
+        // However, if the family has been modified, all symbols are reloaded, replacing the existing ones and adding the missing ones.
+        // This behavior must be handled correctly to ensure that families and their symbols are loaded as intended.
+        // In the context of the family manager, we aim to load all symbols of a family when the family is loaded or reloaded (e.g., when the "Load family" button in the family view is clicked),
+        // even if the family has not been modified.
+
+
+
+        // TODO: 
+        // - check if family is already loaded.
+        //   - if not, load family (all symbols are loaded automatically).
+        //   - if yes, try to load the family. This will fail if the family is already loaded. In that case load all missing symbols individually.
+        //     if the family has been modified, loading the family will replace the old family and load all symbols.
+        // - Remove the cersion check in the FamilyMetadata. I need to thing whether saving the version is useful at all.
+
         try
         {
             // Load the family info from the local family file.
@@ -514,14 +533,14 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             {
                 // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
                 // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-                
-                
-                
+
+
+
                 //TODO: 
-                
+
                 if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out loadedFamily))
+                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption() { }, out loadedFamily))
                     {
                         throw new InvalidOperationException("Failed to load the family.");
                     }
@@ -532,6 +551,73 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             }
 
             return loadedFamily;
+        }
+        finally
+        {
+            // Clean up the temporary file
+            RemoveFamilyLocalFile(tempFilePath);
+        }
+    }
+
+    public bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol)
+    {
+        var revitFamily = revitFamilySymbol.Family;
+        var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
+
+        try
+        {
+            // Load the family info from the local family file.
+            //if (!revitFamily.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyMetadata))
+            //{
+            //    //Create a new family info and get the data from the IRevitFamily.
+            //    familyMetadata = new FamilyMetadata
+            //    {
+            //        Version = new Version(0, 0, 0, 0),
+            //        LastModified = revitFamily.Updated,
+            //        ModifiedBy = GetUserName(document)
+            //    };
+            //}
+
+            // Check if the family is already loaded.
+            //var loadedFamily = FindFamily(document, revitFamily);
+            //if (loadedFamily is null)
+            //{
+            //    // Load the family into the Revit document
+            //    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
+            //    {
+            //        const string message = "Failed to load the family.";
+            //        _logger.LogError(message);
+            //        throw new InvalidOperationException(message);
+            //    }
+
+            //    // Attach the family info to the newly loaded family.
+            //    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+            //}
+            //else
+            //{
+            //    // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
+            //    // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
+            //    //TODO: 
+
+            //    if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+            //    {
+            //        if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption() { }, out loadedFamily))
+            //        {
+            //            throw new InvalidOperationException("Failed to load the family.");
+            //        }
+
+            //        // Only attach the new data if the family was updated.
+            //        _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+            //    }
+            //}
+
+            if(document.LoadFamilySymbol(tempFilePath, revitFamilySymbol.Name, new OverwriteFamilyOption() { }, out familySymbol))
+            {
+                return true;
+            }
+
+            familySymbol = null;
+            return false;
         }
         finally
         {
@@ -1482,7 +1568,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             familyFile.CopyTo(tempFile);
         }
 
-        RemoveUnusedAssets(tempFileName, application);
+        // Removing unused assets changes to version of the family. Thus the family will always be treated as modified and a appropriate dialog will be shown to the user.
+        // However, this is unwanted behavior while using the family manager to add families or symbols to a project.
+        // To avoid this, it is recommended to only use families already updated to the Revit 2025 format.
+        // TODO: Probably add an option to control this behavior or create a family update command.
+        //RemoveUnusedAssets(tempFileName, application);
 
         return tempFileName;
     }
