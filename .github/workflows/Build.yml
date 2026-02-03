@@ -8,7 +8,6 @@ jobs:
     runs-on: windows-latest
 
     strategy:
-      max-parallel: 1
       matrix:
         revitYear: [2025, 2026]
 
@@ -18,12 +17,12 @@ jobs:
       with:
         fetch-depth: 0
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v4.2.0
+      uses: gittools/actions/gitversion/setup@v4
       with:
         versionSpec: '0.20.x'
 
     - name: Determine Version
-      uses: gittools/actions/gitversion/execute@vv4.2.0
+      uses: gittools/actions/gitversion/execute@v4
       with:
         useConfigFile: true
         configFilePath: GitVersion.yml
