@@ -1,4 +1,7 @@
-﻿using Autodesk.Revit.DB;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows;
+using System.Windows.Media;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
@@ -6,9 +9,6 @@ using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Ui.Views;
 using Microsoft.Extensions.Logging;
 using ScaleHQ.DotScreen;
-using System.Diagnostics.CodeAnalysis;
-using System.Windows;
-using System.Windows.Media;
 using Point = System.Drawing.Point;
 
 namespace Bim.FamilyManager.Ui;
@@ -78,7 +78,7 @@ public class FamilyDropHandler : IControllableDropHandler
         {
             return;
         }
-        
+
         Interop.GetMousePosition(out var position);
         _logger.LogDebug($"Mouse position: X={position.X}, Y={position.Y}");
 
@@ -190,7 +190,8 @@ public class FamilyDropHandler : IControllableDropHandler
     ///     The view model representing the Revit family symbol to be processed during the drop action.
     /// </param>
     /// <param name="uiDocument">
-    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document where the drop action is performed.
+    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document where the drop action is
+    ///     performed.
     /// </param>
     /// <remarks>
     ///     This method is responsible for closing the drop window, initiating a transaction to load the family,
@@ -247,7 +248,8 @@ public class FamilyDropHandler : IControllableDropHandler
     ///     to be instantiated.
     /// </param>
     /// <param name="uiDocument">
-    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document context in which the symbol will be placed.
+    ///     The <see cref="Autodesk.Revit.UI.UIDocument" /> representing the current Revit document context in which the symbol
+    ///     will be placed.
     /// </param>
     /// <remarks>
     ///     This method posts a request to Revit to place the specified family symbol in the active view.
@@ -289,7 +291,7 @@ public class FamilyDropHandler : IControllableDropHandler
     /// <exception cref="Autodesk.Revit.Exceptions.InvalidOperationException">
     ///     Thrown if the family cannot be loaded into the specified document.
     /// </exception>
-    private bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family )
+    private bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family)
     {
         return _familyManager.TryLoadFamily(revitFamily, document, out family);
     }

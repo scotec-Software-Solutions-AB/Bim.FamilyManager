@@ -501,16 +501,18 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
                 if (_searchPattern.Length >= 3)
                 {
                     var families = new List<IRevitFamily>();
-                    await foreach(var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
+                    await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
                     {
                         families.Add(family);
                     }
+
                     return families.OrderBy(f => f.Name)
                                    .ToList();
                 }
+
                 return [];
             }).ConfigureAwait(true).GetAwaiter().GetResult();
-            
+
             SearchResult = searchResult.Select(family => (IFamilyViewModel)_familyFactory(family))
                                        .ToList();
         }

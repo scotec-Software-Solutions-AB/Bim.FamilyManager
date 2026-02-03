@@ -321,9 +321,11 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
                     {
                         families.Add(family);
                     }
+
                     return families.OrderBy(f => f.Name)
                                    .ToList();
                 }
+
                 return [];
             }).ConfigureAwait(true).GetAwaiter().GetResult();
 

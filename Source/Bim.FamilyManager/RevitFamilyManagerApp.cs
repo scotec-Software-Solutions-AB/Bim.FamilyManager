@@ -7,7 +7,7 @@ using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;
-using Bim.FamilyManager.Resources;
+using Bim.FamilyManager.Ui.Resources;
 using Bim.FamilyManager.Ui.Views;
 using log4net;
 using Microsoft.Extensions.Configuration;
@@ -94,29 +94,28 @@ public class RevitFamilyManagerApp : RevitApp
         var options = Services.GetRequiredService<IOptions<FamilyManagerOptions>>().Value;
         var tabName = options.RevitOptions?.TabName;
         var panelName = options.RevitOptions?.PanelName ?? "Bim.FamilyManager";
-        
+
         // Create tabs, panels ond buttons
         //RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), StringResources.Tab_Name);
 
         RibbonPanel panel;
         if (string.IsNullOrEmpty(tabName))
         {
-            panel = RevitTabManager.GetPanel(Application, panelName, Tab.AddIns);
-            
+            panel = RevitTabManager.GetPanel(Application!, panelName, Tab.AddIns);
         }
         else
         {
             RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), tabName);
             panel = RevitTabManager.GetPanel(Application, panelName, tabName);
         }
-        
+
         panel.AddItem(CreateFamilyManagerButtonData());
         panel.AddItem(CreateSettingsButtonData());
         panel.AddItem(CreatePreviewImageButtonData());
 
         _pane = Services.GetRequiredService<FamilyManagerPane>();
 
-        Application.RegisterDockablePane(new DockablePaneId(Constants.PaneId), Ui.Resources.StringResources.Pane_Name, _pane);
+        Application!.RegisterDockablePane(new DockablePaneId(Constants.PaneId), StringResources.Pane_Name, _pane);
 
         return true;
     }
@@ -236,8 +235,8 @@ public class RevitFamilyManagerApp : RevitApp
         var largeImageSource = BuildImageResourcePath("FamilyManagerPrimary_32x32.png");
 
         var pushButtonData = RevitControlFactory.CreateButtonData("FamilyManager.Open"
-            , StringResources.Command_OpenFamilyManager_Text
-            , StringResources.Command_OpenFamilyManager_Description
+            , Resources.StringResources.Command_OpenFamilyManager_Text
+            , Resources.StringResources.Command_OpenFamilyManager_Description
             , smallImageSource
             , largeImageSource
             , typeof(OpenFamilyManagerCommandFactory));
@@ -263,8 +262,8 @@ public class RevitFamilyManagerApp : RevitApp
         var largeImageSource = BuildImageResourcePath("SettingsPrimary_32x32.png");
 
         var pushButtonData = RevitControlFactory.CreateButtonData("FamilyManager.Settings"
-            , StringResources.Command_OpenFamilyManagerSettings_Text
-            , StringResources.Command_OpenFamilyManagerSettings_Description
+            , Resources.StringResources.Command_OpenFamilyManagerSettings_Text
+            , Resources.StringResources.Command_OpenFamilyManagerSettings_Description
             , smallImageSource
             , largeImageSource
             , typeof(OpenFamilyManagerSettingsCommandFactory)
@@ -279,8 +278,8 @@ public class RevitFamilyManagerApp : RevitApp
         var largeImageSource = BuildImageResourcePath("CreatePreview_32x32.png");
 
         var pushButtonData = RevitControlFactory.CreateButtonData("FamilyManager.CreatePreviewImage"
-            , StringResources.Command_CreatePreviewImage_Text
-            , StringResources.Command_CreatePreviewImage_Description    
+            , Resources.StringResources.Command_CreatePreviewImage_Text
+            , Resources.StringResources.Command_CreatePreviewImage_Description
             , smallImageSource
             , largeImageSource
             , typeof(CreatePreviewImageCommandFactory)

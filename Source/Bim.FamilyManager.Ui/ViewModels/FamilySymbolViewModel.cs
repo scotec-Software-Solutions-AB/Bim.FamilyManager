@@ -62,7 +62,8 @@ public abstract class FamilySymbolViewModel : ViewModel, IFamilySymbolViewModel
     ///     An <see cref="ImageSource" /> representing the preview image for this symbol, or <c>null</c> if unavailable.
     /// </value>
     /// <remarks>
-    ///     The preview image is created from the symbol's preview stream, if available. The returned image is suitable for display in WPF UI.
+    ///     The preview image is created from the symbol's preview stream, if available. The returned image is suitable for
+    ///     display in WPF UI.
     /// </remarks>
     public ImageSource? Preview
     {

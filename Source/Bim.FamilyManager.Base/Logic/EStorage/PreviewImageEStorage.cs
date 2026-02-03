@@ -1,7 +1,6 @@
-﻿using Autodesk.Revit.DB;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text.Json;
+using Autodesk.Revit.DB;
 
 namespace Bim.FamilyManager.Base.Logic.EStorage;
 
@@ -12,7 +11,6 @@ public class PreviewImageEStorage : EStorageSchema
 {
     protected const string FieldNameFamilyPreviewImageName = "FamilyPreviewImageName";
     protected const string FieldNameTypePreviewImages = "TypePreviewImages";
-
 
     private const string SchemaName = "Bim_FamilyManager_PreviewImages_V1";
 
@@ -27,10 +25,10 @@ public class PreviewImageEStorage : EStorageSchema
     private static readonly Guid SchemaId = new("1F9E97BA-765D-43B8-9100-6FDE3FE3114A");
 
     public PreviewImageEStorage() : base(SchemaId, VendorId, SchemaName, new Dictionary<string, Type>
-                                        {
-                                            { FieldNameFamilyPreviewImageName, typeof(string) },
-                                            { FieldNameTypePreviewImages, typeof(IDictionary<string, string>) }
-                                        })
+    {
+        { FieldNameFamilyPreviewImageName, typeof(string) },
+        { FieldNameTypePreviewImages, typeof(IDictionary<string, string>) }
+    })
     {
     }
 
@@ -43,7 +41,7 @@ public class PreviewImageEStorage : EStorageSchema
             { FieldNameFamilyPreviewImageName, familyPreviewImageName },
             { FieldNameTypePreviewImages, base64Data }
         };
-        
+
         Attach(element, dataDictionary);
     }
 
@@ -52,13 +50,15 @@ public class PreviewImageEStorage : EStorageSchema
         base.Detach(element);
     }
 
-
-    public bool TryGet(Element element, [NotNullWhen(true)] out string? familyPreviewImageName, [NotNullWhen(true)] out IDictionary<string, Stream>? typePreviews)
+    public bool TryGet(Element element, [NotNullWhen(true)] out string? familyPreviewImageName,
+                       [NotNullWhen(true)] out IDictionary<string, Stream>? typePreviews)
     {
-        if (base.TryGet(element, out IDictionary<string, object>? dataDictionary))
+        if (base.TryGet(element, out var dataDictionary))
         {
-            if (dataDictionary.TryGetValue(FieldNameFamilyPreviewImageName, out var familyPreviewNameImageObject) && familyPreviewNameImageObject is string familyPreviewImageNameValue
-                && dataDictionary.TryGetValue(FieldNameTypePreviewImages, out var base64DataObject) && base64DataObject is IDictionary<string, string> base64Data)
+            if (dataDictionary.TryGetValue(FieldNameFamilyPreviewImageName, out var familyPreviewNameImageObject) &&
+                familyPreviewNameImageObject is string familyPreviewImageNameValue
+                && dataDictionary.TryGetValue(FieldNameTypePreviewImages, out var base64DataObject) &&
+                base64DataObject is IDictionary<string, string> base64Data)
             {
                 familyPreviewImageName = familyPreviewImageNameValue;
                 typePreviews = base64Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ConvertBase64ToStream());
@@ -70,7 +70,6 @@ public class PreviewImageEStorage : EStorageSchema
         typePreviews = null;
         return false;
     }
-
 }
 
 public static class Base64Extensions
@@ -83,9 +82,10 @@ public static class Base64Extensions
             stream.CopyTo(memoryStream);
             memoryStream.Position = 0;
         }
-        
+
         return Convert.ToBase64String(memoryStream.ToArray());
     }
+
     public static Stream ConvertBase64ToStream(this string base64)
     {
         var bytes = Convert.FromBase64String(base64);

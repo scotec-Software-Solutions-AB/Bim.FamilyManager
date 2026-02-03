@@ -24,7 +24,7 @@ public class CreatePreviewImageCommand : RevitCommand
     protected override Result OnExecute(ExternalCommandData commandData, IServiceProvider services)
     {
         var familyManager = services.GetRequiredService<IFamilyManager>();
-        
+
         var view = commandData.View;
         var application = commandData.Application;
 
@@ -41,7 +41,6 @@ public class CreatePreviewImageCommand : RevitCommand
         };
 
         ComponentManager.InfoCenterPaletteManager.ShowBalloon(result);
-
 
         return Result.Succeeded;
     }

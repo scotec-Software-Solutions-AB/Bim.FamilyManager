@@ -7,11 +7,13 @@ using Microsoft.Extensions.Options;
 namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 /// <summary>
-///     Provides a view model for a folder, enabling interaction with folder data, subfolders, and families using family navigator
+///     Provides a view model for a folder, enabling interaction with folder data, subfolders, and families using family
+///     navigator
 ///     layout options.
 /// </summary>
 /// <remarks>
-///     This class extends <see cref="FolderViewModel{FamilyNavigatorLayoutOptions}" /> and customizes the creation of subfolder
+///     This class extends <see cref="FolderViewModel{FamilyNavigatorLayoutOptions}" /> and customizes the creation of
+///     subfolder
 ///     and family view models.
 ///     It manages dependencies for folder operations, subfolder instantiation, and family instantiation.
 /// </remarks>
@@ -36,7 +38,10 @@ public class FolderViewModel : FolderViewModel<FamilyNavigatorLayoutOptions>
     /// <param name="folder">The <see cref="IFolder" /> instance representing the folder to be managed.</param>
     /// <param name="subfolderFactory">A factory delegate for creating subfolder view models.</param>
     /// <param name="familyFactory">A factory delegate for creating family view models.</param>
-    /// <param name="layoutOptions">An <see cref="IOptionsMonitor{FamilyNavigatorLayoutOptions}" /> for monitoring layout options.</param>
+    /// <param name="layoutOptions">
+    ///     An <see cref="IOptionsMonitor{FamilyNavigatorLayoutOptions}" /> for monitoring layout
+    ///     options.
+    /// </param>
     /// <remarks>
     ///     This constructor sets up the view model with the provided dependencies, enabling management of folder data,
     ///     subfolder instantiation, family instantiation, and layout configuration.

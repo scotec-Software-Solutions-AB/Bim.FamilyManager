@@ -1,11 +1,9 @@
-﻿using Bim.FamilyManager.Abstractions;
+﻿using System.Windows.Media;
+using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
-using System.Linq;
-using System.Threading;
-using System.Windows.Media;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
 
@@ -89,6 +87,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 
                 SelectedFolder = _folders?.FirstOrDefault();
             }
+
             return _folders;
         }
     }

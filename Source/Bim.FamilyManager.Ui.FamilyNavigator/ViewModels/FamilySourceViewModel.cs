@@ -29,8 +29,6 @@ public class FamilySourceViewModel : FamilySourceViewModel<FamilyNavigatorLayout
 
     private readonly IFamilySource _familySource;
     private readonly FolderViewModel.Factory _folderFactory;
-    private IList<IFolderViewModel>? _folders;
-    private IFolderViewModel? _selectedFolder;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilySourceViewModel" /> class.

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Abstractions.ViewModels;
@@ -166,7 +165,6 @@ public abstract class FamilyManagerItemViewModel<TLayoutOptions> : ViewModel, IF
 
         return Helper.CreateBitmapFromStream(preview, transparentColor);
     }
-
 
     /// <summary>
     ///     Applies the specified layout options to the view model's display-related properties.

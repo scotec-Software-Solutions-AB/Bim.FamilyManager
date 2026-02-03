@@ -88,6 +88,25 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     }
 
     /// <summary>
+    ///     Gets a stream that provides a preview of the Revit family data.
+    /// </summary>
+    /// <remarks>
+    ///     This property overrides <see cref="FamilySource{TOptions}.Preview" /> to return a stream
+    ///     positioned at the beginning, allowing for reading the preview data from the start.
+    /// </remarks>
+    /// <returns>
+    ///     A <see cref="Stream" /> object containing the preview data for the Revit family.
+    /// </returns>
+    public override Stream Preview
+    {
+        get
+        {
+            PreviewStream.Position = 0;
+            return PreviewStream;
+        }
+    }
+
+    /// <summary>
     ///     Gets the collection of folders representing the directory structure for Revit families.
     /// </summary>
     /// <value>
@@ -104,11 +123,12 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         _folders ??= await Task.Run(async () =>
         {
             var folders = new List<IFolder>();
-            await foreach(var folder in GetFoldersAsync(_rootPath, cancellationToken))
+            await foreach (var folder in GetFoldersAsync(_rootPath, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 folders.Add(folder);
             }
+
             return folders;
         }, cancellationToken);
 
@@ -116,25 +136,6 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return folder;
-        }
-    }
-
-    /// <summary>
-    ///     Gets a stream that provides a preview of the Revit family data.
-    /// </summary>
-    /// <remarks>
-    ///     This property overrides <see cref="FamilySource{TOptions}.Preview" /> to return a stream
-    ///     positioned at the beginning, allowing for reading the preview data from the start.
-    /// </remarks>
-    /// <returns>
-    ///     A <see cref="Stream" /> object containing the preview data for the Revit family.
-    /// </returns>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
         }
     }
 
@@ -198,7 +199,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         var folders = await Task.Run(() =>
         {
             return System.IO.Directory.GetDirectories(directory, "", SearchOption.TopDirectoryOnly)
-                 .Select(IFolder (d) => new Folder(Path.GetFileName(d), c => GetFoldersAsync(d, c), c => GetFamiliesAsync(d, c)));
+                         .Select(IFolder (d) => new Folder(Path.GetFileName(d), c => GetFoldersAsync(d, c), c => GetFamiliesAsync(d, c)));
         }, cancellationToken).ConfigureAwait(false);
 
         foreach (var folder in folders)
@@ -267,30 +268,31 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     }
 
     /// <summary>
-    /// Asynchronously retrieves a collection of Revit families from the specified directory.
+    ///     Asynchronously retrieves a collection of Revit families from the specified directory.
     /// </summary>
     /// <param name="directory">The directory path to search for Revit family files.</param>
     /// <param name="cancellationToken">
-    /// A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
+    ///     A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// An asynchronous stream of <see cref="IRevitFamily" /> objects representing the Revit families found in the directory.
+    ///     An asynchronous stream of <see cref="IRevitFamily" /> objects representing the Revit families found in the
+    ///     directory.
     /// </returns>
     /// <remarks>
-    /// This method searches for Revit family files (*.rfa) in the specified directory, excluding backup files
-    /// that match the predefined backup file naming pattern. It also associates family files with their corresponding
-    /// description files (*.yaml) if available. If a family is already managed by the
-    /// <see cref="Bim.FamilyManager.Abstractions.IFamilyManager" />, it is reused; otherwise, a new family is created
-    /// and initialized.
+    ///     This method searches for Revit family files (*.rfa) in the specified directory, excluding backup files
+    ///     that match the predefined backup file naming pattern. It also associates family files with their corresponding
+    ///     description files (*.yaml) if available. If a family is already managed by the
+    ///     <see cref="Bim.FamilyManager.Abstractions.IFamilyManager" />, it is reused; otherwise, a new family is created
+    ///     and initialized.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    /// Thrown if the <paramref name="directory" /> is null.
+    ///     Thrown if the <paramref name="directory" /> is null.
     /// </exception>
     /// <exception cref="System.IO.DirectoryNotFoundException">
-    /// Thrown if the specified <paramref name="directory" /> does not exist.
+    ///     Thrown if the specified <paramref name="directory" /> does not exist.
     /// </exception>
     /// <exception cref="System.OperationCanceledException">
-    /// Thrown if the operation is canceled via the <paramref name="cancellationToken" />.
+    ///     Thrown if the operation is canceled via the <paramref name="cancellationToken" />.
     /// </exception>
     private async IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(string directory, [EnumeratorCancellation] CancellationToken cancellationToken)
     {

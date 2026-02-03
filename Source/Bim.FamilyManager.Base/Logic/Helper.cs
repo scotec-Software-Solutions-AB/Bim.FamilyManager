@@ -87,5 +87,4 @@ public class Helper
         writeableBitmap.Freeze();
         return writeableBitmap;
     }
-
 }

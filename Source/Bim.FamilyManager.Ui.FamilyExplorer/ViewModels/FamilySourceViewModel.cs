@@ -12,7 +12,8 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
 /// <remarks>
 ///     This class provides functionality to manage and interact with a family source, including its folders and selection
 ///     state,
-///     using family explorer layout options. It extends <see cref="FamilySourceViewModel{FamilyExplorerLayoutOptions}" /> and
+///     using family explorer layout options. It extends <see cref="FamilySourceViewModel{FamilyExplorerLayoutOptions}" />
+///     and
 ///     customizes
 ///     folder view model creation.
 /// </remarks>
