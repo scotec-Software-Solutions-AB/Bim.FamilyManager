@@ -107,7 +107,7 @@ public static class HostBuilderExtensions
         {
             foreach (var (sectionName, type) in optionsTypes)
             {
-                //TODO: Probably use namingconventions to avoid the switch and the need to add new cases for new sections.
+                //TODO: Probably use naming conventions to avoid the switch and the need to add new cases for new sections.
                 switch (sectionName)
                 {
                     case "FamilySources":
@@ -125,6 +125,11 @@ public static class HostBuilderExtensions
                 services.Configure(type, hostContext.Configuration.GetSection(sectionName));
             }
 
+            // Iterates through all layout option types provided by SettingsManager,
+            // constructs the corresponding configuration section name for each layout,
+            // and configures the service collection to bind each layout option type
+            // to its respective configuration section. This enables dynamic registration
+            // of layout-specific settings for the application.
             foreach (var type in SettingsManager.GetLayoutOptionTypes())
             {
                 var sectionName = "Display:Layouts:" + type.Key;
