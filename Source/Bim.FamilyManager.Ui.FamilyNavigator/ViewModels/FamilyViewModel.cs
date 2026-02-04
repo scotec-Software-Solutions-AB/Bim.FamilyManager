@@ -12,7 +12,8 @@ namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 ///     Provides a view model for a Revit family, enabling interaction with family data, symbols, and related commands.
 /// </summary>
 /// <remarks>
-///     This class extends <see cref="FamilyViewModel{FamilyNavigatorLayoutOptions}" /> and customizes symbol view model creation.
+///     This class extends <see cref="FamilyViewModel{FamilyNavigatorLayoutOptions}" /> and customizes symbol view model
+///     creation.
 ///     It manages dependencies for family operations, symbol instantiation, drag-and-drop handling, and logging.
 /// </remarks>
 public class FamilyViewModel : FamilyViewModel<FamilyNavigatorLayoutOptions>
@@ -39,7 +40,10 @@ public class FamilyViewModel : FamilyViewModel<FamilyNavigatorLayoutOptions>
     ///     instances.
     /// </param>
     /// <param name="dropHandlerFactory">A factory function for creating <see cref="FamilyDropHandler" /> instances.</param>
-    /// <param name="layoutOptions">An <see cref="IOptionsMonitor{FamilyNavigatorLayoutOptions}" /> for monitoring layout options.</param>
+    /// <param name="layoutOptions">
+    ///     An <see cref="IOptionsMonitor{FamilyNavigatorLayoutOptions}" /> for monitoring layout
+    ///     options.
+    /// </param>
     /// <param name="revitTask">The <see cref="RevitTask" /> instance for executing Revit-related tasks.</param>
     /// <param name="logger">The <see cref="ILogger{FamilyViewModel}" /> for logging messages.</param>
     /// <remarks>

@@ -21,17 +21,6 @@ public interface IFamilySource
     string Name { get; }
 
     /// <summary>
-    ///     Gets the collection of folders associated with the Revit family source.
-    /// </summary>
-    /// <value>
-    ///     An <see cref="IAsyncEnumerable{IFolder}" /> representing all top-level folders within the source.
-    /// </value>
-    /// <remarks>
-    ///     Each folder represents a hierarchical structure that can contain subfolders and Revit families.
-    /// </remarks>
-    IAsyncEnumerable<IFolder> GetFoldersAsync(CancellationToken cancellationToken);
-
-    /// <summary>
     ///     Gets a stream containing the preview image of the family source.
     /// </summary>
     /// <value>
@@ -46,6 +35,17 @@ public interface IFamilySource
     ///     A <see cref="string" /> representing the type of the source (e.g., "Directory", "Database", "AzureStorage").
     /// </value>
     string Type { get; }
+
+    /// <summary>
+    ///     Gets the collection of folders associated with the Revit family source.
+    /// </summary>
+    /// <value>
+    ///     An <see cref="IAsyncEnumerable{IFolder}" /> representing all top-level folders within the source.
+    /// </value>
+    /// <remarks>
+    ///     Each folder represents a hierarchical structure that can contain subfolders and Revit families.
+    /// </remarks>
+    IAsyncEnumerable<IFolder> GetFoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
     ///     Occurs when an error is encountered in the family source.

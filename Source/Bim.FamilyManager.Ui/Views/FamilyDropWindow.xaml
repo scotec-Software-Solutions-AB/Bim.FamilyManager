@@ -21,10 +21,21 @@
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate x:Key="ListBoxItemTemplate" DataType="{x:Type viewModels:IFamilyViewModel}">
-                <TextBlock Text="{Binding Name}"
-                           VerticalAlignment="Center"
-                           ToolTip="{Binding Path=Name}" ToolTipService.InitialShowDelay="2000"
-                           ToolTipService.BetweenShowDelay="1000" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border BorderThickness="0" Background="White" Grid.Column="0">
+                        <Image Height="48" Width="48" Stretch="Uniform" Margin="2,2,4,2"
+                               Source="{Binding Path=Preview}" />
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                               Margin="3,0,3,0"
+                               VerticalAlignment="Center"
+                               ToolTip="{Binding Path=Name}" ToolTipService.InitialShowDelay="2000"
+                               ToolTipService.BetweenShowDelay="1000" />
+                </Grid>
             </DataTemplate>
 
 

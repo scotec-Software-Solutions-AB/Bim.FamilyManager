@@ -74,32 +74,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
-    ///     Gets the collection of folders from Azure Blob Storage.
-    /// </summary>
-    public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (_folders is null)
-        {
-            var folders = new List<IFolder>();
-
-            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", cancellationToken))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                folders.Add(folder);
-            }
-
-            _folders = folders;
-        }
-
-        foreach (var folder in _folders)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return folder;
-        }
-
-    }
-
-    /// <summary>
     ///     Gets the preview image stream for the Azure storage source.
     /// </summary>
     public override Stream Preview
@@ -146,6 +120,31 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    ///     Gets the collection of folders from Azure Blob Storage.
+    /// </summary>
+    public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_folders is null)
+        {
+            var folders = new List<IFolder>();
+
+            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                folders.Add(folder);
+            }
+
+            _folders = folders;
+        }
+
+        foreach (var folder in _folders)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return folder;
         }
     }
 
@@ -359,17 +358,19 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
-    /// Retrieves Revit families from Azure Blob Storage under the specified prefix.
+    ///     Retrieves Revit families from Azure Blob Storage under the specified prefix.
     /// </summary>
     /// <param name="prefix">The blob prefix used to filter family files in the storage.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
+    ///     An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
     /// </returns>
     /// <remarks>
-    /// This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit family files
-    /// (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
-    /// If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and returned.
+    ///     This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit
+    ///     family files
+    ///     (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
+    ///     If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and
+    ///     returned.
     /// </remarks>
     private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -379,8 +380,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
 
         var blobs = _blobContainerClient.GetBlobsAsync(prefix: prefix, cancellationToken: cancellationToken);
-            //.Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
-            //.ToList();
+        //.Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+        //.ToList();
 
         await foreach (var blobItem in blobs)
         {
@@ -389,7 +390,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             {
                 continue;
             }
-            
+
             var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {

@@ -466,9 +466,32 @@ public class SettingsManager
 
         foreach (var (sectionName, optionType) in optionTypes)
         {
-            settings[sectionName] = rawSettings.TryGetValue(sectionName, out var jsonElement)
-                ? JsonSerializer.Deserialize(jsonElement.GetRawText(), optionType, JsonOptions) ?? Activator.CreateInstance(optionType)!
-                : Activator.CreateInstance(optionType)!;
+            object? options = null;
+            if (rawSettings.TryGetValue(sectionName, out var jsonElement))
+            {
+                options = JsonSerializer.Deserialize(jsonElement.GetRawText(), optionType, JsonOptions);
+            }
+
+            // The JSON may not initially include all layout options, particularly during the first use of this add-in or when new options are introduced in a later version.
+            // This process ensures that all layout options are created and included in the settings file when it is saved.
+            // However, simply creating a new instance of the options object is insufficient.
+            // Instead, the new object must be serialized and then deserialized.
+            // This approach ensures that additional logic in type-specific JSON converters is executed during deserialization.
+
+            if (options is null)
+            {
+                var newOptions = Activator.CreateInstance(optionType);
+                if (newOptions is not null)
+                {
+                    var serializedOptions = JsonSerializer.Serialize(newOptions, optionType, JsonOptions);
+                    options = JsonSerializer.Deserialize(serializedOptions, optionType, JsonOptions);
+                }
+            }
+
+            if (options is not null)
+            {
+                settings[sectionName] = options;
+            }
         }
 
         return settings;

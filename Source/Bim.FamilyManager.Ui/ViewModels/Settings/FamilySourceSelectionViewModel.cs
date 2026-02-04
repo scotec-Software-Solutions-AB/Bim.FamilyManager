@@ -55,8 +55,6 @@ public class FamilySourceSelectionViewModel : ViewModel
         FamilySources = options.Select(o => familySourceViewModelFactory(o))
                                .OrderBy(fs => fs.TypeName)
                                .ToList();
-
-        SelectedFamilySource = FamilySources.FirstOrDefault();
     }
 
     /// <summary>

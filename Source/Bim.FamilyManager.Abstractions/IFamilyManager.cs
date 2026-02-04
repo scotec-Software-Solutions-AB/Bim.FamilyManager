@@ -36,27 +36,27 @@ public interface IFamilyManager
     event EventHandler<EventArgs> Reloaded;
 
     /// <summary>
-    /// Asynchronously searches for Revit families within the specified folder that match the given search pattern.
+    ///     Asynchronously searches for Revit families within the specified folder that match the given search pattern.
     /// </summary>
     /// <param name="folder">
-    /// The folder in which to search for Revit families. This folder can include subfolders and families.
+    ///     The folder in which to search for Revit families. This folder can include subfolders and families.
     /// </param>
     /// <param name="searchPattern">
-    /// The search pattern used to filter Revit families. This can include wildcards or specific naming criteria.
+    ///     The search pattern used to filter Revit families. This can include wildcards or specific naming criteria.
     /// </param>
     /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
+    ///     A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a collection of 
-    /// <see cref="IRevitFamily" /> objects that match the search criteria within the specified folder.
+    ///     A task that represents the asynchronous operation. The task result contains a collection of
+    ///     <see cref="IRevitFamily" /> objects that match the search criteria within the specified folder.
     /// </returns>
     /// <remarks>
-    /// This method allows for efficient searching of Revit families based on a folder hierarchy and a search pattern.
-    /// It is commonly used to locate specific families in large datasets.
+    ///     This method allows for efficient searching of Revit families based on a folder hierarchy and a search pattern.
+    ///     It is commonly used to locate specific families in large datasets.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    /// Thrown if the <paramref name="folder" /> or <paramref name="searchPattern" /> is <c>null</c>.
+    ///     Thrown if the <paramref name="folder" /> or <paramref name="searchPattern" /> is <c>null</c>.
     /// </exception>
     IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern, CancellationToken cancellationToken);
 
@@ -123,6 +123,7 @@ public interface IFamilyManager
     /// <param name="document">
     ///     The <see cref="Document" /> instance representing the active Revit document where the family will be loaded.
     /// </param>
+    /// <param name="family"></param>
     /// <returns>
     ///     The loaded <see cref="IRevitFamily" /> instance from the Revit document.
     /// </returns>
@@ -136,16 +137,22 @@ public interface IFamilyManager
     /// <exception cref="System.InvalidOperationException">
     ///     Thrown if the family cannot be loaded into the document due to an invalid state or other constraints.
     /// </exception>
-    Family LoadFamily(IRevitFamily revitFamily, Document document);
+    bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family);
+
+    bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol);
 
     /// <summary>
-    ///     Loads the specified Revit family into the currently active document.
+    ///     Attempts to load the specified Revit family into the currently active document.
     /// </summary>
     /// <param name="revitFamily">
     ///     The <see cref="IRevitFamily" /> instance representing the Revit family to be loaded.
     /// </param>
+    /// <param name="family">
+    ///     When this method returns, contains the loaded <see cref="Autodesk.Revit.DB.Family" /> instance,
+    ///     if the operation was successful; otherwise, <c>null</c>.
+    /// </param>
     /// <returns>
-    ///     The loaded <see cref="Autodesk.Revit.DB.Family" /> instance.
+    ///     <c>true</c> if the Revit family was successfully loaded into the active document; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
     ///     This method assumes that there is an active document available in the current context.
@@ -154,7 +161,7 @@ public interface IFamilyManager
     /// <exception cref="System.InvalidOperationException">
     ///     Thrown if there is no active document available.
     /// </exception>
-    Family LoadFamilyIntoActiveDocument(IRevitFamily revitFamily);
+    bool TryLoadFamilyIntoActiveDocument(IRevitFamily revitFamily, [NotNullWhen(true)] out Family? family);
 
     /// <summary>
     ///     Removes the specified Revit family from the active document.

@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
+using System.Reflection;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
 using Bim.FamilyManager.Abstractions;
@@ -12,13 +12,30 @@ namespace Bim.FamilyManager.Base.Logic.EStorage;
 /// </summary>
 public abstract class EStorageSchema
 {
-    
+    private static readonly MethodInfo SetMethodInfo;
+    private static readonly MethodInfo GetMethodInfo;
+    private readonly IDictionary<string, Type> _fields;
+
     private readonly Schema _schema;
     private readonly Guid _schemaId;
 
     private readonly string _schemaName;
-    private readonly IDictionary<string, Type> _fields;
     private readonly string _vendorId;
+
+    static EStorageSchema()
+    {
+        GetMethodInfo = typeof(Entity).GetMethod("Get", [typeof(string)])!;
+        SetMethodInfo = typeof(Entity).GetMethods()
+                                      .Where(m => m is { Name: "Set", IsGenericMethod: true })
+                                      .FirstOrDefault(m =>
+                                      {
+                                          var parameters = m.GetParameters();
+                                          // Ensure the method has exactly two parameters: string and T (generic)
+                                          return parameters.Length == 2 &&
+                                                 parameters[0].ParameterType == typeof(string) &&
+                                                 parameters[1].ParameterType.IsGenericParameter;
+                                      })!;
+    }
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="EStorageSchema" /> class.
@@ -34,39 +51,32 @@ public abstract class EStorageSchema
     }
 
     /// <summary>
-    ///     Attaches the specified data to the given Revit element using the schema.
-    /// </summary>
-    /// <typeparam name="TData">The type of data to attach.</typeparam>
-    /// <param name="element">The Revit element to attach data to.</param>
-    /// <param name="data">The data to attach.</param>
-    public virtual void Attach<TData>(Element element, string fieldName, TData data)
-    {
-        var entity = new Entity(_schema);
-        
-        entity.Set(fieldName, data);
-        element.SetEntity(entity);
-    }
-
-    /// <summary>
     ///     Detaches the schema data from the specified Revit element.
     /// </summary>
     /// <param name="element">The Revit element to detach data from.</param>
-    public virtual void Detach(Element element, string fieldName)
+    public virtual void Detach(Element element /*, string fieldName*/)
     {
-        var entity = element.GetEntity(_schema);
-        entity?.Clear(fieldName);
+        //var entity = element.GetEntity(_schema);
+        element.DeleteEntity(_schema);
+        //entity?.Clear(fieldName);
     }
 
-    /// <summary>
-    ///     Attempts to retrieve the schema data from the specified Revit element.
-    /// </summary>
-    /// <typeparam name="TData">The type of data to retrieve.</typeparam>
-    /// <param name="element">The Revit element to retrieve data from.</param>
-    /// <param name="data">When this method returns, contains the retrieved data if successful; otherwise, the default value.</param>
-    /// <returns><c>true</c> if the data was successfully retrieved; otherwise, <c>false</c>.</returns>
-    public virtual bool TryGet<TData>(Element element, string fieldName, [NotNullWhen(true)] out TData? data)
+    protected virtual void Attach(Element element, IDictionary<string, object> data)
     {
-        data = default;
+        var entity = new Entity(_schema);
+
+        foreach (var (fieldName, value) in data)
+        {
+            var genericMethod = SetMethodInfo.MakeGenericMethod(_fields[fieldName]);
+            genericMethod.Invoke(entity, [fieldName, value]);
+        }
+
+        element.SetEntity(entity);
+    }
+
+    protected virtual bool TryGet(Element element, [NotNullWhen(true)] out IDictionary<string, object>? dataDictionary)
+    {
+        dataDictionary = null;
         var entity = element.GetEntity(_schema);
 
         if (entity == null || !entity.IsValid() || entity.SchemaGUID != _schemaId)
@@ -74,9 +84,19 @@ public abstract class EStorageSchema
             return false;
         }
 
-        data = entity.Get<TData>(_schema.GetField(fieldName));
-        
-        return data != null;
+        dataDictionary = new Dictionary<string, object>();
+        foreach (var (fieldName, fieldType) in _fields)
+        {
+            var method = GetMethodInfo.MakeGenericMethod(fieldType);
+
+            var value = method.Invoke(entity, [fieldName]);
+            if (value is not null)
+            {
+                dataDictionary[fieldName] = value;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -91,7 +111,7 @@ public abstract class EStorageSchema
         schemaBuilder.SetWriteAccessLevel(AccessLevel.Public);
         schemaBuilder.SetVendorId(_vendorId);
         schemaBuilder.SetSchemaName(_schemaName);
-        
+
         foreach (var field in _fields)
         {
             var fieldName = field.Key;
@@ -100,16 +120,23 @@ public abstract class EStorageSchema
             {
                 schemaBuilder.AddArrayField(fieldName, type.GetElementType());
             }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            {
+                var keyType = type.GetGenericArguments()[0];
+                var valueType = type.GetGenericArguments()[1];
+                schemaBuilder.AddMapField(fieldName, keyType, valueType);
+            }
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 var elemType = type.GetGenericArguments()[0];
-                schemaBuilder.AddArrayField(fieldName, elemType);   // IList<byte> -> byte
+                schemaBuilder.AddArrayField(fieldName, elemType); // IList<byte> -> byte
             }
             else
             {
                 schemaBuilder.AddSimpleField(fieldName, type);
             }
         }
+
         schemaBuilder.SetApplicationGUID(Constants.ApplicationId);
 
         return schemaBuilder.Finish();

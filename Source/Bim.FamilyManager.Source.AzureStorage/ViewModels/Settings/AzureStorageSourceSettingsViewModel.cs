@@ -334,7 +334,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
         //catch (MsalUiRequiredException)
         //{
         //}
-        catch (Exception e)
+        catch (Exception)
         {
             Session = null;
         }

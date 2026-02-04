@@ -5,7 +5,7 @@ namespace Bim.FamilyManager.Base.Logic;
 
 public static class ViewImageExporter
 {
-    public static Stream ExportViewPng(Document document, View view, int pixelSize = 1024)
+    public static Stream ExportViewPng(Document document, View view, int pixelSize = 256)
     {
         // Use a transaction group to temporarily hide elements and then roll it back.
         // Within the transaction group, a transaction is used to perform the temporary hiding.
@@ -29,15 +29,17 @@ public static class ViewImageExporter
                 view.HideElementsTemporary(elementIds);
             }
 
-            if (view.HasDetailLevel() && view.CanModifyDetailLevel())
-            {
-                view.DetailLevel = ViewDetailLevel.Fine;
-            }
+            // TODO: Get from user settings
+            //if (view.HasDetailLevel() && view.CanModifyDetailLevel())
+            //{
+            //    view.DetailLevel = ViewDetailLevel.Fine;
+            //}
 
-            if (view.HasDisplayStyle() && view.CanModifyDisplayStyle())
-            {
-                view.DisplayStyle = DisplayStyle.Realistic;
-            }
+            // TODO: Get from user settings
+            //if (view.HasDisplayStyle() && view.CanModifyDisplayStyle())
+            //{
+            //    view.DisplayStyle = DisplayStyle.Realistic;
+            //}
 
             t.Commit();
         }
@@ -55,11 +57,11 @@ public static class ViewImageExporter
             // Choose PNG for both hidden-line/wireframe and shaded/shadow cases
             HLRandWFViewsFileType = ImageFileType.PNG,
             ShadowViewsFileType = ImageFileType.PNG,
-            ImageResolution = ImageResolution.DPI_72
+            ImageResolution = ImageResolution.DPI_72,
+            FitDirection = FitDirectionType.Horizontal
         };
 
         opt.SetViewsAndSheets(new List<ElementId> { view.Id });
-
         document.ExportImage(opt);
 
         // Revit can tell you the produced filename:
