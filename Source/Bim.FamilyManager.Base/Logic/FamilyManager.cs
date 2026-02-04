@@ -1,4 +1,9 @@
-﻿using Autodesk.Revit.ApplicationServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
@@ -13,11 +18,6 @@ using Microsoft.Extensions.Options;
 using OpenMcdf;
 using Scotec.Extensions.Utilities.Strings;
 using Scotec.Queues;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 using TaskDialogCommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons;
@@ -40,8 +40,10 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private readonly Dictionary<int, string> _documentPaths = new();
     private readonly RevitFamilyCache _familyCache;
     private readonly TaskQueue<IRevitFamily> _familyInitializationQueue;
+    private readonly FamilyMetadataEStorage _familyMetadataEStorage = new();
     private readonly ILogger _logger;
     private readonly IDisposable? _optionsChangeTracker;
+    private readonly PreviewImageEStorage _previewImageEStorage = new();
     private readonly UIControlledApplication _revitApplication;
     private readonly IServiceProvider _services;
     private Document? _activeDocument;
@@ -49,8 +51,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private List<IFamilySourceOptions> _familySourceOptions;
     private IEnumerable<IFamilySource>? _familySources;
     private HashSet<string> _loadedFamilies = [];
-    private readonly FamilyMetadataEStorage _familyMetadataEStorage = new ();
-    private readonly PreviewImageEStorage _previewImageEStorage = new ();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManager" /> class.
@@ -222,7 +222,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="folder" /> parameter is <see langword="null" />.
     /// </exception>
-    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern,
+                                                                         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (folder == null)
         {
@@ -243,6 +244,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             }
         }
     }
+
     /// <summary>
     ///     Opens and activates a Revit family for editing in the Revit application.
     /// </summary>
@@ -327,23 +329,27 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Loads a Revit family into the currently active document.
+    ///     Attempts to load a Revit family into the currently active document.
     /// </summary>
     /// <param name="revitFamily">
     ///     An instance of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> representing the Revit family to
     ///     be loaded.
     /// </param>
+    /// <param name="family">
+    ///     When this method returns, contains the loaded <see cref="Autodesk.Revit.DB.Family" /> instance if the operation
+    ///     succeeds; otherwise, <c>null</c>. This parameter is passed uninitialized.
+    /// </param>
     /// <returns>
-    ///     An instance of <see cref="Autodesk.Revit.DB.Family" /> representing the loaded family.
+    ///     <c>true</c> if the Revit family was successfully loaded into the active document; otherwise, <c>false</c>.
     /// </returns>
     /// <exception cref="System.InvalidOperationException">
     ///     Thrown when the active document is <c>null</c>. Ensure that an active document is set before invoking this method.
     /// </exception>
     /// <remarks>
-    ///     This method requires an active Revit document to function correctly. It utilizes the provided Revit family instance
-    ///     and loads it into the active document.
+    ///     This method requires an active Revit document to function correctly. It starts a transaction to load the provided
+    ///     Revit family instance into the active document. If the operation fails, the transaction is rolled back.
     /// </remarks>
-    public Family LoadFamilyIntoActiveDocument(IRevitFamily revitFamily)
+    public bool TryLoadFamilyIntoActiveDocument(IRevitFamily revitFamily, [NotNullWhen(true)] out Family? family)
     {
         if (_activeDocument is null)
         {
@@ -355,11 +361,14 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         using var transaction = new Transaction(_activeDocument, "Load Family");
         transaction.Start();
 
-        var family = LoadFamily(revitFamily, _activeDocument);
+        if (TryLoadFamily(revitFamily, _activeDocument, out family))
+        {
+            transaction.Commit();
+            return true;
+        }
 
-        transaction.Commit();
-
-        return family;
+        transaction.RollBack();
+        return false;
     }
 
     /// <summary>
@@ -435,7 +444,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 previewImage.Position = 0;
 
                 previewImages[familyType.Name] = previewImage;
-
             }
 
             transactionGroup.RollBack();
@@ -465,6 +473,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <param name="document">
     ///     The <see cref="Autodesk.Revit.DB.Document" /> into which the family will be loaded.
     /// </param>
+    /// <param name="family"></param>
     /// <returns>
     ///     The loaded <see cref="Autodesk.Revit.DB.Family" /> instance.
     /// </returns>
@@ -477,66 +486,146 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     attached
     ///     after loading. Temporary files created during the process are cleaned up automatically.
     /// </remarks>
-    public Family LoadFamily(IRevitFamily revitFamily, Document document)
+    public bool TryLoadFamily(IRevitFamily revitFamily, Document document, [NotNullWhen(true)] out Family? family)
     {
+        family = null;
         var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
+
+        // Loading the family does not work as expected.
+        // If the family is not already loaded, both the family and all its symbols are loaded.
+        // When attempting to load a family that already exists in the document, a call to document.LoadFamily() fails and it is not reloaded.
+        // If the family is already loaded but some of its symbols are missing, calling document.LoadFamily() also fails, and the missing symbols are not loaded.
+        // To load all missing symbols, each symbol must be loaded individually.
+        // This behavior must be handled correctly to ensure that families and their symbols are loaded as intended.
+        // In the context of the family manager, we aim to load all symbols of a family when the family is loaded or reloaded (e.g., when the "Load family" button in the family view is clicked),
+        // even if the family has not been modified.
 
         try
         {
-            // Load the family info from the local family file.
-            if (!revitFamily.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyMetadata))
+            var overwriteOptions = new OverwriteFamilyOption();
+            var currentlyLoadedFamily = FindFamily(document, revitFamily);
+            if (!document.LoadFamily(tempFilePath, overwriteOptions, out var loadedFamily))
             {
-                //Create a new family info and get the data from the IRevitFamily.
-                familyMetadata = new FamilyMetadata
+                if (overwriteOptions.IsCancelled)
                 {
-                    Version = new Version(0, 0, 0, 0),
-                    LastModified = revitFamily.Updated,
-                    ModifiedBy = GetUserName(document)
-                };
-            }
-
-            // Check if the family is already loaded.
-            var loadedFamily = FindFamily(document, revitFamily);
-            if (loadedFamily is null)
-            {
-                // Load the family into the Revit document
-                if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(), out loadedFamily))
-                {
-                    const string message = "Failed to load the family.";
-                    _logger.LogError(message);
-                    throw new InvalidOperationException(message);
+                    // The user attempted to load a different version of the family but canceled the operation.
+                    // There is nothing further to do.
+                    return false;
                 }
 
-                // Attach the family info to the newly loaded family.
-                _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+                if (currentlyLoadedFamily is not null)
+                {
+                    // If the family is already loaded, calling document.LoadFamily will fail if the family being loaded has the same version.
+                    // However, it is necessary to ensure that all symbols are loaded.
+
+                    LoadMissingSymbols(revitFamily, document, currentlyLoadedFamily, tempFilePath);
+
+                    family = currentlyLoadedFamily;
+                    return true;
+                }
+
+                return false;
             }
             else
             {
-                // If it is, we need to determine the version and reload the family only if the file being loaded has a newer version.
-                // Ideally, only the already loaded symbols should be updated (consider displaying a UI message for confirmation).
-                
-                
-                
-                //TODO: 
-                
-                if (!_familyMetadataEStorage.TryGet(loadedFamily, out var loadedFamilyMetadata) || loadedFamilyMetadata.Version < familyMetadata.Version)
+                family = loadedFamily;
+                // If currentLyLoadedFamily is null, the family has been loaded for the first time.
+                // No further actions are necessary. Otherwise, load any missing symbols if they exist.
+                if (currentlyLoadedFamily is not null)
                 {
-                    if (!document.LoadFamily(tempFilePath, new OverwriteFamilyOption(){  }, out loadedFamily))
-                    {
-                        throw new InvalidOperationException("Failed to load the family.");
-                    }
-
-                    // Only attach the new data if the family was updated.
-                    _familyMetadataEStorage.Attach(loadedFamily, familyMetadata);
+                    // The family was successfully loaded and replaced the existing one.
+                    // However, it is necessary to ensure that all symbols are loaded.
+                    // The variable `currentlyLoadedFamily` is not null here but is invalid because the family was replaced.
+                    // Therefore, do not use it in this context.
+                    LoadMissingSymbols(revitFamily, document, loadedFamily, tempFilePath);
                 }
             }
 
-            return loadedFamily;
+            // Load the family info from the local family file.
+            //if (!revitFamily.TryGetFamilyInfo<FamilyMetadata>("FamilyMetadata", out var familyMetadata))
+            //{
+            //    //Create a new family info and get the data from the IRevitFamily.
+            //    familyMetadata = new FamilyMetadata
+            //    {
+            //        Version = new Version(0, 0, 0, 0),
+            //        LastModified = revitFamily.Updated,
+            //        ModifiedBy = GetUserName(document)
+            //    };
+            //}
+
+            return family is not null;
         }
         finally
         {
             // Clean up the temporary file
             RemoveFamilyLocalFile(tempFilePath);
+        }
+    }
+
+    public bool TryLoadFamilySymbol(IRevitFamilySymbol revitFamilySymbol, Document document, [NotNullWhen(true)] out FamilySymbol? familySymbol)
+    {
+        var revitFamily = revitFamilySymbol.Family;
+        var tempFilePath = CreateFamilyLocalFile(revitFamily.Family, revitFamily.Name, document.Application);
+
+        try
+        {
+            if (document.LoadFamilySymbol(tempFilePath, revitFamilySymbol.Name, new OverwriteFamilyOption(), out familySymbol))
+            {
+                return true;
+            }
+
+            familySymbol = null;
+            return false;
+        }
+        finally
+        {
+            // Clean up the temporary file
+            RemoveFamilyLocalFile(tempFilePath);
+        }
+    }
+
+    public static void TemporarilyHideAllFamilyConnectors(Document doc, View view)
+    {
+        // Collect all connector elements in a FAMILY document
+        var connectorIds = new FilteredElementCollector(doc)
+                           .OfClass(typeof(ConnectorElement))
+                           .WhereElementIsNotElementType()
+                           .Select(e => e.Id)
+                           .ToList();
+
+        if (connectorIds.Count == 0)
+        {
+            return;
+        }
+
+        using var transaction = new Transaction(doc, "Temp-hide connectors");
+        transaction.Start();
+
+        // Optional: reset previous temporary hide/isolate in this view
+        if (view.IsTemporaryHideIsolateActive())
+        {
+            view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);
+        }
+
+        // Temporary hide (same as HH / sunglasses)
+        view.HideElementsTemporary(connectorIds);
+
+        transaction.Commit();
+    }
+
+    private void LoadMissingSymbols(IRevitFamily revitFamily, Document document, Family family, string familyFilePath)
+    {
+        var familySymbols = family.GetFamilySymbolIds()
+                                  .Select(id => document.GetElement(id) as FamilySymbol)
+                                  .Where(symbol => symbol != null)
+                                  .ToHashSet();
+
+        foreach (var symbol in revitFamily.FamilySymbols)
+        {
+            if (familySymbols.All(existingSymbol => existingSymbol!.Name != symbol.Name))
+            {
+                document.LoadFamilySymbol(familyFilePath, symbol.Name, new OverwriteFamilyOption(), out var familySymbol);
+            }
         }
     }
 
@@ -663,7 +752,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavingAsEventArgs" /> event when a document is being saved as a new file.
+    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavingAsEventArgs" /> event when a document is being saved
+    ///     as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document being saved.</param>
@@ -673,7 +763,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavedAsEventArgs" /> event when a document has been saved as a new file.
+    ///     Handles the <see cref="Autodesk.Revit.DB.Events.DocumentSavedAsEventArgs" /> event when a document has been saved
+    ///     as a new file.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The event data containing the document that was saved.</param>
@@ -714,7 +805,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         transaction.Commit();
     }
 
-
     private FamilyMetadata CreateFamilyMetadata(Document document)
     {
         var userName = GetUserName(document);
@@ -736,32 +826,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         }
 
         return familyInfo;
-    }
-
-
-
-    public static void TemporarilyHideAllFamilyConnectors(Document doc, View view)
-    {
-        // Collect all connector elements in a FAMILY document
-        var connectorIds = new FilteredElementCollector(doc)
-                           .OfClass(typeof(ConnectorElement))
-                           .WhereElementIsNotElementType()
-                           .Select(e => e.Id)
-                           .ToList();
-
-        if (connectorIds.Count == 0) return;
-
-        using var transaction = new Transaction(doc, "Temp-hide connectors");
-        transaction.Start();
-
-        // Optional: reset previous temporary hide/isolate in this view
-        if (view.IsTemporaryHideIsolateActive())
-            view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);
-
-        // Temporary hide (same as HH / sunglasses)
-        view.HideElementsTemporary(connectorIds);
-
-        transaction.Commit();
     }
 
     /// <summary>
@@ -885,12 +949,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
 
         stream.Position = 0;
     }
-    
+
     private void UpdatePreviewImage(Document document, MemoryStream stream)
     {
         if (_previewImageEStorage.TryGet(document.OwnerFamily, out var familyPreviewImageName, out var previewStreams))
         {
-                ViewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
+            ViewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
         }
 
         //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))
@@ -1208,28 +1272,29 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     }
 
     /// <summary>
-    /// Asynchronously retrieves all Revit families from the leaf folders of the specified root folder.
+    ///     Asynchronously retrieves all Revit families from the leaf folders of the specified root folder.
     /// </summary>
     /// <param name="rootFolder">
-    /// The root folder from which to retrieve Revit families. This folder may contain subfolders
-    /// and families.
+    ///     The root folder from which to retrieve Revit families. This folder may contain subfolders
+    ///     and families.
     /// </param>
     /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
+    ///     A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// An asynchronous stream of <see cref="IRevitFamily"/> objects representing all families
-    /// found in the leaf folders of the specified root folder.
+    ///     An asynchronous stream of <see cref="IRevitFamily" /> objects representing all families
+    ///     found in the leaf folders of the specified root folder.
     /// </returns>
     /// <remarks>
-    /// This method traverses the folder hierarchy starting from the specified root folder
-    /// and collects families from all leaf folders. The traversal is performed asynchronously
-    /// to improve performance.
+    ///     This method traverses the folder hierarchy starting from the specified root folder
+    ///     and collects families from all leaf folders. The traversal is performed asynchronously
+    ///     to improve performance.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    /// Thrown if the <paramref name="rootFolder"/> is <c>null</c>.
+    ///     Thrown if the <paramref name="rootFolder" /> is <c>null</c>.
     /// </exception>
-    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesFromLeafFoldersAsync(IFolder rootFolder, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesFromLeafFoldersAsync(IFolder rootFolder,
+                                                                                           [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var leafFolders = GetLeafFoldersAsync(rootFolder, cancellationToken);
         await foreach (var folder in leafFolders)
@@ -1273,12 +1338,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                 yield return leaf;
             }
             // Found at least one subfolder, so this is not a leaf folder
-            continue;
         }
+
         // No subfolders found, so this is a leaf folder
         yield return folder;
     }
-    
+
     /// <summary>
     ///     and updating their loaded state based on the current document.
     /// </summary>
@@ -1482,7 +1547,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             familyFile.CopyTo(tempFile);
         }
 
-        RemoveUnusedAssets(tempFileName, application);
+        // Removing unused assets changes to version of the family. Thus the family will always be treated as modified and a appropriate dialog will be shown to the user.
+        // However, this is unwanted behavior while using the family manager to add families or symbols to a project.
+        // To avoid this, it is recommended to only use families already updated to the Revit 2025 format.
+        // TODO: Probably add an option to control this behavior or create a family update command.
+        //RemoveUnusedAssets(tempFileName, application);
 
         return tempFileName;
     }
@@ -1602,6 +1671,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             transaction.RollBack();
             document.Close(false);
         }
+
         document.Close(true);
     }
 
@@ -1616,6 +1686,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// </remarks>
     private class OverwriteFamilyOption : IFamilyLoadOptions
     {
+        public bool IsCancelled { get; private set; }
+
         /// <summary>
         ///     Handles the event when a family is found during the loading process in Revit.
         /// </summary>
@@ -1666,16 +1738,24 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             switch (result)
             {
                 case TaskDialogResult.CommandLink1:
+                {
                     overwriteParameterValues = false;
                     return true;
+                }
+                    ;
 
                 case TaskDialogResult.CommandLink2:
+                {
                     overwriteParameterValues = true;
                     return true;
+                }
 
                 default:
+                {
                     overwriteParameterValues = false;
+                    IsCancelled = true;
                     return false; // Cancel
+                }
             }
         }
 
@@ -1705,7 +1785,6 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         ///     and is used to customize the behavior of shared family loading operations, such as deciding whether
         ///     to overwrite existing shared families, their source, and their parameter values.
         /// </remarks>
-        ///
         public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, /*[UnscopedRef]*/ out FamilySource source,
                                         /*[UnscopedRef]*/ out bool overwriteParameterValues)
         {

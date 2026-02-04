@@ -1,11 +1,8 @@
-﻿using Autodesk.Revit.DB;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
 using Bim.FamilyManager.Abstractions;
-using Microsoft.VisualBasic.FileIO;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Bim.FamilyManager.Base.Logic.EStorage;
 
@@ -15,17 +12,15 @@ namespace Bim.FamilyManager.Base.Logic.EStorage;
 /// </summary>
 public abstract class EStorageSchema
 {
-    
+    private static readonly MethodInfo SetMethodInfo;
+    private static readonly MethodInfo GetMethodInfo;
+    private readonly IDictionary<string, Type> _fields;
+
     private readonly Schema _schema;
     private readonly Guid _schemaId;
 
     private readonly string _schemaName;
-    private readonly IDictionary<string, Type> _fields;
     private readonly string _vendorId;
-
-    private static readonly MethodInfo SetMethodInfo;
-    private static readonly MethodInfo GetMethodInfo;
-
 
     static EStorageSchema()
     {
@@ -42,8 +37,6 @@ public abstract class EStorageSchema
                                       })!;
     }
 
-
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="EStorageSchema" /> class.
     /// </summary>
@@ -55,7 +48,17 @@ public abstract class EStorageSchema
         _fields = fields;
 
         _schema ??= GetSchema() ?? CreateSchema();
+    }
 
+    /// <summary>
+    ///     Detaches the schema data from the specified Revit element.
+    /// </summary>
+    /// <param name="element">The Revit element to detach data from.</param>
+    public virtual void Detach(Element element /*, string fieldName*/)
+    {
+        //var entity = element.GetEntity(_schema);
+        element.DeleteEntity(_schema);
+        //entity?.Clear(fieldName);
     }
 
     protected virtual void Attach(Element element, IDictionary<string, object> data)
@@ -69,17 +72,6 @@ public abstract class EStorageSchema
         }
 
         element.SetEntity(entity);
-    }
-
-    /// <summary>
-    ///     Detaches the schema data from the specified Revit element.
-    /// </summary>
-    /// <param name="element">The Revit element to detach data from.</param>
-    public virtual void Detach(Element element/*, string fieldName*/)
-    {
-        //var entity = element.GetEntity(_schema);
-        element.DeleteEntity(_schema);
-        //entity?.Clear(fieldName);
     }
 
     protected virtual bool TryGet(Element element, [NotNullWhen(true)] out IDictionary<string, object>? dataDictionary)
@@ -119,7 +111,7 @@ public abstract class EStorageSchema
         schemaBuilder.SetWriteAccessLevel(AccessLevel.Public);
         schemaBuilder.SetVendorId(_vendorId);
         schemaBuilder.SetSchemaName(_schemaName);
-        
+
         foreach (var field in _fields)
         {
             var fieldName = field.Key;
@@ -137,13 +129,14 @@ public abstract class EStorageSchema
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 var elemType = type.GetGenericArguments()[0];
-                schemaBuilder.AddArrayField(fieldName, elemType);   // IList<byte> -> byte
+                schemaBuilder.AddArrayField(fieldName, elemType); // IList<byte> -> byte
             }
             else
             {
                 schemaBuilder.AddSimpleField(fieldName, type);
             }
         }
+
         schemaBuilder.SetApplicationGUID(Constants.ApplicationId);
 
         return schemaBuilder.Finish();

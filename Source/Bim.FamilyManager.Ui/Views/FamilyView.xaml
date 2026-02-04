@@ -29,15 +29,16 @@
             <DataTemplate x:Key="ListBoxItemTemplate" DataType="{x:Type viewModels:IFamilyViewModel}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Border BorderThickness="0" Background="White" Grid.Column="0">
-                        <Image Height="48" Width="48" Stretch="Uniform" Margin="2,2,4,2" Source="{Binding Path=Preview}"/>
+                        <Image Height="48" Width="48" Stretch="Uniform" Margin="2,2,4,2"
+                               Source="{Binding Path=Preview}" />
                     </Border>
                     <TextBlock Grid.Column="1" Text="{Binding Name}"
                                Margin="3,0,3,0"
-                               VerticalAlignment="Center"/>
+                               VerticalAlignment="Center" />
                 </Grid>
             </DataTemplate>
 

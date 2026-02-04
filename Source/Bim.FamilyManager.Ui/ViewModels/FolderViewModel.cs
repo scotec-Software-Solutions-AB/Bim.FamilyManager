@@ -1,5 +1,4 @@
-﻿using System.Windows.Documents;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
@@ -19,8 +18,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     where TLayoutOptions : LayoutOptions
 {
     private IEnumerable<IFamilyViewModel>? _families;
-    private IEnumerable<IFolderViewModel>? _subfolders;
     private bool _isExpanded;
+    private IEnumerable<IFolderViewModel>? _subfolders;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FolderViewModel{TLayoutOptions}" /> class with the specified folder
@@ -105,24 +104,26 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
                     var subfolders = Task.Run(async () =>
                     {
                         var subfolders = new List<IFolder>();
-                        await foreach(var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+                        await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
                         {
                             subfolders.Add(subfolder);
                         }
-                        
+
                         return subfolders.OrderBy(f => f.Name)
                                          .ToList();
                     }).ConfigureAwait(true).GetAwaiter().GetResult();
-                    
+
                     _subfolders = subfolders.Select(CreateSubfolderViewModel)
                                             .ToList();
                 }
+
                 return _subfolders;
             }
+
             return null;
         }
     }
-        // Performance: Do not load the families if the folder is not expanded.
+    // Performance: Do not load the families if the folder is not expanded.
 
     /// <summary>
     ///     Gets the collection of families associated with the folder represented by this view model.
@@ -152,6 +153,7 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
                         {
                             families.Add(family);
                         }
+
                         return families.OrderBy(f => f.Name)
                                        .ToList();
                     }).ConfigureAwait(true).GetAwaiter().GetResult();

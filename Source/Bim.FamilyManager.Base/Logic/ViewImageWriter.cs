@@ -1,6 +1,5 @@
-﻿using OpenMcdf;
-using System.IO;
-using System.Xml.Linq;
+﻿using System.IO;
+using OpenMcdf;
 
 namespace Bim.FamilyManager.Base.Logic;
 
@@ -13,7 +12,7 @@ public class ViewImageWriter
         {
             return;
         }
-        
+
         using var root = RootStorage.Open(documentStream, StorageModeFlags.LeaveOpen);
         root.Delete("Previews");
 
@@ -28,7 +27,7 @@ public class ViewImageWriter
         familyManagerStorage.Delete("PreviewImages");
 
         var previewStorage = familyManagerStorage.CreateStorage("PreviewImages");
-        
+
         WriteFamilyPreview(previewStorage, documentStream, typePreviewImageStreams[familyPreviewImageName]);
         WriteTypePreviews(previewStorage, documentStream, typePreviewImageStreams);
 
@@ -36,16 +35,15 @@ public class ViewImageWriter
     }
 
     //FamilyPreviewImage
-    private static void WriteFamilyPreview(Storage storage, Stream documentStream, Stream previewImageStream)     
+    private static void WriteFamilyPreview(Storage storage, Stream documentStream, Stream previewImageStream)
     {
         // Remove all previously inserted preview images.
-        storage.Delete("FamilyPreviewImage"); 
-        
-        BuildPreviewImageStream(storage, "FamilyPreviewImage", previewImageStream);
-        documentStream.Position = 0;    
+        storage.Delete("FamilyPreviewImage");
 
+        BuildPreviewImageStream(storage, "FamilyPreviewImage", previewImageStream);
+        documentStream.Position = 0;
     }
-    
+
     private static void BuildPreviewImageStream(Storage storage, string name, Stream stream)
     {
         using var previewStream = storage.CreateStream(name);
@@ -54,8 +52,7 @@ public class ViewImageWriter
         stream.Position = 0;
     }
 
-
-    private static void WriteTypePreviews(Storage storage, Stream documentStream, IDictionary<string, Stream> typePreviewImageStreams)     
+    private static void WriteTypePreviews(Storage storage, Stream documentStream, IDictionary<string, Stream> typePreviewImageStreams)
     {
         foreach (var (name, stream) in typePreviewImageStreams)
         {
@@ -67,8 +64,8 @@ public class ViewImageWriter
 
     private static void WriteRevitFamilyPreview(RootStorage root, Stream documentStream, Stream imageStream)
     {
-        // TODO: Need to write pre and post fix.
-        return;
+        // TODO: Need to write pre and post fix. This is not needed for the family manager.
+#if false        
         root.Delete("RevitPreview4.0");
 
         // Add the new family info.
@@ -81,5 +78,6 @@ public class ViewImageWriter
 
         imageStream.Position = 0;
         documentStream.Position = 0;
+#endif
     }
 }

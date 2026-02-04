@@ -1,7 +1,6 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.ExtensibleStorage;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Autodesk.Revit.DB;
 
 namespace Bim.FamilyManager.Base.Logic.EStorage;
 
@@ -11,7 +10,7 @@ namespace Bim.FamilyManager.Base.Logic.EStorage;
 public class FamilyMetadataEStorage : EStorageSchema
 {
     protected const string FamilyMetadataFieldName = "FamilyMetadata";
-    
+
     private const string SchemaName = "Bim_FamilyManager_FamilyMetadata_V1";
 
     /// <summary>
@@ -31,9 +30,9 @@ public class FamilyMetadataEStorage : EStorageSchema
     ///     Initializes a new instance of the <see cref="FamilyMetadataEStorage" /> class.
     /// </summary>
     public FamilyMetadataEStorage() : base(SchemaId, VendorId, SchemaName, new Dictionary<string, Type>
-                                        {
-                                            { FamilyMetadataFieldName, typeof(IList<byte>) }
-                                        })
+    {
+        { FamilyMetadataFieldName, typeof(IList<byte>) }
+    })
     {
     }
 
@@ -52,11 +51,10 @@ public class FamilyMetadataEStorage : EStorageSchema
         base.Detach(element);
     }
 
-
     public bool TryGet(Element element, [NotNullWhen(true)] out FamilyMetadata? data)
     {
         data = null;
-        if (base.TryGet(element, out IDictionary<string, object>? dataDictionary))
+        if (base.TryGet(element, out var dataDictionary))
         {
             if (dataDictionary.TryGetValue(FamilyMetadataFieldName, out var value) && value is IList<byte> binaryData)
             {

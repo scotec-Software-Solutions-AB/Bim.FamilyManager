@@ -45,8 +45,8 @@ public static class ViewImageExporter
         }
 
         // Export the view as image (NO transaction needed)
-            // FilePath is a *base name*; Revit appends view name / index.
-            var basePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("D"));
+        // FilePath is a *base name*; Revit appends view name / index.
+        var basePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("D"));
         var opt = new ImageExportOptions
         {
             ExportRange = ExportRange.SetOfViews,
@@ -57,13 +57,13 @@ public static class ViewImageExporter
             // Choose PNG for both hidden-line/wireframe and shaded/shadow cases
             HLRandWFViewsFileType = ImageFileType.PNG,
             ShadowViewsFileType = ImageFileType.PNG,
-            ImageResolution = ImageResolution.DPI_72, 
+            ImageResolution = ImageResolution.DPI_72,
             FitDirection = FitDirectionType.Horizontal
         };
 
         opt.SetViewsAndSheets(new List<ElementId> { view.Id });
         document.ExportImage(opt);
-        
+
         // Revit can tell you the produced filename:
         var exportedFile = ImageExportOptions.GetFileName(document, view.Id);
 

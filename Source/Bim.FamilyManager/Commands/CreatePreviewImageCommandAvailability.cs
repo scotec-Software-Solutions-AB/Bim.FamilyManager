@@ -10,14 +10,14 @@ public class CreatePreviewImageCommandAvailability : RevitCommandAvailability
 {
     protected override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories, IServiceProvider services)
     {
-        var document = applicationData.ActiveUIDocument.Document;
-        var view = applicationData.ActiveUIDocument.ActiveView;
+        var view = applicationData.ActiveUIDocument?.ActiveView;
         if (view is null)
         {
             return false;
         }
 
-        if (document.IsFamilyDocument)
+        var document = applicationData.ActiveUIDocument?.Document;
+        if (document?.IsFamilyDocument == true)
         {
             var settings = document.GetDocumentPreviewSettings();
             return settings.IsViewIdValidForPreview(view.Id);

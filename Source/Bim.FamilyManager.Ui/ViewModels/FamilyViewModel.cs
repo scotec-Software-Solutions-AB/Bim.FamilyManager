@@ -276,8 +276,8 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
         {
             var family = await _revitTask.Run(uiApplication =>
             {
-                var family = _familyManager.LoadFamilyIntoActiveDocument(Family);
-                return family;
+                _familyManager.TryLoadFamilyIntoActiveDocument(Family, out var loadedFamily);
+                return loadedFamily;
             }).ConfigureAwait(true);
 
             NotifyChanges();
