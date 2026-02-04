@@ -59,16 +59,6 @@
                                                   ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}"
                                                   Click="OnSettingsButtonClick" BorderBrush="#FFABADB3" />
 
-                    <!--<controls1:ImageButton
-                        ImageSource="pack://application:,,,/Bim.FamilyManager.Ui;component/Resources/Images/RefreshPrimary_24x24.png"
-                        Height="24" Padding="3" Margin="0,0,10,0"
-                        Command="{Binding ReloadCommand}"
-                        ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Refresh}" />
-                    <controls1:ImageButton
-                        ImageSource="pack://application:,,,/Bim.FamilyManager.Ui;component/Resources/Images/SettingsPrimary_24x24.png"
-                        Height="24" Padding="3"
-                        Click="OnSettingsButtonClick"
-                        ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}" />-->
                 </StackPanel>
             </Grid>
 

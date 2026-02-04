@@ -7,8 +7,8 @@
     <Color x:Key="BackgroundColor">#FFFFFFFF</Color>
     <Color x:Key="ForegroundColor">#FF404040</Color>
     <Color x:Key="InvertedForegroundColor">#FFFFFFFF</Color>
-    <Color x:Key="PrimaryBackgroundColor">#FFFAFAFA</Color>
-    <Color x:Key="SecondaryBackgroundColor">#FFF3F3F3</Color>
+    <Color x:Key="PrimaryBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="SecondaryBackgroundColor">#FFF7F7F7</Color>
     <Color x:Key="BorderColor">#FFABADB3</Color>
     <Color x:Key="SelectedBorderColor">Gray</Color>
 

@@ -6,6 +6,7 @@
              xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
              xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.FamilyNavigator.Resources"
+             xmlns:viewModels="clr-namespace:Bim.FamilyManager.Ui.FamilyNavigator.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="400"
              d:DataContext="{d:DesignInstance viewModels:FamilyManagerViewModel, IsDesignTimeCreatable=false}">
