@@ -37,6 +37,7 @@ namespace Bim.FamilyManager.Installer
 
             project.Platform = Platform.x64;
 
+            var revitVersion = Environment.GetEnvironmentVariable("RevitVersion") ?? "2025"; // fallback if not set
             var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "2025.0.0"; // fallback if not set
             var version = semver.Split('-', '+')[0];
             
@@ -46,6 +47,11 @@ namespace Bim.FamilyManager.Installer
             }
             
             project.Version = parsedVersion;
+            project.Properties = new[]
+            {
+                new Property("REVIT_VERSION", revitVersion)
+            };
+
 
             var ui = project.ManagedUI = new ManagedUI();
             ui.InstallDialogs.Add<WelcomeDialog>()

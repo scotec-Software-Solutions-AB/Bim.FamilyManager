@@ -43,8 +43,13 @@ namespace Bim.FamilyManager.Installer
             
             parentDialog.GoNextButton.Click += (sender, e) =>
             {
-                var revitVersion = Environment.GetEnvironmentVariable("RevitVersion") ?? "2025"; // fallback if not set
                 var runtime = parentDialog.MsiRuntime();
+                var revitVersion = runtime.Session["REVIT_VERSION"];
+                if (string.IsNullOrWhiteSpace(revitVersion))
+                {
+                    throw new InvalidOperationException("REVIT_VERSION MSI property is not set.");
+                }
+
                 if (scopeViewModel.IsUserScope)
                 {
                     runtime.Session["MSIINSTALLPERUSER"] = "1";
