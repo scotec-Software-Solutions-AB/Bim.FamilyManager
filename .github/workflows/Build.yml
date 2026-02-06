@@ -99,8 +99,10 @@ jobs:
       shell: pwsh
       run: |
         $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.Installer.exe"
-        Write-Host "Running: $exe"
-        & $exe
+        $dir = Split-Path $exe -Parent
+      
+        $p = Start-Process -FilePath $exe -WorkingDirectory $dir -Wait -PassThru
+        if ($p.ExitCode -ne 0) { throw "Installer builder failed with exit code $($p.ExitCode)" }
 
     - name: Rename MSI
       shell: pwsh
