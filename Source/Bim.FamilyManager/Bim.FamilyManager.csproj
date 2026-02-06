@@ -71,4 +71,29 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
+	<ItemGroup>
+		<ExtraPublishFiles Include="Bim.FamilyManager.addin" />
+	</ItemGroup>
+
+	<!--<Target Name="CopyExtraFilesToPublishOutput" AfterTargets="Publish">
+		<Message Importance="high" Text="Copying extra files to publish output: $(PublishUrl)" />
+		<Copy
+			SourceFiles="@(ExtraPublishFiles)"
+			DestinationFolder="$(PublishUrl)%(RecursiveDir)"
+			SkipUnchangedFiles="true" />
+	</Target>-->
+
+	<!-- Copy into ../../Publish (parent of Bim.FamilyManager) -->
+	<Target Name="CopyExtraFilesToPublishRoot" AfterTargets="Publish">
+		<!-- PublishUrl usually ends with a trailing slash -->
+		<PropertyGroup>
+			<_PublishRoot>$([System.IO.Path]::GetFullPath('$(PublishDir)..\'))</_PublishRoot>
+		</PropertyGroup>
+
+		<Message Importance="high" Text="Copying extra files to publish root: $(_PublishRoot)" />
+		<Copy
+			SourceFiles="@(ExtraPublishFiles)"
+			DestinationFolder="$(_PublishRoot)%(RecursiveDir)"
+			SkipUnchangedFiles="true" />
+	</Target>
 </Project>

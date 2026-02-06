@@ -23,20 +23,24 @@ namespace Bim.FamilyManager.Installer
     /// <summary>
     /// Interaction logic for InstallScopeDialog.xaml
     /// </summary>
-    public partial class InstallScopeDialog : UserControl, IWpfDialogContent
+    public partial class InstallScopeControl : UserControl, IWpfDialogContent
     {
-        public InstallScopeDialog()
+        private CustomDialogBase _parentDialog;
+        
+        public InstallScopeControl()
         {
-            Debugger.Launch();
             InitializeComponent();
         }
 
         public void Init(CustomDialogBase parentDialog)
         {
-            var scopeViewModel = new ScopeViewModel() { IsMachineScope = true };
+            _parentDialog = parentDialog;
+            var scopeViewModel = new ScopeViewModel();
             DataContext = scopeViewModel;
 
-
+            parentDialog.GoNextButton.IsEnabled = false;
+                
+            
             parentDialog.GoNextButton.Click += (sender, e) =>
             {
                 var revitVersion = Environment.GetEnvironmentVariable("REVIT_VERSION") ?? "2025"; // fallback if not set
@@ -54,6 +58,11 @@ namespace Bim.FamilyManager.Installer
                 }
 
             };
+        }
+
+        private void RadioButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            _parentDialog.GoNextButton.IsEnabled = true;
         }
     }
 }
