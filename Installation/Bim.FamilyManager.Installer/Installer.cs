@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using WixSharp;
 using ExitDialog = WixSharp.UI.WPF.ExitDialog;
 using ProgressDialog = WixSharp.UI.WPF.ProgressDialog;
@@ -26,14 +27,25 @@ namespace Bim.FamilyManager.Installer
                     new Dir("Bim.FamilyManager",
                         new Files(@"..\..\..\..\Publish\Bim.FamilyManager\*.*")))
             );
+#if REVIT2026
+            project.UpgradeCode = new Guid("40FC4669-353A-4610-8F95-505FC8EFFBD2");
+#else
             project.UpgradeCode = new Guid("6B4E2EEC-E9E3-4AC1-9A1F-83F605B543BE");
+#endif
             //project.GUID = new Guid("91E63B96-01C1-481E-9334-50EF5C48DEDF");
             project.GUID = Guid.NewGuid();
 
             project.Platform = Platform.x64;
 
-            //TODO: Set version dynamically
-            project.Version = new Version("1.0.0");
+            var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "2025.0.0"; // fallback if not set
+            var version = semver.Split('-', '+')[0];
+            
+            if (!Version.TryParse(version, out var parsedVersion))
+            {
+                throw new InvalidOperationException("Invalid version format in PkgVersion environment variable. Expected format: Major.Minor.Build (e.g., 2025.0.0)");
+            }
+            
+            project.Version = parsedVersion;
 
             var ui = project.ManagedUI = new ManagedUI();
             ui.InstallDialogs.Add<WelcomeDialog>()
@@ -50,7 +62,7 @@ namespace Bim.FamilyManager.Installer
                 var runtime = e.ManagedUI.Shell.MsiRuntime();
 
                 runtime.UIText["CustomDlgTitle"] = "Select Installation Scope";
-                runtime.UIText["CustomDlgTitleDescription"] = "\"Choose whether you want to install this application for all users on this computer or only for your current Windows account";
+                runtime.UIText["CustomDlgTitleDescription"] = "Choose whether you want to install this application for all users on this computer or only for your current Windows account";
 
             };
 
