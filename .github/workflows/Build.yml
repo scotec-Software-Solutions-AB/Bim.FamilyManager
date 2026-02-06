@@ -34,6 +34,7 @@ jobs:
         $revitConst = "REVIT${{ matrix.revitYear }}"
          
         "PkgVersion=$pkg"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "RevitVersion=${{ matrix.revitYear }}"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         "REVIT_CONST=$revitConst"| Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
     
         Write-Host "Computed PkgVersion: $pkg"

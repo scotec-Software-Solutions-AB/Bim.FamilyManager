@@ -43,7 +43,7 @@ namespace Bim.FamilyManager.Installer
             
             parentDialog.GoNextButton.Click += (sender, e) =>
             {
-                var revitVersion = Environment.GetEnvironmentVariable("REVIT_VERSION") ?? "2025"; // fallback if not set
+                var revitVersion = Environment.GetEnvironmentVariable("RevitVersion") ?? "2025"; // fallback if not set
                 var runtime = parentDialog.MsiRuntime();
                 if (scopeViewModel.IsUserScope)
                 {
