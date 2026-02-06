@@ -85,16 +85,51 @@ jobs:
 #      run: |
 #        cp sbom/* Publish/
 
-    - name: Copy .addin file
-      run: |
-        cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
+#    - name: Copy .addin file
+#      run: |
+#        cp ./Source/Bim.FamilyManager/Bim.FamilyManager.addin Publish/
 
-    - name: Zip Publish folder contents
-      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.PkgVersion }}.zip"
+    - name: Run the generated WixSharp .exe to produce the .msi
       shell: pwsh
+      run: |
+        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\MyInstaller.exe"
+        Write-Host "Running: $exe"
+        & $exe
 
-    - name: Upload Publish zip as artifact
+    - name: Rename MSI
+      shell: pwsh
+      run: |
+        $src = ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.msi"
+        if (!(Test-Path $src)) { throw "MSI not found: $src" }
+    
+        $newName = "Bim.FamilyManager_${{ env.PkgVersion }}.msi"
+        $dst = Join-Path (Split-Path $src -Parent) $newName
+    
+        Move-Item $src $dst -Force
+        "MSI_PATH=$dst" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        Write-Host "Renamed MSI to: $dst"
+
+    - name: Upload .msi as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Bim.FamilyManager-${{ matrix.revitYear }}
-        path: Bim.FamilyManager_v${{env.PkgVersion}}.zip
+        name: Bim.FamilyManager_${{ env.PKG_VERSION }}
+        path: ${{ env.MSI_PATH }}
+        if-no-files-found: error
+
+
+#    - name: Zip Publish folder contents
+#      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.PkgVersion }}.zip"
+#      shell: pwsh
+
+#    - name: Upload Publish zip as artifact
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: Bim.FamilyManager-${{ matrix.revitYear }}
+#        path: Bim.FamilyManager_v${{env.PkgVersion}}.zip
+
+    - name: Upload .msi as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Bim.FamilyManager_${{ env.PKG_VERSION }}
+        path: ${{ env.MSI_PATH }}
+        if-no-files-found: error
