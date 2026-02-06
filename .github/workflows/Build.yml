@@ -92,7 +92,7 @@ jobs:
     - name: Run the generated WixSharp .exe to produce the .msi
       shell: pwsh
       run: |
-        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\MyInstaller.exe"
+        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.Installer.exe"
         Write-Host "Running: $exe"
         & $exe
 
