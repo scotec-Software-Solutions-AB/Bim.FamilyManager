@@ -135,9 +135,3 @@ jobs:
 #        name: Bim.FamilyManager-${{ matrix.revitYear }}
 #        path: Bim.FamilyManager_v${{env.PkgVersion}}.zip
 
-    - name: Upload .msi as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Bim.FamilyManager_${{ env.PKG_VERSION }}
-        path: ${{ env.MSI_PATH }}
-        if-no-files-found: error
