@@ -70,7 +70,7 @@ jobs:
 
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
-        -p:PublishProfile=Properties/PublishProfiles/FolderProfile.pubxml 
+        -p:PublishProfile=FolderProfile 
         -p:RevitYear="${{ matrix.revitYear }}"
         -p:DefineConstants="$env:REVIT_CONST"
         -p:Version="$PkgVersion"
