@@ -17,6 +17,8 @@ namespace Bim.FamilyManager.Installer
                 UpgradeCode = GetUpgradeCode(),
                 Version = GetProductVersion(),
                 ControlPanelInfo = GetProductInfo(),
+                MajorUpgrade = MajorUpgrade.Default,
+                BackgroundImage = @"Resources\Icons\BimFamilyManagerLogoText.png",
                 Properties = new[]
                 {
                     new Property("REVIT_VERSION", GetRevitVersion())
@@ -73,7 +75,8 @@ namespace Bim.FamilyManager.Installer
                 UrlInfoAbout = "https://www.scotec.com/bimfamilymanager",
                 UrlUpdateInfo = "https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/releases",
                 InstallLocation = "[INSTALLDIR]", 
-                Manufacturer = "scotec"
+                Manufacturer = "scotec",
+                ProductIcon = @"Resources\Icons\BimFamilyManagerLogo.ico"
             };
         }
 
@@ -87,7 +90,7 @@ namespace Bim.FamilyManager.Installer
                 throw new InvalidOperationException("Invalid version format in PkgVersion environment variable. Expected format: Major.Minor.Build (e.g., 2025.0.0)");
             }
 
-            // Returning versions like 2025.0.0, Wix generates the following warning while building the .msi file:
+            // When using versions like 2025.0.0, Wix generates the following warning while building the .msi file:
             // WIX1148: Invalid MSI package version: '2025.0.0'. The Windows Installer SDK says that MSI package versions must have a
             //    major version less than 256, a minor version less than 256, and a build version less than 65536. The revision value is
             //    ignored but version labels and metadata are not allowed. Violating the MSI rules sometimes works as expected but

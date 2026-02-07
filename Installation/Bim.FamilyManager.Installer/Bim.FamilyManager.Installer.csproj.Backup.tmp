@@ -8,15 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\Images\Logo\BIM Family Manager Logo Text.png" Link="Resources\Icons\BimFamilyManagerLogoText.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\Images\Logo\BIM Family Manager Logo.ico" Link="Resources\Icons\BimFamilyManagerLogo.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <Content Include="..\..\Images\Logo\BIM Family Manager Logo.ico" Link="Resources\Icons\BIM Family Manager Logo.ico" />
   </ItemGroup>
 
 	<ItemGroup>
