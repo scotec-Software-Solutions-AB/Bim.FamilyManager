@@ -6,7 +6,7 @@ on:
     types: [published]
 
 permissions:
-  contents: write   # required to upload assets to a GitHub Release
+  contents: write   # required only for uploading assets to GitHub Releases
 
 jobs:
   build:
@@ -35,18 +35,20 @@ jobs:
     - name: Compute package version (incl prerelease)
       shell: pwsh
       run: |
-        $base = "${{ matrix.revitYear }}.$($env:GitVersion_Minor).$($env:GitVersion_Patch)"
-        $pkg  = "$base$($env:GitVersion_PreReleaseTagWithDash)"
+        # Shared product version (SemVer) independent of Revit year
+        $pkg = "$env:GitVersion_NuGetVersionV2"
+        if ([string]::IsNullOrWhiteSpace($pkg)) { $pkg = "$env:GitVersion_NuGetVersion" }
+        
         $revitConst = "REVIT${{ matrix.revitYear }}"
-         
-        "PkgVersion=$pkg"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        "RevitVersion=${{ matrix.revitYear }}"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        "REVIT_CONST=$revitConst"| Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-    
+        
+        "PkgVersion=$pkg"              | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "RevitVersion=${{ matrix.revitYear }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "REVIT_CONST=$revitConst"      | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        
         Write-Host "Computed PkgVersion: $pkg"
-        Write-Host "DefineConstants: $revitConst"
         Write-Host "GitVersion_SemVer: $($env:GitVersion_SemVer)"
         Write-Host "GitVersion_NuGetVersion: $($env:GitVersion_NuGetVersion)"
+        Write-Host "GitVersion_NuGetVersionV2: $($env:GitVersion_NuGetVersionV2)"
 
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
@@ -117,7 +119,8 @@ jobs:
         $src = ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.msi"
         if (!(Test-Path $src)) { throw "MSI not found: $src" }
     
-        $newName = "Bim.FamilyManager_${{ env.PkgVersion }}.msi"
+        # IMPORTANT: PkgVersion is now shared across matrix legs, so include RevitYear in the file name
+        $newName = "Bim.FamilyManager_Revit${{ matrix.revitYear }}_${{ env.PkgVersion }}.msi"
         $dst = Join-Path (Split-Path $src -Parent) $newName
     
         Move-Item $src $dst -Force
@@ -127,7 +130,8 @@ jobs:
     - name: Upload .msi as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Bim.FamilyManager_${{ env.PkgVersion }}
+        # IMPORTANT: make artifact names unique per matrix leg
+        name: Bim.FamilyManager_Revit${{ matrix.revitYear }}_${{ env.PkgVersion }}
         path: ${{ env.MSI_PATH }}
         if-no-files-found: error
 
@@ -160,4 +164,3 @@ jobs:
           files: artifacts/**/*.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-``
