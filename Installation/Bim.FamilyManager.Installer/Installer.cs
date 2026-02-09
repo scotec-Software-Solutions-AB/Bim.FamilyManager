@@ -10,7 +10,7 @@ namespace Bim.FamilyManager.Installer
     {
         public static void Main(string[] args)
         {
-            var project = new ManagedProject("Bim.FamilyManager", GetDirectories())
+            var project = new ManagedProject($"BIM Family Manager {GetProductVersion()}", GetDirectories())
             {
                 GUID = Guid.NewGuid(),
                 Platform = Platform.x64,
@@ -18,7 +18,7 @@ namespace Bim.FamilyManager.Installer
                 Version = GetProductVersion(),
                 ControlPanelInfo = GetProductInfo(),
                 MajorUpgrade = MajorUpgrade.Default,
-                BackgroundImage = @"Resources\Icons\BimFamilyManagerLogoText.png",
+                //BackgroundImage = @"Resources\Icons\BimFamilyManagerLogoText.png",
                 Properties = new[]
                 {
                     new Property("REVIT_VERSION", GetRevitVersion())
