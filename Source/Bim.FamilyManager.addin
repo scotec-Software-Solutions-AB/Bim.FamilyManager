@@ -3,7 +3,7 @@
 <RevitAddIns>
 
 	<AddIn Type="Application">
-		<Name>BIM Family Manager</Name>
+		<Name>BIM FamilyManager</Name>
 		<FullClassName> Bim.FamilyManager.RevitFamilyManagerAppFactory</FullClassName>
 		<Assembly>Bim.FamilyManager\Bim.FamilyManager.dll</Assembly>
 		<AddInId>767167BD-79B6-4B62-A8DE-D0C32E217B75</AddInId>

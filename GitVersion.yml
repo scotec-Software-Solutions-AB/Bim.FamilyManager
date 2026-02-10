@@ -4,12 +4,12 @@ tag-prefix: '[vV]?'
 
 branches:
   main:
-    increment: Minor
+    increment: Patch
     label: ''
 
   develop:
     mode: ContinuousDeployment
-    increment: Minor
+    increment: Patch
     label: dev
 
   feature:
