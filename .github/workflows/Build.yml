@@ -113,11 +113,10 @@ jobs:
     - name: Rename MSI
       shell: pwsh
       run: |
-        $src = ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.msi"
+        $src = ".\Installation\Bim.FamilyManager.Installer\bin\Release\BIM.FamilyManager ${{ env.RevitVersion }}.msi"
         if (!(Test-Path $src)) { throw "MSI not found: $src" }
     
-        # IMPORTANT: PkgVersion is now shared across matrix legs, so include RevitYear in the file name
-        $newName = "Bim.FamilyManager_Revit${{ matrix.revitYear }}_${{ env.PkgVersion }}.msi"
+        $newName = "BIM.FamilyManager_${{ env.RevitVersion }}_${{ env.PkgVersion }}.msi"
         $dst = Join-Path (Split-Path $src -Parent) $newName
     
         Move-Item $src $dst -Force
@@ -128,20 +127,19 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         # IMPORTANT: make artifact names unique per matrix leg
-        name: Bim.FamilyManager_Revit${{ matrix.revitYear }}_${{ env.PkgVersion }}
+        name: BIM.FamilyManager_${{ env.RevitVersion }}_${{ env.PkgVersion }}
         path: ${{ env.MSI_PATH }}
         if-no-files-found: error
 
-
 #    - name: Zip Publish folder contents
-#      run: Compress-Archive -Path Publish\* -DestinationPath "Bim.FamilyManager_v${{ env.PkgVersion }}.zip"
+#      run: Compress-Archive -Path Publish\* -DestinationPath "BIM.FamilyManager_v${{ env.PkgVersion }}.zip"
 #      shell: pwsh
 
 #    - name: Upload Publish zip as artifact
 #      uses: actions/upload-artifact@v4
 #      with:
-#        name: Bim.FamilyManager-${{ matrix.revitYear }}
-#        path: Bim.FamilyManager_v${{env.PkgVersion}}.zip
+#        name: BIM.FamilyManager-${{ matrix.revitYear }}
+#        path: BIM.FamilyManager_v${{env.PkgVersion}}.zip
 
   publish_release_assets:
     name: Attach MSIs to Release

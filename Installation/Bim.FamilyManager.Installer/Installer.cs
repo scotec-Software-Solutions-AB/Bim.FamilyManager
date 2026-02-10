@@ -10,7 +10,7 @@ namespace Bim.FamilyManager.Installer
     {
         public static void Main(string[] args)
         {
-            var project = new ManagedProject($"BIM Family Manager {GetProductVersion()}", GetDirectories())
+            var project = new ManagedProject($"BIM.FamilyManager {GetRevitVersion()}", GetDirectories())
             {
                 GUID = Guid.NewGuid(),
                 Platform = Platform.x64,
@@ -82,7 +82,7 @@ namespace Bim.FamilyManager.Installer
 
         private static Version GetProductVersion()
         {
-            var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "2025.0.0"; // fallback if not set
+            var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "0.1.0-local"; // fallback if not set
             var version = semver.Split('-', '+')[0];
             
             if (!Version.TryParse(version, out var parsedVersion))
