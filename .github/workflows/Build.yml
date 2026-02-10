@@ -107,8 +107,8 @@ jobs:
         $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.Installer.exe"
         $dir = Split-Path $exe -Parent
       
-#        $p = Start-Process -FilePath $exe -WorkingDirectory $dir -Wait -PassThru
-#        if ($p.ExitCode -ne 0) { throw "Installer builder failed with exit code $($p.ExitCode)" }
+        #$p = Start-Process -FilePath $exe -WorkingDirectory $dir -Wait -PassThru
+        #if ($p.ExitCode -ne 0) { throw "Installer builder failed with exit code $($p.ExitCode)" }
         
         Push-Location $dir
         & $exe
