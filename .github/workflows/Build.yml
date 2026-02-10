@@ -100,6 +100,7 @@ jobs:
       run: |
         dotnet tool install --global wix --version 7.0.0-rc.1
         wix --version
+        wix eula accept wix7
     
     - name: Run the generated WixSharp .exe to produce the .msi
       shell: pwsh
