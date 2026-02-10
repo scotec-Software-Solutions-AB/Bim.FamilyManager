@@ -98,7 +98,7 @@ jobs:
     - name: Install WiX v4 tool (wix.exe)
       shell: pwsh
       run: |
-        dotnet tool install --global wix --version 6.0.2
+        dotnet tool install --global wix --version 7.0.0-rc.1
         wix --version
     
     - name: Run the generated WixSharp .exe to produce the .msi
@@ -110,7 +110,6 @@ jobs:
         #$p = Start-Process -FilePath $exe -WorkingDirectory $dir -Wait -PassThru
         #if ($p.ExitCode -ne 0) { throw "Installer builder failed with exit code $($p.ExitCode)" }
         
-        wix.exe extension add -g WixToolset.UI.wixext
         
         Push-Location $dir
         & $exe
@@ -123,8 +122,7 @@ jobs:
       shell: pwsh
       run: |
         $path = ".\Installation\Bim.FamilyManager.Installer\bin\Release"
-        Write-Host "Listing: $path"
-        Get-ChildItem -Path $path -Force |
+        Write-Host "Listing: $path"        Get-ChildItem -Path $path -Force |
           Select-Object Name, Length, LastWriteTime |
           Format-Table -AutoSize |
           Out-String -Width 4096 |
