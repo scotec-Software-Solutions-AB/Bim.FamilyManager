@@ -36,9 +36,7 @@ jobs:
       shell: pwsh
       run: |
         # Shared product version (SemVer) independent of Revit year
-        $pkg = "$env:GitVersion_NuGetVersionV2"
-        if ([string]::IsNullOrWhiteSpace($pkg)) { $pkg = "$env:GitVersion_NuGetVersion" }
-        
+        $pkg = "$env:GitVersion_SemVer"
         $revitConst = "REVIT${{ matrix.revitYear }}"
         
         "PkgVersion=$pkg"              | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -46,9 +44,8 @@ jobs:
         "REVIT_CONST=$revitConst"      | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         
         Write-Host "Computed PkgVersion: $pkg"
-        Write-Host "GitVersion_SemVer: $($env:GitVersion_SemVer)"
-        Write-Host "GitVersion_NuGetVersion: $($env:GitVersion_NuGetVersion)"
-        Write-Host "GitVersion_NuGetVersionV2: $($env:GitVersion_NuGetVersionV2)"
+        Write-Host "Revit version: ${{ matrix.revitYear }}"
+        Write-Host "Revit constant: $revitConst"
 
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v3
@@ -72,7 +69,7 @@ jobs:
         -p:DefineConstants="$env:REVIT_CONST"
         -p:Version="$env:PkgVersion"
         -p:PackageVersion="$env:PkgVersion"
-        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
 
     - name: Build
       run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release 
@@ -81,7 +78,7 @@ jobs:
         -p:DefineConstants="$env:REVIT_CONST"
         -p:Version="$env:PkgVersion"
         -p:PackageVersion="$env:PkgVersion"
-        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
 
     - name: Publish
       run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release 
@@ -90,7 +87,7 @@ jobs:
         -p:DefineConstants="$env:REVIT_CONST"
         -p:Version="$PkgVersion"
         -p:PackageVersion="$env:PkgVersion"
-        -p:InformationalVersion="$env:PkgVersion+$env:GitVersion_Sha"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
 
 #    - name: Install CycloneDX SBOM Tool
 #      run: dotnet tool install --global CycloneDX
