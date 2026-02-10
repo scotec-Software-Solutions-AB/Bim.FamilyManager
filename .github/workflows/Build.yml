@@ -110,6 +110,8 @@ jobs:
         #$p = Start-Process -FilePath $exe -WorkingDirectory $dir -Wait -PassThru
         #if ($p.ExitCode -ne 0) { throw "Installer builder failed with exit code $($p.ExitCode)" }
         
+        wix.exe extension add -g WixToolset.UI.wixext
+        
         Push-Location $dir
         & $exe
         $code = $LASTEXITCODE
