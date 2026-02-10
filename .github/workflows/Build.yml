@@ -117,6 +117,17 @@ jobs:
 
         if ($code -ne 0) { throw "Installer builder failed with exit code $code" }
 
+    - name: List release folder
+      shell: pwsh
+      run: |
+        $path = ".\Installation\Bim.FamilyManager.Installer\bin\Release"
+        Write-Host "Listing: $path"
+        Get-ChildItem -Path $path -Force |
+          Select-Object Name, Length, LastWriteTime |
+          Format-Table -AutoSize |
+          Out-String -Width 4096 |
+          Write-Host
+
     - name: Rename MSI
       shell: pwsh
       run: |
