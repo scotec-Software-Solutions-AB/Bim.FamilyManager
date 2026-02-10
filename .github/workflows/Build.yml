@@ -60,7 +60,7 @@ jobs:
     - name: Install WiX v4 tool (wix.exe)
       shell: pwsh
       run: |
-        dotnet tool install --global wix
+        dotnet tool install --global wix --version 6.0.2
         wix --version
     
     - name: Restore dependencies
