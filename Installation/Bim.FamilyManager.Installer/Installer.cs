@@ -18,7 +18,7 @@ namespace Bim.FamilyManager.Installer
                 Version = GetProductVersion(),
                 ControlPanelInfo = GetProductInfo(),
                 MajorUpgrade = MajorUpgrade.Default,
-                //BackgroundImage = @"Resources\Icons\BimFamilyManagerLogoText.png",
+                BackgroundImage = @"Resources\Icons\BackgroundWithText.png",
                 Properties = new[]
                 {
                     new Property("REVIT_VERSION", GetRevitVersion())
@@ -76,7 +76,7 @@ namespace Bim.FamilyManager.Installer
                 UrlUpdateInfo = "https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/releases",
                 InstallLocation = "[INSTALLDIR]", 
                 Manufacturer = "scotec",
-                ProductIcon = @"Resources\Icons\BimFamilyManagerLogo.ico"
+                ProductIcon = @"Resources\Icons\Logo.ico"
             };
         }
 

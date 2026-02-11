@@ -8,15 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\Images\Logo\BIM Family Manager Logo Text.png" Link="Resources\Icons\BimFamilyManagerLogoText.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Remove="Resources\Icons\BackgroundWithoutText.png" />
+    <None Remove="Resources\Icons\BackgroundWithText.png" />
+    <None Remove="Resources\Icons\Logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\Images\Logo\BIM Family Manager Logo.ico" Link="Resources\Icons\BimFamilyManagerLogo.ico">
+    <Content Include="Resources\Icons\BackgroundWithoutText.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="Resources\Icons\BackgroundWithText.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Icons\Logo.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 	<ItemGroup>
@@ -25,7 +31,9 @@
   </ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\Icons\" />
+	  <None Update="Resources\Icons\Logo.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>
