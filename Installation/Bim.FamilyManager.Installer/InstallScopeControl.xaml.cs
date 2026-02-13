@@ -35,10 +35,13 @@ namespace Bim.FamilyManager.Installer
         public void Init(CustomDialogBase parentDialog)
         {
             _parentDialog = parentDialog;
-            var scopeViewModel = new ScopeViewModel();
+            var scopeViewModel = new ScopeViewModel
+            {
+                IsUserScope = true
+            };
             DataContext = scopeViewModel;
 
-            parentDialog.GoNextButton.IsEnabled = false;
+            parentDialog.GoNextButton.IsEnabled = true;
                 
             
             parentDialog.GoNextButton.Click += (sender, e) =>

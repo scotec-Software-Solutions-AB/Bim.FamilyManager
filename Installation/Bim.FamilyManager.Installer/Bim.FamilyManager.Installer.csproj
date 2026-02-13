@@ -8,18 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Icons\BackgroundWithoutText.png" />
-    <None Remove="Resources\Icons\BackgroundWithText.png" />
+    <None Remove="Resources\Icons\BackgroundImage.png" />
+    <None Remove="Resources\Icons\BannerImage.png" />
     <None Remove="Resources\Icons\Logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Icons\BackgroundWithoutText.png">
+    <Content Include="Resources\Icons\BackgroundImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Icons\BackgroundWithText.png">
+    <Content Include="Resources\Icons\BannerImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\Icons\Logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -31,6 +34,12 @@
   </ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Resources\Icons\BackgroundWithoutText.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Resources\Icons\BackgroundWithText.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Resources\Icons\Logo.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>

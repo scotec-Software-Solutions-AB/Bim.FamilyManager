@@ -7,12 +7,6 @@
              d:DesignHeight="420"
              d:DesignWidth="640">
 
-    <!--
-      Expected bindings (example):
-        InstallAllUsers : bool
-        InstallCurrentUser : bool
-        IsAdminRequiredVisible : Visibility (optional)
-    -->
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -28,20 +22,6 @@
 
             <RadioButton GroupName="InstallScope"
                          Margin="0,0,0,10"
-                         IsChecked="{Binding IsMachineScope, Mode=TwoWay}"
-                         Click="RadioButtonOnClick">
-                <StackPanel>
-                    <TextBlock FontWeight="SemiBold"
-                               Text="Install for all users (per-machine)" />
-                    <TextBlock Foreground="#FF555555"
-                               TextWrapping="Wrap"
-                               Margin="0,2,0,0"
-                               Text="Recommended on shared computers. Installs into a machine-wide location. Administrator privileges may be required."/>
-                </StackPanel>
-            </RadioButton>
-
-            <RadioButton GroupName="InstallScope"
-                         Margin="0,0,0,10"
                          IsChecked="{Binding IsUserScope, Mode=TwoWay}" 
                          Click="RadioButtonOnClick">
                 <StackPanel>
@@ -51,6 +31,20 @@
                                TextWrapping="Wrap"
                                Margin="0,2,0,0"
                                Text="Recommended if you do not have admin rights. Installs into your user profile and affects only your account."/>
+                </StackPanel>
+            </RadioButton>
+
+            <RadioButton GroupName="InstallScope"
+                         Margin="0,0,0,10"
+                         IsChecked="{Binding IsMachineScope, Mode=TwoWay}"
+                         Click="RadioButtonOnClick">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold"
+                               Text="Install for all users (per-machine)" />
+                    <TextBlock Foreground="#FF555555"
+                               TextWrapping="Wrap"
+                               Margin="0,2,0,0"
+                               Text="Recommended on shared computers. Installs into a machine-wide location. Administrator privileges may be required."/>
                 </StackPanel>
             </RadioButton>
 

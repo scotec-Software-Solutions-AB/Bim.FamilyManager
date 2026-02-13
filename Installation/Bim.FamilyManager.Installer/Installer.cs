@@ -18,7 +18,9 @@ namespace Bim.FamilyManager.Installer
                 Version = GetProductVersion(),
                 ControlPanelInfo = GetProductInfo(),
                 MajorUpgrade = MajorUpgrade.Default,
-                BackgroundImage = @"Resources\Icons\BackgroundWithText.png",
+                BackgroundImage = @"Resources\Icons\BackgroundImage.png",
+                BannerImage = @"Resources\Icons\BannerImage.png",
+
                 Properties = new[]
                 {
                     new Property("REVIT_VERSION", GetRevitVersion())
