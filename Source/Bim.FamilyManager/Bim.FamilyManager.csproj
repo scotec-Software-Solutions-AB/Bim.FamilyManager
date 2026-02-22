@@ -19,13 +19,13 @@
 
 
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2025.2.0-dev.27" />
-		<PackageReference Include="Scotec.Revit" Version="2025.2.0-dev.27" />
+		<PackageReference Include="Scotec.Revit.Ui" Version="2025.2.1-dev.16" />
+		<PackageReference Include="Scotec.Revit" Version="2025.2.1-dev.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2026.2.0-dev.27" />
-		<PackageReference Include="Scotec.Revit" Version="2026.2.0-dev.27" />
+		<PackageReference Include="Scotec.Revit.Ui" Version="2026.2.1-dev.16" />
+		<PackageReference Include="Scotec.Revit" Version="2026.2.1-dev.16" />
 	</ItemGroup>
 
 
