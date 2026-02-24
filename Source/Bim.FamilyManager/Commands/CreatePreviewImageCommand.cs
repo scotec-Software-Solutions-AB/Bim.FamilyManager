@@ -11,7 +11,7 @@ using Scotec.Revit.Isolation;
 namespace Bim.FamilyManager.Commands;
 
 [RevitCommandIsolation(ContextName = "Bim.FamilyManager")]
-[RevitTransactionMode(Mode = RevitTransactionMode.None)]
+[Transaction(TransactionMode.Manual)]
 public class CreatePreviewImageCommand : RevitCommand
 {
     public CreatePreviewImageCommand()

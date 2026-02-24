@@ -17,7 +17,7 @@ namespace Bim.FamilyManager.Commands;
 ///     and operates in an isolated context to avoid conflicts with other assemblies.
 /// </remarks>
 [RevitCommandIsolation(ContextName = "Bim.FamilyManager")]
-[RevitTransactionMode(Mode = RevitTransactionMode.None)]
+[RevitTransactionMode(Mode = RevitTransactionMode.ReadOnly)]
 public class OpenFamilyManagerSettingsCommand : RevitCommand
 {
     /// <summary>
