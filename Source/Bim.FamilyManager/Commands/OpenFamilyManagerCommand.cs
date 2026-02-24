@@ -31,7 +31,6 @@ public class OpenFamilyManagerCommand : RevitCommand
     /// </remarks>
     public OpenFamilyManagerCommand()
     {
-        NoTransaction = true;
     }
 
     /// <summary>
