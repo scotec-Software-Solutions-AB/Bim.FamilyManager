@@ -3,8 +3,15 @@
 	<PropertyGroup>
 	</PropertyGroup>
 
+	<ItemGroup Condition="'$(RevitYear)'=='2025'">
+		<PackageReference Include="Scotec.Revit" Version="2025.2.1" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(RevitYear)'=='2026'">
+		<PackageReference Include="Scotec.Revit" Version="2026.2.1" />
+	</ItemGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Scotec.Revit" Version="2026.2.0-dev.27" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.17" />
 		<PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
 

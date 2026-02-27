@@ -10,4 +10,10 @@
 		<IsPackable>false</IsPackable>
     	<LangVersion>14.0</LangVersion>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- Default if nothing provided -->
+    <RevitYear Condition="'$(RevitYear)'==''">2025</RevitYear>
+  </PropertyGroup>
+  
 </Project>

@@ -2,15 +2,47 @@
 
   <PropertyGroup>
 	  <OutputType></OutputType>
-	  <TargetFramework>net48</TargetFramework>
+	  <TargetFramework>net4.7.2</TargetFramework>
+	  <UseWpf>true</UseWpf>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="wix" Version="3.14.1" />
-    <PackageReference Include="WixSharp" Version="1.26.0" />
-    <PackageReference Include="WixSharp.bin" Version="1.26.0" />
-    <PackageReference Include="WixSharp.wix.bin" Version="3.14.1" />
+    <None Remove="Resources\Icons\BackgroundImage.png" />
+    <None Remove="Resources\Icons\BannerImage.png" />
+    <None Remove="Resources\Icons\Logo.ico" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Icons\BackgroundImage.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Icons\BannerImage.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Icons\Logo.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+	<ItemGroup>
+    <PackageReference Include="WixSharp-wix4.WPF" Version="2.12.2" />
+    <PackageReference Include="WixSharp_wix4" Version="2.12.2" />
+  </ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Resources\Icons\BackgroundWithoutText.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Resources\Icons\BackgroundWithText.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Resources\Icons\Logo.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>
