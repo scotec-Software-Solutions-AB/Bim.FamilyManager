@@ -377,21 +377,13 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
-        {
             yield break;
-        }
 
-        var blobs = _blobContainerClient.GetBlobsAsync(prefix: prefix, cancellationToken: cancellationToken);
-        //.Where(b => !BackupRegex.IsMatch(b.Name) && b.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
-        //.ToList();
-
-        await foreach (var blobItem in blobs)
+        await foreach (var blobItem in EnumerateBlobs(cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (BackupRegex.IsMatch(blobItem.Name) || !blobItem.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
-            {
                 continue;
-            }
 
             var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
@@ -407,8 +399,32 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                 );
             }
         }
-    }
 
+        yield break;
+
+        // Local iterator to yield BlobItem from either source
+        async IAsyncEnumerable<Azure.Storage.Blobs.Models.BlobItem> EnumerateBlobs([EnumeratorCancellation] CancellationToken ct)
+        {
+            if (includeSubfolders)
+            {
+                await foreach (var blob in _blobContainerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+                {
+                    yield return blob;
+                }
+            }
+            else
+            {
+                await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(prefix: prefix, delimiter: "/", cancellationToken: ct))
+                {
+                    if (item.IsBlob)
+                    {
+                        yield return item.Blob;
+                    }
+                }
+            }
+        }
+
+    }
     /// <summary>
     ///     Creates a <see cref="RevitFamilyInfo" /> instance for the specified blob.
     /// </summary>

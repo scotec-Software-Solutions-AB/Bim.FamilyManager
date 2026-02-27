@@ -156,6 +156,8 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
 
                         return families.OrderBy(f => f.Name)
                                        .ToList();
+                        
+                        // Probably performace problem. UI blocking.
                     }).ConfigureAwait(true).GetAwaiter().GetResult();
                     _families = families.Select(CreateFamilyViewModel)
                                         .ToList();
