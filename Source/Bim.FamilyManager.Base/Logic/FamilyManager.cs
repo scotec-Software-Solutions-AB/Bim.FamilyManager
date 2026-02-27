@@ -1300,7 +1300,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         await foreach (var folder in leafFolders)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await foreach (var family in folder.GetFamiliesAsync(cancellationToken))
+            await foreach (var family in folder.GetFamiliesAsync(true, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 yield return family;

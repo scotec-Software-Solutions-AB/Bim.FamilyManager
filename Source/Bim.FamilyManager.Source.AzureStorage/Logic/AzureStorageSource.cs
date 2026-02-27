@@ -351,28 +351,30 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                 yield return new Folder(
                     Path.GetFileName(itemPrefix.Trim('/')),
                     c => GetFoldersAsync(itemPrefix, c), // Recursively get subfolders
-                    c => GetFamilies(itemPrefix, c)
+                    (i, c) => GetFamilies(itemPrefix, i, c)
                 );
             }
         }
     }
 
     /// <summary>
-    ///     Retrieves Revit families from Azure Blob Storage under the specified prefix.
+    /// Retrieves Revit families from Azure Blob Storage under the specified prefix.
     /// </summary>
     /// <param name="prefix">The blob prefix used to filter family files in the storage.</param>
+    /// <param name="includeSubfolders">
+    /// A boolean value indicating whether to include subfolders in the search for Revit families.
+    /// </param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    ///     An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
+    /// An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
     /// </returns>
     /// <remarks>
-    ///     This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit
-    ///     family files
-    ///     (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
-    ///     If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and
-    ///     returned.
+    /// This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit
+    /// family files (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
+    /// If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and
+    /// returned.
     /// </remarks>
-    private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
         {

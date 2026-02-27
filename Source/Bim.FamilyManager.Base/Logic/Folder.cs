@@ -30,7 +30,7 @@ public delegate IAsyncEnumerable<IFolder> GetSubfoldersAsyncDelegate(Cancellatio
 /// <remarks>
 ///     This delegate is used to enable lazy-loading of families, allowing efficient access to hierarchical data.
 /// </remarks>
-public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(CancellationToken cancellationToken);
+public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(bool includeSubfolders, CancellationToken cancellationToken);
 
 /// <summary>
 ///     Represents a folder in the Revit Family Manager hierarchy.
@@ -117,6 +117,9 @@ public class Folder : IFolder
     /// <summary>
     ///     Asynchronously retrieves the collection of Revit families contained within this folder.
     /// </summary>
+    /// <param name="includeSubfolders">
+    ///     A boolean value indicating whether to include families from subfolders in the retrieval.
+    /// </param>
     /// <param name="cancellationToken">
     ///     A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.
     /// </param>
@@ -125,11 +128,12 @@ public class Folder : IFolder
     /// </returns>
     /// <remarks>
     ///     This method provides an asynchronous way to access the Revit families stored in the folder,
-    ///     allowing for efficient enumeration and cancellation support.
+    ///     with an option to include families from subfolders. It supports efficient enumeration and
+    ///     cancellation to enhance performance and responsiveness.
     /// </remarks>
-    public IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(CancellationToken cancellationToken)
+    public IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, CancellationToken cancellationToken)
     {
-        return _families(cancellationToken);
+        return _families(includeSubfolders, cancellationToken);
     }
 
     /// <summary>

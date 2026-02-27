@@ -51,18 +51,20 @@ public interface IFolder
     IAsyncEnumerable<IFolder> GetSubfoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Asynchronously retrieves the collection of Revit families contained within this folder.
+    /// Asynchronously retrieves the collection of Revit families contained within this folder.
     /// </summary>
+    /// <param name="includeSubfolders">
+    /// A boolean value indicating whether to include families from subfolders in the result.
+    /// </param>
     /// <param name="cancellationToken">
-    ///     A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains an
-    ///     <see cref="IEnumerable{IRevitFamily}" /> representing the Revit families in the folder.
+    /// An <see cref="IAsyncEnumerable{IRevitFamily}"/> representing the Revit families in the folder.
     /// </returns>
     /// <remarks>
-    ///     This method provides access to all Revit families directly stored in the folder, including their metadata and
-    ///     symbols.
+    /// This method provides access to all Revit families directly stored in the folder, including their metadata and symbols.
+    /// If <paramref name="includeSubfolders"/> is set to <c>true</c>, families from subfolders will also be included.
     /// </remarks>
-    IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(CancellationToken cancellationToken);
+    IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, CancellationToken cancellationToken);
 }

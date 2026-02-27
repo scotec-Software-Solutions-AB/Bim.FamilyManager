@@ -149,7 +149,7 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
                     var families = Task.Run(async () =>
                     {
                         var families = new List<IRevitFamily>();
-                        await foreach (var family in Folder.GetFamiliesAsync(CancellationToken.None))
+                        await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
                         {
                             families.Add(family);
                         }
