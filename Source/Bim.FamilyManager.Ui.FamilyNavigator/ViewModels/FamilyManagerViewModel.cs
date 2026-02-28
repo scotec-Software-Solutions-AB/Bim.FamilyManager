@@ -78,7 +78,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         _logo = options.Value.Logo;
         StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded);
 
-        _reloadCommand = new RelayCommand(() => { _familyManager.Reload(); });
+        _reloadCommand = new RelayCommand(() => { _familyManager.ReloadAsync(); });
         _goHomeCommand = new RelayCommand(GoHome, CanGoHome);
         _goBackCommand = new RelayCommand(GoBack, CanGoBack);
     }

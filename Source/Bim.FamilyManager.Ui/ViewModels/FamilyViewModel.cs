@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
@@ -96,18 +97,25 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
         StaticWeakEventManager.AddWeakHandler(family, nameof(IRevitFamily.Initialized),
             (sender, args) =>
             {
-                OnPropertyChanged(nameof(Preview));
-                OnPropertyChanged(nameof(Product));
-                OnPropertyChanged(nameof(ProductVersion));
-                OnPropertyChanged(nameof(Updated));
-
                 // Invalidate symbols cache on reinitialization to ensure they are recreated.
                 _symbols = null;
-                OnPropertyChanged(nameof(Symbols));
+                Application.Current.Dispatcher.Invoke(OnInitialized, DispatcherPriority.ApplicationIdle);
             });
 
         StaticWeakEventManager.AddWeakHandler(family, nameof(IRevitFamily.LoadedInDocumentChanged),
-            (sender, args) => { Application.Current.Dispatcher.Invoke(NotifyChanges); });
+            (sender, args) =>
+            {
+                Application.Current.Dispatcher.Invoke(NotifyChanges);
+            });
+    }
+
+    private void OnInitialized()
+    {
+        OnPropertyChanged(nameof(Preview));
+        OnPropertyChanged(nameof(Product));
+        OnPropertyChanged(nameof(ProductVersion));
+        OnPropertyChanged(nameof(Updated));
+        OnPropertyChanged(nameof(Symbols));
     }
 
     /// <summary>
@@ -148,7 +156,8 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     /// <remarks>
     ///     Returns the preview image if available, otherwise a default image.
     /// </remarks>
-    public override ImageSource? Preview => GetPreview(Family.Preview);
+    public override ImageSource? Preview => 
+        GetPreview(Family.Preview);
 
     /// <summary>
     ///     Command to edit the family.

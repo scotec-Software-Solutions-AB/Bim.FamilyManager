@@ -1,14 +1,15 @@
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Base.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Client;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
 namespace Bim.FamilyManager.Source.AzureStorage.Logic;
@@ -39,6 +40,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
+    private CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
     /// <summary>
     ///     Static constructor. Loads the preview image resource for Azure storage source.
@@ -131,8 +133,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         if (_folders is null)
         {
             var folders = new List<IFolder>();
+            var token = _tokenSource.Token;
 
-            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", cancellationToken))
+            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 folders.Add(folder);
@@ -217,6 +220,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     protected override void OnReload()
     {
         _folders = null;
+        _tokenSource.Cancel(true);
+        _tokenSource = new CancellationTokenSource();
     }
 
     /// <summary>
@@ -345,6 +350,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(prefix: prefix, delimiter: "/", cancellationToken: cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            
             if (item.IsPrefix)
             {
                 var itemPrefix = item.Prefix;
@@ -444,6 +450,16 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         Stream LoadFileStream()
         {
+            // TODO: Probably stream to file and then use FileStream as below. This reduces the amount of needed memory. 
+            //  blobClient.DownloadTo(tempPath)
+            //  return new FileStream(
+            //    tempPath,
+            //    FileMode.Open,
+            //    FileAccess.Read,
+            //    FileShare.Read,
+            //    bufferSize: 128 * 1024,
+            //    options: FileOptions.DeleteOnClose | FileOptions.SequentialScan);
+            //  
             var blobClient = _blobContainerClient.GetBlobClient(blobName);
             var memoryStream = new MemoryStream();
             blobClient.DownloadTo(memoryStream);
