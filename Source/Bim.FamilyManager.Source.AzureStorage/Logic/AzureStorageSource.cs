@@ -10,6 +10,7 @@ using Scotec.Revit.RevitFamily;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Azure.Storage.Blobs.Models;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
 namespace Bim.FamilyManager.Source.AzureStorage.Logic;
@@ -347,7 +348,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             yield break;
         }
 
-        await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(prefix: prefix, delimiter: "/", cancellationToken: cancellationToken))
+        var options = new GetBlobsByHierarchyOptions()
+        {
+            Delimiter = "/",
+            Prefix = prefix
+        };
+        await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(options, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             
@@ -413,14 +419,25 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         {
             if (includeSubfolders)
             {
-                await foreach (var blob in _blobContainerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+                var options = new GetBlobsOptions()
+                {
+                    Prefix = prefix
+                };
+
+                await foreach (var blob in _blobContainerClient.GetBlobsAsync(options, ct))
                 {
                     yield return blob;
                 }
             }
             else
             {
-                await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(prefix: prefix, delimiter: "/", cancellationToken: ct))
+                var options = new GetBlobsByHierarchyOptions()
+                {
+                    Delimiter = "/",
+                    Prefix = prefix
+                };
+
+                await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(options, ct))
                 {
                     if (item.IsBlob)
                     {
@@ -516,7 +533,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         // Regex to match backup files with the format: MyFile.0001.rfa
         var pattern = $@"^{Regex.Escape(fileNameWithoutExtension)}\.\d{{4}}{Regex.Escape(extension)}$";
 
-        var backupBlobs = _blobContainerClient.GetBlobs(prefix: prefix)
+        var options = new GetBlobsOptions()
+        {
+            Prefix = prefix
+        };
+
+        var backupBlobs = _blobContainerClient.GetBlobs(options)
                                               .Where(b => Regex.IsMatch(Path.GetFileName(b.Name), pattern, RegexOptions.IgnoreCase))
                                               .Select(b => int.Parse(Path.GetFileName(b.Name)
                                                                          .Substring(fileNameWithoutExtension.Length + 1, 4)))
