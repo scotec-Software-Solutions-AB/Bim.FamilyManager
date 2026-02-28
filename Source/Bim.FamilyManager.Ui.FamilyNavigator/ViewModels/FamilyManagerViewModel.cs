@@ -1,11 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Bim.FamilyManager.Abstractions;
+﻿using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Bim.FamilyManager.Ui.Views.Settings;
@@ -13,6 +6,14 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Wpf.ViewModels;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
@@ -36,11 +37,8 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     private readonly RelayCommand _reloadCommand;
     private readonly FamilySourceViewModel.Factory _sourceFactory;
     private IEnumerable<IFamilySourceViewModel>? _familySources;
-    private bool _isActiveSearch;
     private IEnumerable<IFamilyManagerItemViewModel>? _items;
     private string _searchPattern = string.Empty;
-    private IEnumerable<IFamilyViewModel>? _searchResult;
-    private IFamilyManagerItemViewModel? _selectedItem;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManagerViewModel" /> class.
@@ -156,7 +154,63 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     ///     The selected family source determines the context for operations such as
     ///     filtering and searching families.
     /// </remarks>
-    public IFamilySourceViewModel? SelectedFamilySource => _history.FirstOrDefault() as IFamilySourceViewModel;
+    public IFamilySourceViewModel? SelectedFamilySource
+    {
+        get;
+        set
+        {
+            if (field is not null)
+            {
+                field.PropertyChanged -= OnFoldersPropertyChanged;
+            }
+
+            SetProperty(ref field, value);
+
+            if (field is not null)
+            {
+                field.PropertyChanged += OnFoldersPropertyChanged;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the <see cref="INotifyPropertyChanged.PropertyChanged"/> event for the <see cref="IFamilySourceViewModel.Folders"/> property.
+    /// </summary>
+    /// <param name="sender">
+    /// The source object that raised the event, typically an instance of <see cref="IFamilySourceViewModel"/>.
+    /// </param>
+    /// <param name="e">
+    /// The <see cref="PropertyChangedEventArgs"/> containing the name of the property that changed.
+    /// </param>
+    /// <remarks>
+    /// This method is triggered when the <see cref="IFamilySourceViewModel.Folders"/> property changes.
+    /// If the folders collection becomes null or empty and the navigation history contains more than one item,
+    /// all items except the first are removed from the history. The breadcrumb properties are updated accordingly.
+    /// If only one item remains in the history, the <see cref="Items"/> property is updated to reflect the current folders.
+    /// This ensures that the UI remains consistent when the folders collection of a family source changes, 
+    /// such as when the source becomes connected or disconnected.
+    /// </remarks>
+    private void OnFoldersPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if(sender is IFamilySourceViewModel source && e.PropertyName == nameof(IFamilySourceViewModel.Folders))
+        {
+            if ((source.Folders is null || source.Folders.Count == 0) && _history.Count > 1)
+            {
+                for (var i = _history.Count - 1; i > 0; i--)
+                {
+                    _history.RemoveAt(i);
+                }
+            }
+
+            OnPropertyChanged(nameof(Breadcrumb1));
+            OnPropertyChanged(nameof(Breadcrumb2));
+
+            if (_history.Count == 1)
+            {
+                Items = source.Folders;
+            }
+        }
+    }
 
     /// <summary>
     ///     Gets or sets the collection of items currently displayed in the Family Manager.
@@ -178,12 +232,12 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     /// </remarks>
     public IFamilyManagerItemViewModel? SelectedItem
     {
-        get => _selectedItem;
+        get;
         set
         {
-            if (_selectedItem is not null)
+            if (field is not null)
             {
-                _selectedItem.IsSelected = false;
+                field.IsSelected = false;
             }
 
             if (value != null)
@@ -204,7 +258,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
                 PushHistoryItem(value);
             }
 
-            SetProperty(ref _selectedItem, value);
+            SetProperty(ref field, value);
         }
     }
 
@@ -238,8 +292,8 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     /// </remarks>
     public bool IsActiveSearch
     {
-        get => _isActiveSearch;
-        set => SetProperty(ref _isActiveSearch, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     /// <summary>
@@ -253,8 +307,8 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     /// </remarks>
     public IEnumerable<IFamilyViewModel>? SearchResult
     {
-        get => _searchResult;
-        private set => SetProperty(ref _searchResult, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     /// <summary>
@@ -388,7 +442,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         OnPropertyChanged(nameof(Breadcrumb2));
         if (_history.Count == 0)
         {
-            OnPropertyChanged(nameof(SelectedFamilySource));
+            SelectedFamilySource = null;
         }
 
         NotifyCanExecuteChanged();
@@ -403,9 +457,9 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     private void ClearHistory()
     {
         _history.Clear();
+        SelectedFamilySource = null;
         OnPropertyChanged(nameof(Breadcrumb1));
         OnPropertyChanged(nameof(Breadcrumb2));
-        OnPropertyChanged(nameof(SelectedFamilySource));
 
         NotifyCanExecuteChanged();
     }
@@ -441,7 +495,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
             OnPropertyChanged(nameof(Breadcrumb2));
             if (_history.Count == 1)
             {
-                OnPropertyChanged(nameof(SelectedFamilySource));
+                SelectedFamilySource = (IFamilySourceViewModel)value;
             }
 
             NotifyCanExecuteChanged();
