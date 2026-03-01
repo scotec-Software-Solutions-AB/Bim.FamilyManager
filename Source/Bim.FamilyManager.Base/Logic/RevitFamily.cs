@@ -21,6 +21,8 @@ public sealed class RevitFamily : IRevitFamily
     private IList<IRevitFamilySymbol>? _familySymbols;
     private bool _isLoadedInDocument;
 
+    private Stream? _preview;
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="RevitFamily" /> class.
     /// </summary>
@@ -179,13 +181,34 @@ public sealed class RevitFamily : IRevitFamily
     {
         get
         {
-            //if(_familyInfo.TryGetInfoDataStream("FamilyPreviewImage", out var previewStream))
-            if (_familyInfo.TryGetStream("Bim.FamilyManager/PreviewImages/FamilyPreviewImage", out var previewStream))
+            if (!IsInitialized)
             {
-                return previewStream;
+                return null;
             }
 
-            return _familyInfo.Preview;
+            var previewStream = _preview;
+
+            if (previewStream is null)
+            {
+                // Try to get the preview image from the family info storage
+                previewStream = _familyInfo.TryGetStream("Bim.FamilyManager/PreviewImages/FamilyPreviewImage", out var infoPreview) 
+                    ? infoPreview 
+                    : _familyInfo.Preview;
+
+                _preview = previewStream;
+            }
+
+            return previewStream is null ? null : CloneStream(previewStream);
+
+            static Stream CloneStream(Stream stream)
+            {
+                stream.Position = 0;
+                var clone = new MemoryStream();
+                stream.CopyTo(clone);
+                clone.Position = 0;
+                stream.Position = 0;
+                return clone;
+            }
         }
     }
 
@@ -200,9 +223,28 @@ public sealed class RevitFamily : IRevitFamily
     ///     <see cref="RevitFamilyInfo" /> to instances of <see cref="RevitFamilySymbol" />. If the symbols have not been
     ///     initialized, they will be lazily loaded upon first access.
     /// </remarks>
-    public IList<IRevitFamilySymbol> FamilySymbols => _familySymbols ??= _familyInfo.FamilySymbolInfos
-                                                                                    .Select(s => (IRevitFamilySymbol)new RevitFamilySymbol(s, this))
-                                                                                    .ToList();
+    public IList<IRevitFamilySymbol> FamilySymbols
+    {
+        get
+        {
+            if (_familySymbols is null)
+            {
+                // Families are initialized asynchronously.
+                // However, symbols may be required during drag-and-drop operations or for displaying tooltips.
+                // Therefore, initialization is forced here.
+                if (!_familyInfo.IsInitialized)
+                {
+                    _familyInfo.Initialize();
+                }
+
+                _familySymbols = _familyInfo.FamilySymbolInfos
+                                            .Select(IRevitFamilySymbol (s) => new RevitFamilySymbol(s, this))
+                                            .ToList();
+            }
+
+            return _familySymbols;
+        }
+    }
 
     /// <summary>
     ///     Occurs when the <see cref="RevitFamily" /> instance has been successfully initialized.
@@ -281,6 +323,7 @@ public sealed class RevitFamily : IRevitFamily
             IsInitialized = false;
             _familySymbols = null;
             _familyInfo = familyInfo;
+            _preview = null;
         }
 
         Initialize();

@@ -30,7 +30,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     private readonly FamilyViewModel.Factory _familyFactory;
     private readonly IFamilyManager _familyManager;
     private readonly string? _logo;
-    private readonly RelayCommand _reloadCommand;
+    private readonly AsyncRelayCommand _reloadCommand;
     private readonly FamilySourceViewModel.Factory _sourceFactory;
     private IEnumerable<IFamilySourceViewModel>? _familySources;
     private bool _isActiveSearch;
@@ -72,7 +72,10 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
 
         _logo = options.Value.Logo;
         StaticWeakEventManager.AddWeakHandler(_familyManager, nameof(_familyManager.Reloaded), OnReloaded);
-        _reloadCommand = new RelayCommand(() => { _familyManager.Reload(); });
+        _reloadCommand = new AsyncRelayCommand(async () =>
+        {
+            await _familyManager.ReloadAsync();
+        });
     }
 
     /// <summary>

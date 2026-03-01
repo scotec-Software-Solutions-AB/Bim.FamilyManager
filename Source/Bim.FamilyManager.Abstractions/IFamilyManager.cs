@@ -24,7 +24,7 @@ public interface IFamilyManager
     /// </remarks>
     IEnumerable<IFamilySource> FamilySources { get; }
 
-    void Reload();
+    Task ReloadAsync();
 
     /// <summary>
     ///     Occurs when the family manager has completed reloading its data.

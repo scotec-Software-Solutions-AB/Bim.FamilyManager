@@ -51,6 +51,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private List<IFamilySourceOptions> _familySourceOptions;
     private IEnumerable<IFamilySource>? _familySources;
     private HashSet<string> _loadedFamilies = [];
+    private CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManager" /> class.
@@ -164,17 +165,23 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     family sources and data. It also triggers the <see cref="Reloaded" /> event to notify
     ///     subscribers of the reload operation.
     /// </remarks>
-    public void Reload()
+    public async Task ReloadAsync()
     {
-        _familyInitializationQueue.Stop();
-        _familyInitializationQueue.Clear();
+        await _tokenSource.CancelAsync();
+        _tokenSource = new CancellationTokenSource();
+        await Task.Run(() =>
+        {
 
-        _familySources = null;
-        _familyCache.Clear();
+            _familyInitializationQueue.Stop();
+            _familyInitializationQueue.Clear();
 
-        _familyInitializationQueue.Start();
+            _familySources = null;
+            _familyCache.Clear();
 
-        Reloaded?.Invoke(this, EventArgs.Empty);
+            _familyInitializationQueue.Start();
+
+            Reloaded?.Invoke(this, EventArgs.Empty);
+        });
     }
 
     /// <summary>
@@ -685,7 +692,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private void Reload(FamilySourcesOptions options)
     {
         _familySourceOptions = GetAllSourcesFromOptions(options);
-        Reload();
+        ReloadAsync();
     }
 
     /// <summary>
@@ -1370,7 +1377,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             var options = new ParallelOptions
             {
                 // Optional: Limit the number of concurrent threads. Since we have I/O-bound work, we can use a higher value.
-                MaxDegreeOfParallelism = Environment.ProcessorCount * 2
+                MaxDegreeOfParallelism = 4, //Environment.ProcessorCount * 2,
+                CancellationToken = _tokenSource.Token
             };
             Parallel.ForEach(families, options, family =>
             {
