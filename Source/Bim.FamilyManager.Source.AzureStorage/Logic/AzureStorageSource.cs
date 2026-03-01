@@ -42,7 +42,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
     private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-
+    private List<BlobItem>? _blobCache;
+    
     /// <summary>
     ///     Static constructor. Loads the preview image resource for Azure storage source.
     /// </summary>
@@ -131,12 +132,27 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </summary>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (_blobContainerClient is null)
+        {
+            yield break;
+        }
+
         if (_folders is null)
         {
             var folders = new List<IFolder>();
             var token = _tokenSource.Token;
 
-            await foreach (var folder in GetFoldersAsync(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
+            // Fill the cache once
+            if (_blobCache is null)
+            {
+                _blobCache = new List<BlobItem>();
+                await foreach (var blob in _blobContainerClient!.GetBlobsAsync(cancellationToken: token))
+                {
+                    _blobCache.Add(blob);
+                }
+            }
+
+            await foreach (var folder in GetFoldersFromCache(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 folders.Add(folder);
@@ -151,6 +167,91 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             yield return folder;
         }
     }
+
+    /// <summary>
+    /// Retrieves folders from the cached blobs under the specified prefix.
+    /// </summary>
+    private async IAsyncEnumerable<IFolder> GetFoldersFromCache(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_blobCache is null)
+            yield break;
+
+        // Find all unique folder prefixes under the given prefix
+        var folderPrefixes = _blobCache
+                             .Where(b => b.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                             .Select(b => GetImmediateSubfolder(prefix, b.Name))
+                             .Where(p => p is not null)
+                             .Distinct();
+
+        foreach (var itemPrefix in folderPrefixes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new Folder(
+                Path.GetFileName(itemPrefix!.Trim('/')),
+                c => GetFoldersFromCache(itemPrefix, c), // Recursively get subfolders
+                (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
+            );
+        }
+    }
+
+    /// <summary>
+    /// Retrieves Revit families from the cached blobs under the specified prefix.
+    /// </summary>
+    private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_blobCache is null)
+            yield break;
+
+        IEnumerable<BlobItem> blobs;
+        if (includeSubfolders)
+        {
+            blobs = _blobCache.Where(b => b.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+        }
+        else
+        {
+            blobs = _blobCache.Where(b =>
+            {
+                if (!b.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    return false;
+                var remainder = b.Name.Substring(prefix.Length);
+                return !remainder.Contains('/');
+            });
+        }
+
+        foreach (var blobItem in blobs)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (BackupRegex.IsMatch(blobItem.Name) || !blobItem.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
+            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+            {
+                yield return family;
+            }
+            else
+            {
+                yield return CreateRevitFamily(
+                    familyName,
+                    CreateFamilyInfo(blobItem.Name),
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobItem.Name)
+                );
+            }
+        }
+    }
+    /// <summary>
+    /// Helper to get the immediate subfolder under a prefix.
+    /// </summary>
+    private static string? GetImmediateSubfolder(string prefix, string blobName)
+    {
+        var remainder = blobName.Substring(prefix.Length);
+        var idx = remainder.IndexOf('/');
+        if (idx > 0)
+            return prefix + remainder.Substring(0, idx + 1);
+        return null;
+    }
+
+
 
     /// <summary>
     ///     Occurs when the Azure storage source is connected.
