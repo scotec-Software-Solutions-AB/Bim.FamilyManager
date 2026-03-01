@@ -1,25 +1,27 @@
-using Azure.Storage.Blobs;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Base.Logic;
-using Bim.FamilyManager.Source.AzureStorage.Options;
-using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
-using Scotec.Events.WeakEvents;
-using Scotec.Identity.AzureActiveDirectory;
-using Scotec.Revit.RevitFamily;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Bim.FamilyManager.Abstractions;
+using Bim.FamilyManager.Base.Logic;
+using Bim.FamilyManager.Source.AzureStorage.Options;
+using Scotec.Events.WeakEvents;
+using Scotec.Identity.AzureActiveDirectory;
+using Scotec.Revit.RevitFamily;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
-    
 namespace Bim.FamilyManager.Source.AzureStorage.Logic;
 
 /// <summary>
 ///     Represents a family source backed by Azure Blob Storage, providing access to folders and Revit families.
 ///     Handles authentication, connection management, and blob operations.
 /// </summary>
+/// <remarks>
+///     This class uses <see cref="AzureBlobCache" /> to efficiently cache and enumerate blobs and folders.
+///     All folder and family queries are performed in-memory after the initial cache population, minimizing Azure API
+///     calls.
+/// </remarks>
 public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 {
     /// <summary>
@@ -38,16 +40,18 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private static readonly Stream PreviewStream;
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
     private readonly IAadAuthService _authService;
-    private readonly ILogger<AzureStorageSource> _logger;
+    private AzureBlobCache? _blobCache;
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
-    private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-    private AzureBlobCache? _blobCache;
+    private CancellationTokenSource _tokenSource = new();
 
     /// <summary>
     ///     Static constructor. Loads the preview image resource for Azure storage source.
     /// </summary>
+    /// <remarks>
+    ///     Loads a PNG image from resources for use as a preview icon.
+    /// </remarks>
     static AzureStorageSource()
     {
         const string packUri =
@@ -63,17 +67,17 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <param name="familyManager">The family manager instance.</param>
     /// <param name="familyFactory">The factory for creating Revit families.</param>
     /// <param name="authService">The Azure AD authentication service.</param>
-    /// <param name="logger">The logger instance.</param>
+    /// <remarks>
+    ///     Sets up authentication and starts a silent connection attempt to Azure Blob Storage.
+    /// </remarks>
     public AzureStorageSource(
         AzureStorageSourceOptions options,
         IFamilyManager familyManager,
         IRevitFamily.Factory familyFactory,
-        IAadAuthService authService,
-        ILogger<AzureStorageSource> logger)
+        IAadAuthService authService)
         : base(options, familyManager, familyFactory)
     {
         _authService = authService;
-        _logger = logger;
 
         _ = ConnectToAzureStorageSilentAsync(CancellationToken.None);
     }
@@ -81,6 +85,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <summary>
     ///     Gets the preview image stream for the Azure storage source.
     /// </summary>
+    /// <remarks>
+    ///     Returns a stream positioned at the beginning for reading the preview image.
+    /// </remarks>
     public override Stream Preview
     {
         get
@@ -99,6 +106,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Gets or sets the current Azure AD authentication session.
     ///     Handles event registration and connection management.
     /// </summary>
+    /// <remarks>
+    ///     When the session changes, event handlers are updated and the connection is managed accordingly.
+    /// </remarks>
     private IAadAuthSession? Session
     {
         get => _session;
@@ -131,6 +141,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <summary>
     ///     Gets the collection of folders from Azure Blob Storage.
     /// </summary>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the operation to complete.</param>
+    /// <returns>An asynchronous stream of <see cref="IFolder" /> representing the folders containing Revit families.</returns>
+    /// <remarks>
+    ///     This method initializes the <see cref="AzureBlobCache" /> and uses it to enumerate folders efficiently.
+    ///     The folders are retrieved using <see cref="GetFoldersFromCache" />.
+    /// </remarks>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
@@ -163,77 +179,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
-    /// Helper to get the folder prefix from a blob name.
-    /// </summary>
-    private static string GetFolderPrefix(string blobName)
-    {
-        var idx = blobName.LastIndexOf('/');
-        return idx >= 0 ? blobName.Substring(0, idx + 1) : string.Empty;
-    }
-
-    /// <summary>
-    /// Retrieves folders from the cached blobs under the specified prefix.
-    /// </summary>
-    private async IAsyncEnumerable<IFolder> GetFoldersFromCache(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (_blobCache is null)
-            yield break;
-
-        foreach (var itemPrefix in _blobCache.GetImmediateSubfolders(prefix))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return new Folder(
-                System.IO.Path.GetFileName(itemPrefix.Trim('/')),
-                c => GetFoldersFromCache(itemPrefix, c),
-                (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
-            );
-        }
-    }
-
-    /// <summary>
-    /// Retrieves Revit families from the cached blobs under the specified prefix.
-    /// </summary>
-    private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (_blobCache is null)
-            yield break;
-
-        foreach (var blobName in _blobCache.GetBlobNamesByPrefix(prefix, includeSubfolders))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", System.StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            var familyName = System.IO.Path.GetFileNameWithoutExtension(blobName);
-            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
-            {
-                yield return family;
-            }
-            else
-            {
-                yield return CreateRevitFamily(
-                    familyName,
-                    CreateFamilyInfo(blobName),
-                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName)
-                );
-            }
-        }
-    }
-    /// <summary>
-    /// Helper to get the immediate subfolder under a prefix.
-    /// </summary>
-    private static string? GetImmediateSubfolder(string prefix, string blobName)
-    {
-        var remainder = blobName.Substring(prefix.Length);
-        var idx = remainder.IndexOf('/');
-        if (idx > 0)
-            return prefix + remainder.Substring(0, idx + 1);
-        return null;
-    }
-
-
-
-    /// <summary>
     ///     Occurs when the Azure storage source is connected.
     /// </summary>
     public event AzureStorageSourceEventHandler? Connected;
@@ -247,6 +192,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Connects to Azure Blob Storage using interactive authentication.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <remarks>
+    ///     This method attempts to establish an authenticated session and connect to Azure Blob Storage.
+    /// </remarks>
     public async Task ConnectToAzureStorageAsync(CancellationToken cancellationToken)
     {
         try
@@ -279,6 +228,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <param name="sourceBlobName">The name of the source blob.</param>
     /// <param name="destinationBlobName">The name of the destination blob.</param>
     /// <exception cref="System.InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
+    /// <remarks>
+    ///     This method performs a server-side copy of a blob within the same container.
+    /// </remarks>
     public void CopyBlob(string sourceBlobName, string destinationBlobName)
     {
         if (_blobContainerClient is null)
@@ -299,6 +251,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <summary>
     ///     Called when the source is reloaded.
     /// </summary>
+    /// <remarks>
+    ///     Resets the folder and cache state, and cancels any outstanding operations.
+    /// </remarks>
     protected override void OnReload()
     {
         _folders = null;
@@ -308,10 +263,87 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
+    ///     Retrieves folders from the cached blobs under the specified prefix.
+    /// </summary>
+    /// <param name="prefix">The blob prefix to search for folders.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the operation to complete.</param>
+    /// <returns>An asynchronous stream of <see cref="IFolder" /> representing the subfolders.</returns>
+    /// <remarks>
+    ///     This method uses <see cref="AzureBlobCache.GetImmediateSubfolders" /> for efficient folder enumeration.
+    /// </remarks>
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    private async IAsyncEnumerable<IFolder> GetFoldersFromCache(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+    {
+        if (_blobCache is null)
+        {
+            yield break;
+        }
+
+        foreach (var itemPrefix in _blobCache.GetImmediateSubfolders(prefix))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new Folder(
+                Path.GetFileName(itemPrefix.Trim('/')),
+                c => GetFoldersFromCache(itemPrefix, c),
+                (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
+            );
+        }
+    }
+
+    /// <summary>
+    ///     Retrieves Revit families from the cached blobs under the specified prefix.
+    /// </summary>
+    /// <param name="prefix">The blob prefix used to filter family files in the storage.</param>
+    /// <param name="includeSubfolders">If true, includes families in all subfolders; otherwise, only direct children.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the operation to complete.</param>
+    /// <returns>An asynchronous stream of <see cref="IRevitFamily" /> objects representing the Revit families found.</returns>
+    /// <remarks>
+    ///     This method uses <see cref="AzureBlobCache.GetBlobNamesByPrefix" /> for efficient file enumeration.
+    ///     It matches blob names and creates or retrieves <see cref="IRevitFamily" /> instances.
+    /// </remarks>
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders,
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                                                                      [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_blobCache is null)
+        {
+            yield break;
+        }
+
+        foreach (var blobName in _blobCache.GetBlobNamesByPrefix(prefix, includeSubfolders))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var familyName = Path.GetFileNameWithoutExtension(blobName);
+            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+            {
+                yield return family;
+            }
+            else
+            {
+                yield return CreateRevitFamily(
+                    familyName,
+                    CreateFamilyInfo(blobName),
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName)
+                );
+            }
+        }
+    }
+
+    /// <summary>
     ///     Handles the SignedOut event for the Azure AD session.
     /// </summary>
     /// <param name="session">The Azure AD session.</param>
     /// <param name="args">The event arguments.</param>
+    /// <remarks>
+    ///     Disconnects from Azure Blob Storage when the session is signed out.
+    /// </remarks>
     private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
     {
         try
@@ -320,13 +352,16 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
         catch (Exception)
         {
-            //TODO: Logging
+            //TODO:
         }
     }
 
     /// <summary>
     ///     Disconnects from Azure Blob Storage and clears cached data.
     /// </summary>
+    /// <remarks>
+    ///     This method resets the blob container client, folder cache, and triggers the <see cref="Disconnected" /> event.
+    /// </remarks>
     private void Disconnect()
     {
         _blobContainerClient = null;
@@ -341,6 +376,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </summary>
     /// <param name="session">The Azure AD session.</param>
     /// <param name="args">The event arguments.</param>
+    /// <remarks>
+    ///     Connects to Azure Blob Storage when the session is signed in.
+    /// </remarks>
     private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
     {
         try
@@ -349,7 +387,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         }
         catch (Exception)
         {
-            //TODO: Logging
+            //TODO
         }
     }
 
@@ -357,6 +395,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Establishes a connection to Azure Blob Storage using the current session.
     /// </summary>
     /// <exception cref="System.InvalidOperationException">Thrown if the session is null.</exception>
+    /// <remarks>
+    ///     This method creates a <see cref="BlobContainerClient" /> using the session's token credential.
+    /// </remarks>
     private void Connect()
     {
         if (Session is null)
@@ -373,6 +414,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Creates authentication options for Azure AD.
     /// </summary>
     /// <returns>An <see cref="AadAuthOptions" /> instance configured for the current source options.</returns>
+    /// <remarks>
+    ///     This method builds the authentication options required for Azure AD token acquisition.
+    /// </remarks>
     private AadAuthOptions CreateAuthOptions()
     {
         var cacheFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -392,6 +436,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Attempts to connect to Azure Blob Storage silently using cached credentials.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <remarks>
+    ///     This method attempts to sign in using cached credentials, falling back to interactive sign-in if necessary.
+    /// </remarks>
     private async Task ConnectToAzureStorageSilentAsync(CancellationToken cancellationToken)
     {
         try
@@ -419,124 +467,14 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     }
 
     /// <summary>
-    ///     Retrieves folders from Azure Blob Storage under the specified prefix.
-    /// </summary>
-    /// <param name="prefix">The blob prefix to search for folders.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>An async enumerable of <see cref="IFolder" /> instances representing folders.</returns>
-    private async IAsyncEnumerable<IFolder> GetFoldersAsync(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (_blobContainerClient is null)
-        {
-            yield break;
-        }
-
-        var options = new GetBlobsByHierarchyOptions()
-        {
-            Delimiter = "/",
-            Prefix = prefix
-        };
-        await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(options, cancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            if (item.IsPrefix)
-            {
-                var itemPrefix = item.Prefix;
-                yield return new Folder(
-                    Path.GetFileName(itemPrefix.Trim('/')),
-                    c => GetFoldersAsync(itemPrefix, c), // Recursively get subfolders
-                    (i, c) => GetFamilies(itemPrefix, i, c)
-                );
-            }
-        }
-    }
-
-    /// <summary>
-    /// Retrieves Revit families from Azure Blob Storage under the specified prefix.
-    /// </summary>
-    /// <param name="prefix">The blob prefix used to filter family files in the storage.</param>
-    /// <param name="includeSubfolders">
-    /// A boolean value indicating whether to include subfolders in the search for Revit families.
-    /// </param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// An asynchronous enumerable of <see cref="IRevitFamily" /> instances representing the Revit families found.
-    /// </returns>
-    /// <remarks>
-    /// This method filters blobs in Azure Blob Storage based on the provided prefix and ensures that only valid Revit
-    /// family files (e.g., files with a ".rfa" extension and not matching backup patterns) are returned.
-    /// If a family already exists in the family manager, it is returned directly; otherwise, a new family is created and
-    /// returned.
-    /// </remarks>
-    private async IAsyncEnumerable<IRevitFamily> GetFamilies(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (_blobContainerClient is null)
-            yield break;
-
-        await foreach (var blobItem in EnumerateBlobs(cancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (BackupRegex.IsMatch(blobItem.Name) || !blobItem.Name.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            var familyName = Path.GetFileNameWithoutExtension(blobItem.Name);
-            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
-            {
-                yield return family;
-            }
-            else
-            {
-                yield return CreateRevitFamily(
-                    familyName,
-                    CreateFamilyInfo(blobItem.Name),
-                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobItem.Name)
-                );
-            }
-        }
-
-        yield break;
-
-        // Local iterator to yield BlobItem from either source
-        async IAsyncEnumerable<Azure.Storage.Blobs.Models.BlobItem> EnumerateBlobs([EnumeratorCancellation] CancellationToken ct)
-        {
-            if (includeSubfolders)
-            {
-                var options = new GetBlobsOptions()
-                {
-                    Prefix = prefix
-                };
-
-                await foreach (var blob in _blobContainerClient.GetBlobsAsync(options, ct))
-                {
-                    yield return blob;
-                }
-            }
-            else
-            {
-                var options = new GetBlobsByHierarchyOptions()
-                {
-                    Delimiter = "/",
-                    Prefix = prefix
-                };
-
-                await foreach (var item in _blobContainerClient.GetBlobsByHierarchyAsync(options, ct))
-                {
-                    if (item.IsBlob)
-                    {
-                        yield return item.Blob;
-                    }
-                }
-            }
-        }
-
-    }
-    /// <summary>
     ///     Creates a <see cref="RevitFamilyInfo" /> instance for the specified blob.
     /// </summary>
     /// <param name="blobName">The name of the blob.</param>
     /// <returns>A <see cref="RevitFamilyInfo" /> instance containing metadata and file information.</returns>
     /// <exception cref="System.InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
+    /// <remarks>
+    ///     This method downloads the blob to a memory stream and creates a <see cref="RevitFamilyInfo" /> for it.
+    /// </remarks>
     private RevitFamilyInfo CreateFamilyInfo(string blobName)
     {
         if (_blobContainerClient is null)
@@ -550,16 +488,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         Stream LoadFileStream()
         {
-            // TODO: Probably stream to file and then use FileStream as below. This reduces the amount of needed memory. 
-            //  blobClient.DownloadTo(tempPath)
-            //  return new FileStream(
-            //    tempPath,
-            //    FileMode.Open,
-            //    FileAccess.Read,
-            //    FileShare.Read,
-            //    bufferSize: 128 * 1024,
-            //    options: FileOptions.DeleteOnClose | FileOptions.SequentialScan);
-            //  
+            // TODO: Consider streaming to file for large blobs to reduce memory usage.
             var blobClient = _blobContainerClient.GetBlobClient(blobName);
             var memoryStream = new MemoryStream();
             blobClient.DownloadTo(memoryStream);
@@ -575,6 +504,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <param name="stream">The stream containing the family data.</param>
     /// <param name="blobName">The name of the blob to save to.</param>
     /// <exception cref="System.InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
+    /// <remarks>
+    ///     This method creates a backup of the existing blob before overwriting it, then uploads the new data and updates the
+    ///     family metadata.
+    /// </remarks>
     private void SaveFamily(IRevitFamily family, Stream stream, string blobName)
     {
         if (_blobContainerClient is null)
@@ -616,7 +549,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         // Regex to match backup files with the format: MyFile.0001.rfa
         var pattern = $@"^{Regex.Escape(fileNameWithoutExtension)}\.\d{{4}}{Regex.Escape(extension)}$";
 
-        var options = new GetBlobsOptions()
+        var options = new GetBlobsOptions
         {
             Prefix = prefix
         };
