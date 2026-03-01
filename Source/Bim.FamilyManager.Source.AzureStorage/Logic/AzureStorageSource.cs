@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using Azure.Storage.Blobs.Models;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
 
-
+    
 namespace Bim.FamilyManager.Source.AzureStorage.Logic;
 
 /// <summary>
@@ -43,9 +43,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private IEnumerable<IFolder>? _folders;
     private IAadAuthSession? _session;
     private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-    private List<BlobItem>? _blobCache;
-    private Dictionary<string, BlobItem>? _blobItemCache;
-    private Dictionary<string, List<string>>? _folderBlobMap;
+    private AzureBlobCache? _blobCache;
 
     /// <summary>
     ///     Static constructor. Loads the preview image resource for Azure storage source.
@@ -136,33 +134,17 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (_blobContainerClient is null)
+        {
             yield break;
+        }
 
         if (_folders is null)
         {
             var folders = new List<IFolder>();
             var token = _tokenSource.Token;
 
-            // Build caches once
-            if (_blobItemCache is null || _folderBlobMap is null)
-            {
-                _blobItemCache = new Dictionary<string, BlobItem>(StringComparer.OrdinalIgnoreCase);
-                _folderBlobMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-                await foreach (var blob in _blobContainerClient.GetBlobsAsync(cancellationToken: token))
-                {
-                    _blobItemCache[blob.Name] = blob;
-
-                    // Build folder map
-                    var folderPrefix = GetFolderPrefix(blob.Name);
-                    if (!_folderBlobMap.TryGetValue(folderPrefix, out var list))
-                    {
-                        list = new List<string>();
-                        _folderBlobMap[folderPrefix] = list;
-                    }
-                    list.Add(blob.Name);
-                }
-            }
+            _blobCache ??= new AzureBlobCache(_blobContainerClient);
+            await _blobCache.InitializeAsync(token);
 
             await foreach (var folder in GetFoldersFromCache(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
             {
@@ -194,21 +176,14 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </summary>
     private async IAsyncEnumerable<IFolder> GetFoldersFromCache(string prefix, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (_folderBlobMap is null)
+        if (_blobCache is null)
             yield break;
 
-        // Find all unique immediate subfolders under the given prefix
-        var subfolders = _folderBlobMap.Keys
-            .Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && k.Length > prefix.Length)
-            .Select(k => GetImmediateSubfolder(prefix, k))
-            .Where(p => p is not null)
-            .Distinct();
-
-        foreach (var itemPrefix in subfolders)
+        foreach (var itemPrefix in _blobCache.GetImmediateSubfolders(prefix))
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return new Folder(
-                Path.GetFileName(itemPrefix!.Trim('/')),
+                System.IO.Path.GetFileName(itemPrefix.Trim('/')),
                 c => GetFoldersFromCache(itemPrefix, c),
                 (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
             );
@@ -220,26 +195,16 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </summary>
     private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (_folderBlobMap is null || _blobItemCache is null)
+        if (_blobCache is null)
             yield break;
 
-        IEnumerable<string> blobNames;
-        if (includeSubfolders)
-        {
-            blobNames = _blobItemCache.Keys.Where(name => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-        }
-        else
-        {
-            blobNames = _folderBlobMap.TryGetValue(prefix, out var names) ? names : Enumerable.Empty<string>();
-        }
-
-        foreach (var blobName in blobNames)
+        foreach (var blobName in _blobCache.GetBlobNamesByPrefix(prefix, includeSubfolders))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", System.StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            var familyName = Path.GetFileNameWithoutExtension(blobName);
+            var familyName = System.IO.Path.GetFileNameWithoutExtension(blobName);
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {
                 yield return family;
@@ -337,6 +302,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     protected override void OnReload()
     {
         _folders = null;
+        _blobCache = null;
         _tokenSource.Cancel(true);
         _tokenSource = new CancellationTokenSource();
     }
@@ -365,6 +331,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     {
         _blobContainerClient = null;
         _folders = null;
+        _blobCache = null;
         Disconnected?.Invoke(this);
         Reload();
     }
