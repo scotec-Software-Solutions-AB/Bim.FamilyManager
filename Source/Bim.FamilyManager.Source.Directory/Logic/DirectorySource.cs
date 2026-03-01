@@ -39,6 +39,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     private readonly ILogger<DirectorySource> _logger;
     private readonly string _rootPath;
     private IEnumerable<IFolder>? _folders;
+    private DirectoryFileCache? _fileCache;
 
     /// <summary>
     ///     Initializes static members of the <see cref="DirectorySource" /> class.
@@ -120,15 +121,19 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (_fileCache is null)
+            _fileCache = new DirectoryFileCache(_rootPath);
+
+        await _fileCache.InitializeAsync(cancellationToken);
+
         _folders ??= await Task.Run(async () =>
         {
             var folders = new List<IFolder>();
-            await foreach (var folder in GetFoldersAsync(_rootPath, cancellationToken))
+            await foreach (var folder in GetFoldersFromCache(_rootPath, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 folders.Add(folder);
             }
-
             return folders;
         }, cancellationToken);
 
@@ -136,6 +141,52 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return folder;
+        }
+    }
+
+    private async IAsyncEnumerable<IFolder> GetFoldersFromCache(string directory, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_fileCache is null)
+            yield break;
+
+        foreach (var subfolder in _fileCache.GetImmediateSubfolders(directory))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new Folder(
+                Path.GetFileName(subfolder),
+                c => GetFoldersFromCache(subfolder, c),
+                (i, c) => GetFamiliesFromCache(subfolder, i, c)
+            );
+        }
+    }
+
+    private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string directory, bool includeSubfolders, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (_fileCache is null)
+            yield break;
+
+        var familyFiles = _fileCache.GetFamilyFiles(directory, includeSubfolders)
+            .Where(filePath => !BackupRegex.IsMatch(filePath))
+            .ToList();
+
+        var descriptionFiles = _fileCache.GetDescriptionFiles(directory, includeSubfolders);
+
+        var sets = GroupFamiliesAndDescriptions(familyFiles, descriptionFiles);
+
+        foreach (var set in sets)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var familyName = set.Name;
+            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+            {
+                yield return family;
+            }
+            else
+            {
+                yield return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+            }
         }
     }
 
