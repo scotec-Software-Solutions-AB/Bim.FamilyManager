@@ -1,36 +1,54 @@
 # Adding a Directory Family Source
 
-A directory family source connects Bim.FamilyManager to a local or network folder containing Revit family files.
+A **Directory family source** connects Bim.FamilyManager to a local or network folder that contains Revit family files (`.rfa`).
 
-## Fields
+This is the simplest source type and typically used for:
+- an office library folder on a file server
+- discipline-specific folders (ELT, HLS, GA, …)
+- a local “work-in-progress” library during development
 
-- **Name**  
-  *A user-friendly name for the source (e.g., "Local Library" or "Network Families").*  
-  **Required**
+## Dialog fields
 
-- **Path**  
-  *The full path to the folder containing your `.rfa` family files.*  
-  **Required**  
-  Example: `C:\BIM\RevitFamilies` or `\\Server\Shared\Families`
+![Directory family source settings](Images/settings_family_source_directory.png)
 
-- **Include Subfolders**  
-  *If enabled, Bim.FamilyManager will search for families in all subfolders of the specified path.*  
-  Optional (default: enabled)
+### Name (required)
 
-- **Active**  
-  *Indicates whether this source is currently active and available in the manager.*  
-  Optional (default: enabled)
+A user-friendly name shown in the list of sources and throughout the UI. Keep it short and recognizable, e.g.:
 
-- **Description**  
-  *Optional notes or comments about the source (e.g., "Main office library").*  
-  Optional
+- `Mechanical`
+- `Electrical`
+- `Plumbing`
+
+### Directory (required)
+
+The folder path that contains your family files. You can:
+
+- paste/type the path directly, or
+- click the folder button to browse and select a directory
+
+Examples:
+
+- `C:\BIM\RevitFamilies\Furniture`
+- `\\Server\Shared\Families\Plumbing`
+
+### Active
+
+If enabled, the source is used when browsing/searching families. You can also toggle this later in the source list.
 
 ## Steps
 
-1. Enter a unique name for the source.
-2. Browse or type the folder path.
-3. Enable or disable subfolder inclusion.
-4. Optionally add a description.
-5. Click "Save" or "Add" to register the source.
+1. Open **Settings → Family Sources**.
+2. Click **Add** and select **Directory**.
+3. Enter a **Name**.
+4. Select the **Directory** (folder).
+5. Optionally uncheck **Active** if you don’t want to use it immediately.
+6. Click **OK**.
+7. Click **Save** in the settings dialog to persist.
+
+## Notes and best practices
+
+- **Permissions & availability:** Make sure the directory is reachable from the machine where Revit runs (especially for network shares).
+- **Drive mappings:** If you work with multiple machines/users, prefer UNC paths over mapped drives to avoid inconsistencies.
+- **Performance:** Very large folders can take longer to enumerate. Consider splitting huge libraries into multiple sources.
 
 [Back to Managing Family Sources](Managing%20Family%20Sources.md)

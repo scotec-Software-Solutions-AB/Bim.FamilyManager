@@ -1,49 +1,97 @@
 # Adding an Azure Family Source
 
-An Azure family source connects Bim.FamilyManager to a Microsoft Azure Storage account, allowing access to cloud-hosted family libraries.
+An **Azure family source** connects Bim.FamilyManager to a library stored in **Azure Blob Storage**.
 
-## Fields
+Authentication is done via **Azure Active Directory (Entra ID)** using:
+- **Client ID** (application ID)
+- **Tenant ID**
+- interactive sign-in (with silent sign-in when possible)
 
-- **Name**  
-  *A user-friendly name for the Azure source (e.g., "Company Cloud Families").*  
-  **Required**
+![Azure family source settings](Images/settings_family_source_azure.png)
 
-- **Azure Storage Account Name**  
-  *The name of your Azure Storage account.*  
-  **Required**
+## Prerequisites
 
-- **Azure Container Name**  
-  *The name of the blob container where family files are stored.*  
-  **Required**
+To use an Azure family source you typically need:
 
-- **Access Key / SAS Token**  
-  *The access key or Shared Access Signature (SAS) token for authentication.*  
-  **Required**
+- An **Azure Storage Account** (Blob storage)
+- A **Blob container** that contains `.rfa` files
+- An **Azure AD application registration** (for interactive sign-in)
+- Appropriate permissions for the signed-in user (e.g. *Storage Blob Data Reader* or higher on the container/account)
 
-- **Directory Path (within container)**  
-  *The path inside the container where families are located (can be left blank for root).*  
-  Optional
+> The exact permission model depends on how your organization manages Azure. If you’re unsure, ask your Azure admin to provide a Client/Tenant ID pair and grant access to the container.
 
-- **Include Subfolders**  
-  *If enabled, Bim.FamilyManager will search all subfolders within the specified container path.*  
-  Optional (default: enabled)
+## Dialog fields
 
-- **Active**  
-  *Indicates whether this source is currently active and available in the manager.*  
-  Optional (default: enabled)
+### Name (required)
 
-- **Description**  
-  *Optional notes or comments about the Azure source.*  
-  Optional
+A user-friendly name shown in the UI (e.g. `Azure`, `Company Cloud Families`).
+
+### Endpoint url (required)
+
+The storage endpoint URL, for example:
+
+- `https://<account>.blob.core.windows.net`
+
+### Container name (required)
+
+The name of the blob container where families are stored, e.g. `families`.
+
+### Root path (required)
+
+A virtual “folder” path inside the container that scopes the source to a sub-tree.
+
+Examples:
+
+- `Families`
+- `Libraries/MEP`
+- `Revit/2025`
+
+This value is also shown in the **Source** column in the Family Sources list.
+
+### Client ID (required, GUID)
+
+The application (client) ID of your Azure AD app registration, as a GUID.
+
+### Tenant ID (required, GUID)
+
+Your Azure AD (Entra) tenant ID, as a GUID.
+
+### Active
+
+If enabled, the source is used when browsing/searching families.
+
+### Signed in as
+
+Shows the currently signed-in account. When not signed in, it displays **“Not signed in.”**.
+
+## Signing in
+
+- If all required fields are valid, the dialog enables sign-in.
+- Bim.FamilyManager attempts a **silent sign-in** when possible (using cached tokens).
+- If silent sign-in is not possible, use the **Sign in** action to authenticate interactively.
+
+Token caching:
+- Tokens are cached per user under the local profile (LocalAppData) in a folder named `BIM.FamilyManager`.
+- The cache file name contains the client id (e.g. `msal_cache_<clientId>.bin`).
 
 ## Steps
 
-1. Enter a unique name for the source.
-2. Fill in the Azure Storage account and container names.
-3. Provide the access key or SAS token.
-4. Specify the directory path if needed.
-5. Enable or disable subfolder inclusion.
-6. Optionally add a description.
-7. Click "Save" or "Add" to register the source.
+1. Open **Settings → Family Sources**.
+2. Click **Add** and select **Azure Storage**.
+3. Fill in **Name**, **Endpoint url**, **Container name**, **Root path**, **Client ID**, and **Tenant ID**.
+4. Click **Sign in** (if not signed in already).
+5. Confirm with **OK**.
+6. Click **Save** in the settings dialog to persist.
+
+## Troubleshooting
+
+- **“Not signed in.” stays visible**
+  - Verify **Client ID** and **Tenant ID** are valid GUIDs.
+  - Ensure the signed-in user has access to the storage container/account.
+- **Families are not found**
+  - Confirm `Endpoint url` and `Container name` are correct.
+  - Check that your families exist under the specified **Root path**.
+- **Sign-in button disabled**
+  - One or more required fields are missing or invalid (Client/Tenant IDs must be GUIDs).
 
 [Back to Managing Family Sources](Managing%20Family%20Sources.md)
