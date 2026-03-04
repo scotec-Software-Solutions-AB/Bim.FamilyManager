@@ -1,119 +1,197 @@
+
 # Bim.FamilyManager
 
-**Bim.FamilyManager** is a powerful tool designed to streamline the management, organization, and deployment of Autodesk® Revit® family files within architectural and engineering workflows. Built on .NET 8, it offers a modern, user-friendly interface for handling Revit families from various sources, including local directories and Azure Storage.
+**Bim.FamilyManager** is an open-source **Autodesk® Revit® add‑in** that simplifies how Revit family libraries are organized, discovered, and deployed across teams and projects.
 
-> **Compatibility:** Bim.FamilyManager is compatible with Autodesk Revit 2025 and 2026.
+It provides a modern interface for browsing and loading Revit family files (`.rfa`) from **multiple configurable sources**, including **local directories** and **Azure Blob Storage**. The goal is to make family libraries easier to manage while remaining fully integrated in the Revit workflow.
 
-## Features
+> **Compatibility:** Autodesk® Revit® **2025** and **2026**
 
-- **Centralized Family Management:**  
-Organize, browse, and manage your Revit family files seamlessly within the Revit environment.
+---
 
-- **Multiple Source Support:**  
-Connect to local folders or cloud storage (Azure Storage) to access and synchronize family libraries.
+# Features
 
-- **Modern UI:**  
-Offers a modern user interface, with customizable themes and layouts.
+### Centralized Family Management
+Browse, organize, and load Revit families from multiple sources within a single interface.
 
-- **Drag & Drop:**  
-Easily add families using intuitive drag-and-drop functionality.
+### Multiple Source Support
+Connect family libraries from:
+- Local folders
+- Network shares
+- Azure Blob Storage
 
-- **Settings Management:**  
-Configure display, layout, and source settings to fit your workflow.
+### Modern User Interface
+Clean and responsive WPF interface with customizable layouts and themes.
 
-- **Extensible Architecture:**  
+### Drag & Drop Support
+Add or load families using intuitive drag-and-drop functionality.
+
+### Configurable Sources
+Enable, disable, or configure multiple family sources depending on your workflow.
+
+### Extensible Architecture
 Designed for easy integration of additional storage providers or UI customizations.
 
-## Getting Started
+---
 
-### Prerequisites
+# Screenshots
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- Windows OS (recommended for Revit integration)
+![Revit with Bim.FamilyManager](./Documentation/Images/family_manager_revit.png)
 
-### Building the Project
+![Bim.FamilyManager Modern UI](./Documentation/Images/family_manager_modern_view.png)
 
-**1. Clone the repository**
-```
+![Family Sources Settings](./Documentation/Images/settings_family_sources.png)
+
+---
+
+# Documentation
+
+Detailed documentation is available in the **Documentation** folder.
+
+- [Introduction](Documentation/Introduction.md)
+- [Managing Family Sources](Documentation/Managing%20Family%20Sources.md)
+- [Adding a Directory Family Source](Documentation/Adding%20a%20Directory%20Family%20Source.md)
+- [Adding an Azure Family Source](Documentation/Adding%20an%20Azure%20Family%20Source.md)
+
+The documentation explains how to configure and manage family libraries stored locally, on network shares, or in Azure Blob Storage.
+
+---
+
+# Getting Started
+
+## Prerequisites
+
+- Autodesk **Revit 2025 or newer**
+- **.NET 8 SDK**
+- Windows OS
+
+Download .NET:
+
+https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
+---
+
+# Building the Project
+
+## 1. Clone the repository
+
+```bash
 git clone https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager.git
-cd family-manager
+cd Bim.FamilyManager
 ```
 
-**2. Build the solution using Visual Studio 2022 or via command line**
-```
+## 2. Build the solution
+
+Using the .NET CLI:
+
+```bash
 dotnet build
 ```
 
-**3. Deploy the Add-in**  
-   Copy the built add-in files (DLLs and the corresponding `.addin` manifest file) to your Revit Add-ins folder.  
-   The typical path for Revit 2025 is:
-   ```
-   C:\ProgramData\Autodesk\Revit\Addins\2025\
-   ```
-   or
-  ```
-   C:\Users\YourUser\AppData\Roaming\Autodesk\Revit\Addins\2025\
-   ```  
+Or open the solution in **Visual Studio** and build normally.
 
-**4. Launch Revit**  
-Start Autodesk Revit. The Bim.FamilyManager add-in will appear in the "scotec" tab.
+---
 
-**5. Configure & Use**  
-Access Bim.FamilyManager from the Add-Ins tab and set up your sources and preferences.
+# Installing the Add‑In
 
-> **Note:** Bim.FamilyManager requires Revit 2025 or newer.
+Copy the compiled DLLs and the `.addin` manifest file to one of the Revit Add‑In folders.
 
-## Project Structure
+Example locations:
 
-- `Bim.FamilyManager`  
-Main logic and entry point for the add-in.
+**Machine-wide installation**
 
-- `Bim.FamilyManager.Abstractions`  
-Shared interfaces and abstractions.
+```
+C:\ProgramData\Autodesk\Revit\Addins\2025\
+```
 
-- `Bim.FamilyManager.Base`  
-Base implementations and common utilities.
+**Per-user installation**
 
-- `Bim.FamilyManager.Ui`  
-Shared UI components, dialogs, and themes.
+```
+C:\Users\<username>\AppData\Roaming\Autodesk\Revit\Addins\2025\
+```
 
-- `Bim.FamilyManager.Ui.Standard`  
-Classic WPF user interface.
+After installation, restart Revit.
 
-- `Bim.FamilyManager.Ui.Modern`  
-Modern WPF user interface with updated layouts.
+The **Bim.FamilyManager** ribbon panel will appear in the **scotec** tab.
 
-- `Bim.FamilyManager.Source.Directory`  
-Integration for local/network directory management.
+---
 
-- `Bim.FamilyManager.Source.AzureStorage`  
-Integration for Azure Storage management.
+# Configuring Family Sources
 
-## Screenshots
+After starting the add-in:
 
+1. Open **Settings**
+2. Navigate to **Family Sources**
+3. Add a source (Directory or Azure Storage)
+4. Configure the connection
+5. Save the settings
 
-![Revit with Bim.FamilyManager](./Documentation/Images/family_manager_revit.png "Revit with BM.FamilyManager")
+More details:
 
-![Bim.FamilyManager](./Documentation/Images/family_manager_modern_view.png "Bim.FamilyManager")
+- [Managing Family Sources](Documentation/Managing%20Family%20Sources.md)
 
-![Bim.FamilyManager Family Sources](./Documentation/Images/settings_family_sources.png "Bim.FamilyManager Family Sources")
+---
 
+# Project Structure
 
-## Professional Support & Custom Solutions
+| Project | Description |
+|-------|-------------|
+| **Bim.FamilyManager** | Main add‑in logic and Revit integration |
+| **Bim.FamilyManager.Abstractions** | Shared interfaces and contracts |
+| **Bim.FamilyManager.Base** | Core implementations and shared utilities |
+| **Bim.FamilyManager.Ui** | Shared UI components |
+| **Bim.FamilyManager.Ui.Standard** | Classic WPF interface |
+| **Bim.FamilyManager.Ui.Modern** | Modern WPF interface |
+| **Bim.FamilyManager.Source.Directory** | Directory based family source |
+| **Bim.FamilyManager.Source.AzureStorage** | Azure Blob Storage source integration |
 
-Need assistance or custom features? Visit our [homepage](https://www.scotec.com/en/bimfamilymanager) for professional support, tailored solutions, and consulting services.
+---
 
-We also offer custom Revit add-in development to fit your specific workflows and integration needs.
+# Professional Support & Custom Solutions
 
-## Contributing
+Need assistance or custom functionality?
 
-We welcome contributions to Bim.FamilyManager!  Your input helps improve a tool that benefits the Revit and BIM community.
-For detailed guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+Visit our website:
 
-We’re excited to collaborate! Whether you’re experienced or new to open source, your input is valuable. Help us make Bim.FamilyManager the best it can be!
+https://www.scotec.com/en/bimfamilymanager
 
-## License
+We provide:
 
-This project is licensed under the MIT License. See the [LICENSE](license.txt) file for details.
+- Custom Revit add‑in development
+- BIM workflow automation
+- Integration with cloud platforms
+- Enterprise BIM tooling
 
-*Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc. and/or its subsidiaries and/or affiliates in the USA and/or other countries. Bim.FamilyManager is an independent open-source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk, Inc. or any of its subsidiaries.*
+---
+
+# Contributing
+
+Contributions are welcome!
+
+If you would like to contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+Please read:
+
+[CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+# License
+
+This project is licensed under the **MIT License**.
+
+See:
+
+[LICENSE](license.txt)
+
+---
+
+# Trademark Notice
+
+Autodesk, the Autodesk logo, Revit, and other Autodesk marks are registered trademarks or trademarks of Autodesk, Inc.
+
+**Bim.FamilyManager** is an independent open‑source project and is not affiliated with, sponsored, authorized, or endorsed by Autodesk.
