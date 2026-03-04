@@ -153,7 +153,7 @@ Need assistance or custom functionality?
 
 Visit our website:
 
-https://www.scotec.com/en/bimfamilymanager
+https://www.scotec.com/bimfamilymanager
 
 We provide:
 
