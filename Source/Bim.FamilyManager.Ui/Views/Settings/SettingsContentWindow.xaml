@@ -7,6 +7,7 @@
         xmlns:settings="clr-namespace:Bim.FamilyManager.Ui.ViewModels.Settings"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
+        SizeToContent="Manual"
         Title="{x:Static resources:StringResources.FamilySourceSettings_Window_Title}" Height="450" Width="800"
         d:DataContext="{d:DesignInstance settings:FamilySourceSettingsEditViewModel, IsDesignTimeCreatable=false}">
 

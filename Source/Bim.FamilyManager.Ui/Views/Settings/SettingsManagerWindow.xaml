@@ -10,6 +10,7 @@
                  mc:Ignorable="d"
                  Title="{x:Static resources:StringResources.SettingsManager_Window_Title}" Height="450" Width="800"
                  WindowStartupLocation="CenterOwner"
+                 SizeToContent="Manual"
                  d:DataContext="{d:DesignInstance settings:SettingsManagerViewModel, IsDesignTimeCreatable=false}">
 
     <sco:RevitWindow.Resources>
