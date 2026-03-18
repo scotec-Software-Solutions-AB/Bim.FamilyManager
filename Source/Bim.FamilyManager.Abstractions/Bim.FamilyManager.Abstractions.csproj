@@ -4,11 +4,11 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit" Version="2025.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit" Version="2025.3.0-dev.37" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit" Version="2026.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit" Version="2026.3.0-dev.30" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -21,7 +21,18 @@ using Scotec.Revit.Isolation;
 using Scotec.Revit.Ui;
 using Scotec.Wpf.ViewModels;
 
+[assembly: RevitAddinIsolationContext(ContextName = "Bim.FamilyManager")]
+
 namespace Bim.FamilyManager;
+
+
+internal partial class RevitAddinAssemblyLoadContext
+{
+    partial void OnInitialize()
+    {
+        PreloadedAssemblies = ["Scotec.Wpf.Controls"];
+    }
+}
 
 /// <summary>
 ///     Represents the main application class for the Revit Family Manager.

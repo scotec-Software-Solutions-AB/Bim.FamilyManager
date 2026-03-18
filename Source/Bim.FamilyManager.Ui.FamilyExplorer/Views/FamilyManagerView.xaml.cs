@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.Runtime.Loader;
+using System.Windows;
 using System.Windows.Controls;
 using Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
+using Scotec.Revit.Wpf;
 
 namespace Bim.FamilyManager.Ui.FamilyExplorer.Views;
 
@@ -12,7 +14,7 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.Views;
 ///     It is designed to be used in conjunction with the FamilyManagerViewModel and integrates with the application's MVVM
 ///     architecture.
 /// </remarks>
-public partial class FamilyManagerView : UserControl
+public partial class FamilyManagerView : RevitUserControl
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilyManagerView" /> class.
@@ -24,7 +26,7 @@ public partial class FamilyManagerView : UserControl
     {
         InitializeComponent();
     }
-
+    
     /// <summary>
     ///     Handles the <see cref="ComboBox.SelectionChanged" /> event for the ComboBox in the Family Manager view.
     /// </summary>

@@ -10,11 +10,11 @@
   </ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.3.0-dev.37" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="2026.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit.Wpf" Version="2026.3.0-dev.30" />
 	</ItemGroup>
 
 
@@ -25,7 +25,7 @@
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ScaleHQ.DotScreen" Version="1.0.0-rc.2" />
-    <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1-dev.15" />
+    <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1" />
     <PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
     <PackageReference Include="Scotec.Wpf.Controls" Version="1.0.4-dev.1" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.17" />

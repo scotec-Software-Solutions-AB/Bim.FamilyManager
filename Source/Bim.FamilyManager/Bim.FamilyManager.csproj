@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!--<CompilerGeneratedFilesOutputPath>obj\gen</CompilerGeneratedFilesOutputPath>-->
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,15 +19,14 @@
 		</Content>
 	</ItemGroup>
 
-
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2025.2.2-dev.2" />
-		<PackageReference Include="Scotec.Revit" Version="2025.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit.Ui" Version="2025.3.0-dev.37" />
+		<PackageReference Include="Scotec.Revit" Version="2025.3.0-dev.37" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2026.2.2-dev.2" />
-		<PackageReference Include="Scotec.Revit" Version="2026.2.2-dev.2" />
+		<PackageReference Include="Scotec.Revit.Ui" Version="2026.3.0-dev.37" />
+		<PackageReference Include="Scotec.Revit" Version="2026.3.0-dev.37" />
 	</ItemGroup>
 
 
@@ -91,9 +92,6 @@
 		</PropertyGroup>
 
 		<Message Importance="high" Text="Copying extra files to publish root: $(_PublishRoot)" />
-		<Copy
-			SourceFiles="@(ExtraPublishFiles)"
-			DestinationFolder="$(_PublishRoot)%(RecursiveDir)"
-			SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(ExtraPublishFiles)" DestinationFolder="$(_PublishRoot)%(RecursiveDir)" SkipUnchangedFiles="true" />
 	</Target>
 </Project>

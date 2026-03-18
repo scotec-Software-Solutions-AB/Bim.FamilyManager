@@ -1,11 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Scotec.Revit.Wpf;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.Views;
@@ -18,7 +20,7 @@ namespace Bim.FamilyManager.Ui.Views;
 ///     to integrate with Revit's dockable pane system. It provides functionality for displaying and interacting with
 ///     Revit family data through the associated view model.
 /// </remarks>
-public partial class FamilyManagerPane : Page, IDockablePaneProvider
+public partial class FamilyManagerPane : RevitPage, IDockablePaneProvider
 {
     private readonly IServiceProvider _serviceProvider;
     private string _displayType = string.Empty;
@@ -109,7 +111,7 @@ public partial class FamilyManagerPane : Page, IDockablePaneProvider
     /// </param>
     /// <remarks>
     ///     This method ensures that the view model is updated only when the layout changes. It uses the
-    ///     <see cref="Application.Current.Dispatcher" /> to perform UI updates, such as setting the data context.
+    ///     <see cref="Dispatcher" /> to perform UI updates, such as setting the data context.
     ///     The view model is resolved from the <see cref="IServiceProvider" /> using the provided layout as a key.
     /// </remarks>
     private void BuildFamilyManagerViewModel(string layout)
