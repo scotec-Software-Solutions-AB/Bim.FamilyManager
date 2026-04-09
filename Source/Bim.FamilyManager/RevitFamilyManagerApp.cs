@@ -25,15 +25,6 @@ using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager;
 
-
-internal partial class RevitAddinAssemblyLoadContext
-{
-    partial void OnInitialize()
-    {
-        PreloadedAssemblies = ["Scotec.Wpf.Controls"];
-    }
-}
-
 /// <summary>
 ///     Represents the main application class for the Revit Family Manager.
 ///     This class is responsible for initializing and configuring the application,

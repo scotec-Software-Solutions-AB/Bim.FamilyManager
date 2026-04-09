@@ -96,7 +96,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             // Therefore, ensure that the sources have actually been modified before proceeding.
             if (CheckForChanges(_familySourceOptions, GetAllSourcesFromOptions(sourcesOptions)))
             {
-                Reload(sourcesOptions);
+                _ = Reload(sourcesOptions);
             }
         });
 
@@ -689,10 +689,10 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     clears the existing family cache, and restarts the family initialization queue.
     ///     It ensures that the family management system reflects the latest configuration changes.
     /// </remarks>
-    private void Reload(FamilySourcesOptions options)
+    private async Task Reload(FamilySourcesOptions options)
     {
         _familySourceOptions = GetAllSourcesFromOptions(options);
-        ReloadAsync();
+        await ReloadAsync();
     }
 
     /// <summary>
