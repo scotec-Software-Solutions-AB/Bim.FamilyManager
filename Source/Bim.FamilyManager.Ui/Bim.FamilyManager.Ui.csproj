@@ -10,7 +10,7 @@
   </ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.3.0" />
+		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.3.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(RevitYear)'=='2026'">
@@ -20,7 +20,7 @@
 
 	<ItemGroup>
     <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.269">
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.275">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
