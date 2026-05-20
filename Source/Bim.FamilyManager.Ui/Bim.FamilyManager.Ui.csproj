@@ -9,26 +9,22 @@
 
   </ItemGroup>
 
-	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="2025.3.2" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Wpf" Version="2026.3.0" />
+	<ItemGroup>
+		<PackageReference Include="Scotec.Revit.Wpf" />
 	</ItemGroup>
 
 
 	<ItemGroup>
-    <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.275">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ScaleHQ.DotScreen" Version="1.0.0-rc.2" />
-    <PackageReference Include="Scotec.Events.WeakEvents" Version="1.1.1" />
-    <PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
-    <PackageReference Include="Scotec.Wpf.Controls" Version="1.0.4-dev.1" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.17" />
+	<PackageReference Include="Material.Icons.WPF" />
+	<PackageReference Include="Microsoft.Windows.CsWin32">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="ScaleHQ.DotScreen" />
+	<PackageReference Include="Scotec.Events.WeakEvents" />
+	<PackageReference Include="Scotec.Wpf" />
+	<PackageReference Include="Scotec.Wpf.Controls" />
+	<PackageReference Include="System.Drawing.Common" />
 
   </ItemGroup>
 

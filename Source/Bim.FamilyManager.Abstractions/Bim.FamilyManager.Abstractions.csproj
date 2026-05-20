@@ -3,18 +3,15 @@
 	<PropertyGroup>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit" Version="2025.3.2" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit" Version="2026.3.0" />
+	<ItemGroup>
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" />
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" />
+		<PackageReference Include="Scotec.Revit" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Drawing.Common" Version="8.0.17" />
-		<PackageReference Include="Scotec.Wpf" Version="1.0.4-dev.1" />
-
+		<PackageReference Include="System.Drawing.Common" />
+		<PackageReference Include="Scotec.Wpf" />
 	</ItemGroup>
 
 </Project>

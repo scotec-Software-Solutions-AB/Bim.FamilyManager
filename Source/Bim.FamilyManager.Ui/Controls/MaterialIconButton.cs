@@ -20,6 +20,9 @@ public class MaterialIconButton : Button
     public static readonly DependencyProperty KindProperty = DependencyProperty.Register(nameof(Kind), typeof(MaterialIconKind), typeof(MaterialIconButton),
         new PropertyMetadata(default(MaterialIconKind), OnKindChanged));
 
+    public static readonly DependencyProperty IconSizeProperty = DependencyProperty.Register(nameof(IconSize), typeof(double), typeof(MaterialIconButton),
+        new PropertyMetadata(double.NaN));
+
     private MaterialIcon? _iconPart;
 
     /// <summary>
@@ -50,6 +53,22 @@ public class MaterialIconButton : Button
     {
         get => (MaterialIconKind)GetValue(KindProperty);
         set => SetValue(KindProperty, value);
+    }
+
+    /// <summary>
+    ///     Gets or sets the size (height and width) of the icon displayed by the button.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="double" /> value that specifies the icon size.
+    ///     The default value is <see cref="double.NaN" />.
+    /// </value>
+    /// <remarks>
+    ///     This property is a dependency property and supports data binding.
+    /// </remarks>
+    public double IconSize
+    {
+        get => (double)GetValue(IconSizeProperty);
+        set => SetValue(IconSizeProperty, value);
     }
 
     /// <summary>

@@ -50,12 +50,12 @@
                 <views:FamilySourcesView Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" />
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Top">
-                    <controls1:MaterialIconButton Padding="2" Height="32" Foreground="#b066c2"
+                    <controls1:MaterialIconButton Padding="2" IconSize="32" Foreground="#b066c2"
                                                   BorderThickness="0" Kind="{StaticResource IconReload}"
                                                   ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Refresh}"
                                                   Command="{Binding Path=ReloadCommand}" BorderBrush="#FFABADB3" />
 
-                    <controls1:MaterialIconButton Padding="2" Height="32" Foreground="#c26666"
+                    <controls1:MaterialIconButton Padding="2" IconSize="32" Foreground="#c26666"
                                                   BorderThickness="0" Kind="{StaticResource IconSettings}"
                                                   ToolTip="{x:Static resources:StringResources.FamilyManager_Button_Settings}"
                                                   Click="OnSettingsButtonClick" BorderBrush="#FFABADB3" />

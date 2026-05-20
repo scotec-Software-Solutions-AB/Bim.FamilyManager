@@ -19,20 +19,15 @@
 		</Content>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(RevitYear)'=='2025'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2025.3.2" />
-		<PackageReference Include="Scotec.Revit" Version="2025.3.2" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(RevitYear)'=='2026'">
-		<PackageReference Include="Scotec.Revit.Ui" Version="2026.3.0" />
-		<PackageReference Include="Scotec.Revit" Version="2026.3.0" />
+	<ItemGroup>
+		<PackageReference Include="Scotec.Revit.Ui" />
+		<PackageReference Include="Scotec.Revit" />
 	</ItemGroup>
 
 
 	<ItemGroup>
-		<PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
+		<PackageReference Include="Material.Icons.WPF" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" />
 	</ItemGroup>
 
 	<ItemGroup>

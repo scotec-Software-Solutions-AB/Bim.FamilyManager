@@ -103,7 +103,7 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="1" Margin="10,10,0,0">
             <controls1:MaterialIconButton Kind="{StaticResource IconAccount}"
-                                          Width="40" Height="40" Padding="0" Margin="0"
+                                          IconSize="40" Padding="0" Margin="0"
                                           HorizontalContentAlignment="Center"
                                           HorizontalAlignment="Left"
                                           Command="{Binding SignInCommand}" />

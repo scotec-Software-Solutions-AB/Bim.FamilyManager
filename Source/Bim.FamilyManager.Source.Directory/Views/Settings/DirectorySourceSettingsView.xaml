@@ -69,11 +69,11 @@
                                       x:Name="FolderTextBox"
                                       Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
                                       Watermark="Select source directory" />
-            <controls1:MaterialIconButton Grid.Column="1" Height="21" Foreground="{StaticResource ButtonFolderBrush}"
+            <controls1:MaterialIconButton Grid.Column="1" IconSize="21" Foreground="{StaticResource ButtonFolderBrush}"
                                           Background="{StaticResource PrimaryBackgroundBrush}"
                                           Click="OnSelectFolder" Kind="{StaticResource IconFolder}"
                                           ToolTip="{x:Static resources:StringResources.DirectorySourceSettings_Button_SelectFolder}"
-                                          Padding="0" Margin="0" VerticalAlignment="Bottom" />
+                                          Padding="0" Margin="0" VerticalAlignment="Bottom" FontSize="14" />
 
         </Grid>
 

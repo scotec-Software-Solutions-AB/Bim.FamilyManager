@@ -258,7 +258,7 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
         }
         catch (Exception e)
         {
-            _logger.LogCritical(e, $"Error while loading family into the active document. Family: {Family.Name}");
+            _logger.LogCritical(e, $"Error while removing family from the active document. Family: {Family.Name}");
         }
     }
 

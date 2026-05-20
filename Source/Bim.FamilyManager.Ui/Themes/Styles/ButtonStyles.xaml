@@ -17,6 +17,7 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
         <Setter Property="Opacity" Value="1" />
+        <Setter Property="IconSize" Value="24"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:MaterialIconButton}">
@@ -25,10 +26,11 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <material:MaterialIcon x:Name="PART_Icon" Kind="{TemplateBinding Kind}"
+                        <StackPanel Orientation="Horizontal" Margin="0">
+                            <material:MaterialIcon x:Name="PART_Icon" Kind="{TemplateBinding Kind}" 
+                                                   Height="{TemplateBinding IconSize}" Width="{TemplateBinding IconSize}"
                                                    Foreground="{TemplateBinding Foreground}" Background="Transparent"
-                                                   Padding="0" />
+                                                   Padding="0" Margin="0"  />
                             <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
                                        VerticalAlignment="Center" FontSize="{TemplateBinding FontSize}">
                                 <TextBlock.Style>
