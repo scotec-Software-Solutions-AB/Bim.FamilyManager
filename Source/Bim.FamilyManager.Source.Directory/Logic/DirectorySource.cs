@@ -212,15 +212,28 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var familyName = set.Name;
-            if (FamilyManager.TryGetRevitFamily(familyName, out var family))
+            // A single unreadable family file must not abort the enumeration. Without this guard,
+            // an exception thrown here would silently discard all families of the folder, because
+            // WPF data binding swallows exceptions escaping the bound property getters.
+            IRevitFamily? family;
+            try
+            {
+                var familyName = set.Name;
+                if (!FamilyManager.TryGetRevitFamily(familyName, out family))
+                {
+                    family = CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
+                        (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+                }
+            }
+            catch (Exception e)
+            {
+                family = null;
+                _logger.LogError(e, "Failed to create the family entry. Family file: {FamilyFile}", set.FamilyFile);
+            }
+
+            if (family is not null)
             {
                 yield return family;
-            }
-            else
-            {
-                yield return CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
-                    (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
             }
         }
     }

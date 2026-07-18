@@ -2,6 +2,7 @@
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 
@@ -18,6 +19,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     where TLayoutOptions : LayoutOptions
 {
     private readonly IFamilySource _familySource;
+    private readonly ILogger<FamilySourceViewModel<TLayoutOptions>> _logger;
     private IList<IFolderViewModel>? _folders;
     private IFolderViewModel? _selectedFolder;
 
@@ -36,6 +38,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     ///     An <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout
     ///     options.
     /// </param>
+    /// <param name="logger">The logger used to report errors while loading the folder structure.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the specified family source and panel factory, enabling interaction
     ///     with the family source's data and its associated panel.
@@ -43,10 +46,12 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     protected FamilySourceViewModel(
         IFamilySource familySource,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<TLayoutOptions> layoutOptions)
+        IOptionsMonitor<TLayoutOptions> layoutOptions,
+        ILogger<FamilySourceViewModel<TLayoutOptions>> logger)
         : base(layoutOptions)
     {
         _familySource = familySource;
+        _logger = logger;
 
         StaticWeakEventManager.AddWeakHandler(_familySource, nameof(IFamilySource.Reloaded), OnReloaded);
         Panel = panelFactory.Invoke(familySource);
@@ -70,20 +75,31 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
         {
             if (_folders is null)
             {
-                var folders = Task.Run(async () =>
+                // WPF data binding silently swallows exceptions thrown by property getters.
+                // Any error escaping this getter would surface as a source without folders,
+                // so errors are logged and an empty folder list is returned instead.
+                try
                 {
-                    var folders = new List<IFolder>();
-                    await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
+                    var folders = Task.Run(async () =>
                     {
-                        folders.Add(folder);
-                    }
+                        var folders = new List<IFolder>();
+                        await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
+                        {
+                            folders.Add(folder);
+                        }
 
-                    return folders.OrderBy(f => f.Name)
-                                  .ToList();
-                }).ConfigureAwait(true).GetAwaiter().GetResult();
+                        return folders.OrderBy(f => f.Name)
+                                      .ToList();
+                    }).ConfigureAwait(true).GetAwaiter().GetResult();
 
-                _folders = folders.Select(CreateFolderViewModel)
-                                  .ToList();
+                    _folders = folders.Select(CreateFolderViewModel)
+                                      .ToList();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error while loading folders. Source: {Source}", _familySource.Name);
+                    _folders = [];
+                }
 
                 SelectedFolder = _folders?.FirstOrDefault();
             }

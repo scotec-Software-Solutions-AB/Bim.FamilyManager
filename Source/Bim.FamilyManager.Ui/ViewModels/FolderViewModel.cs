@@ -2,6 +2,7 @@
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Base.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
@@ -17,6 +18,7 @@ namespace Bim.FamilyManager.Ui.ViewModels;
 public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewModel<TLayoutOptions>, IFolderViewModel
     where TLayoutOptions : LayoutOptions
 {
+    private readonly ILogger<FolderViewModel<TLayoutOptions>> _logger;
     private IEnumerable<IFamilyViewModel>? _families;
     private bool _isExpanded;
     private IEnumerable<IFolderViewModel>? _subfolders;
@@ -31,16 +33,19 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     /// <param name="layoutOptions">
     ///     The <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout options.
     /// </param>
+    /// <param name="logger">The logger used to report errors while loading subfolders and families.</param>
     /// <remarks>
     ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and
     ///     layout options, enabling
     ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and
     ///     supports dynamic creation of subfolder and family view models.
     /// </remarks>
-    protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
+    protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions,
+                              ILogger<FolderViewModel<TLayoutOptions>> logger)
         : base(layoutOptions)
     {
         Folder = folder;
+        _logger = logger;
         Preview = folder.Preview is null ? null : GetPreviewImage(folder.Preview);
     }
 
@@ -101,20 +106,33 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
             {
                 if (_subfolders is null)
                 {
-                    var subfolders = Task.Run(async () =>
+                    // WPF data binding silently swallows exceptions thrown by property getters.
+                    // Any error escaping this getter would surface as a folder without subfolders,
+                    // so errors are logged and the affected entries are skipped instead.
+                    try
                     {
-                        var subfolders = new List<IFolder>();
-                        await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+                        var subfolders = Task.Run(async () =>
                         {
-                            subfolders.Add(subfolder);
-                        }
+                            var subfolders = new List<IFolder>();
+                            await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+                            {
+                                subfolders.Add(subfolder);
+                            }
 
-                        return subfolders.OrderBy(f => f.Name)
-                                         .ToList();
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
+                            return subfolders.OrderBy(f => f.Name)
+                                             .ToList();
+                        }).ConfigureAwait(true).GetAwaiter().GetResult();
 
-                    _subfolders = subfolders.Select(CreateSubfolderViewModel)
-                                            .ToList();
+                        _subfolders = subfolders.Select(subfolder => TryCreateViewModel(subfolder, CreateSubfolderViewModel, subfolder.Name))
+                                                .Where(viewModel => viewModel is not null)
+                                                .Select(viewModel => viewModel!)
+                                                .ToList();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Error while loading subfolders. Folder: {Folder}", Folder.Name);
+                        _subfolders = [];
+                    }
                 }
 
                 return _subfolders;
@@ -146,21 +164,34 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
             {
                 if (_families is null)
                 {
-                    var families = Task.Run(async () =>
+                    // WPF data binding silently swallows exceptions thrown by property getters.
+                    // Any error escaping this getter would surface as an empty family list without
+                    // any diagnostics, so errors are logged and the affected entries are skipped instead.
+                    try
                     {
-                        var families = new List<IRevitFamily>();
-                        await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
+                        var families = Task.Run(async () =>
                         {
-                            families.Add(family);
-                        }
+                            var families = new List<IRevitFamily>();
+                            await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
+                            {
+                                families.Add(family);
+                            }
 
-                        return families.OrderBy(f => f.Name)
-                                       .ToList();
-                        
-                        // Probably performace problem. UI blocking.
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
-                    _families = families.Select(CreateFamilyViewModel)
-                                        .ToList();
+                            return families.OrderBy(f => f.Name)
+                                           .ToList();
+
+                            // Probably performace problem. UI blocking.
+                        }).ConfigureAwait(true).GetAwaiter().GetResult();
+                        _families = families.Select(family => TryCreateViewModel(family, CreateFamilyViewModel, family.Name))
+                                            .Where(viewModel => viewModel is not null)
+                                            .Select(viewModel => viewModel!)
+                                            .ToList();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Error while loading families. Folder: {Folder}", Folder.Name);
+                        _families = [];
+                    }
                 }
             }
 
@@ -197,4 +228,30 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     protected abstract IFolderViewModel CreateSubfolderViewModel(IFolder subfolder);
 
     protected abstract IFamilyViewModel CreateFamilyViewModel(IRevitFamily family);
+
+    /// <summary>
+    ///     Creates a view model for the specified item, logging and returning <c>null</c> on failure.
+    /// </summary>
+    /// <typeparam name="TItem">The type of the item to wrap.</typeparam>
+    /// <typeparam name="TViewModel">The type of the created view model.</typeparam>
+    /// <param name="item">The item to create a view model for.</param>
+    /// <param name="factory">The factory used to create the view model.</param>
+    /// <param name="itemName">The display name of the item, used for logging.</param>
+    /// <returns>The created view model, or <c>null</c> if the factory threw an exception.</returns>
+    /// <remarks>
+    ///     A single faulty item must not prevent the remaining items of the folder from being displayed.
+    /// </remarks>
+    private TViewModel? TryCreateViewModel<TItem, TViewModel>(TItem item, Func<TItem, TViewModel> factory, string itemName)
+        where TViewModel : class
+    {
+        try
+        {
+            return factory(item);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while creating the view model. Folder: {Folder}, Item: {Item}", Folder.Name, itemName);
+            return null;
+        }
+    }
 }

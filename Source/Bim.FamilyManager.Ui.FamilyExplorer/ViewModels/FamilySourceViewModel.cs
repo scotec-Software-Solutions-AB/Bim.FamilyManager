@@ -2,6 +2,7 @@
 using Bim.FamilyManager.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.FamilyExplorer.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
@@ -41,6 +42,7 @@ public class FamilySourceViewModel : FamilySourceViewModel<FamilyExplorerLayoutO
     ///     An <see cref="IOptionsMonitor{FamilyExplorerLayoutOptions}" /> providing the current and updated
     ///     layout options.
     /// </param>
+    /// <param name="logger">The logger used to report errors while loading the folder structure.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the specified family source, folder factory, panel factory, and layout
     ///     options.
@@ -50,8 +52,9 @@ public class FamilySourceViewModel : FamilySourceViewModel<FamilyExplorerLayoutO
         IFamilySource familySource,
         FolderViewModel.Factory folderFactory,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<FamilyExplorerLayoutOptions> layoutOptions)
-        : base(familySource, panelFactory, layoutOptions)
+        IOptionsMonitor<FamilyExplorerLayoutOptions> layoutOptions,
+        ILogger<FamilySourceViewModel<FamilyExplorerLayoutOptions>> logger)
+        : base(familySource, panelFactory, layoutOptions, logger)
     {
         _folderFactory = folderFactory;
     }
