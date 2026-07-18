@@ -19,6 +19,7 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     where TLayoutOptions : LayoutOptions
 {
     private readonly ILogger<FolderViewModel<TLayoutOptions>> _logger;
+    private IEnumerable<IFamilyViewModel>? _directFamilies;
     private IEnumerable<IFamilyViewModel>? _families;
     private bool _isExpanded;
     private IEnumerable<IFolderViewModel>? _subfolders;
@@ -200,6 +201,60 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     }
 
     /// <summary>
+    ///     Gets the collection of families located directly in the folder, excluding families in subfolders.
+    /// </summary>
+    /// <value>
+    ///     A collection of <see cref="IFamilyViewModel" /> objects representing the families stored directly in the
+    ///     folder, or <c>null</c> if the folder is neither expanded nor selected.
+    /// </value>
+    /// <remarks>
+    ///     Unlike <see cref="Families" />, which aggregates the families of all subfolders, this property only returns
+    ///     the families whose files are direct children of the folder. It is used by views that render subfolders as
+    ///     separate sections and would otherwise never display the folder's own families.
+    /// </remarks>
+    public IEnumerable<IFamilyViewModel>? DirectFamilies
+    {
+        get
+        {
+            // Performance: Do not load the families if the folder is not expanded or selected.
+            if (IsExpanded || IsSelected)
+            {
+                if (_directFamilies is null)
+                {
+                    // WPF data binding silently swallows exceptions thrown by property getters.
+                    // Any error escaping this getter would surface as an empty family list without
+                    // any diagnostics, so errors are logged and the affected entries are skipped instead.
+                    try
+                    {
+                        var families = Task.Run(async () =>
+                        {
+                            var families = new List<IRevitFamily>();
+                            await foreach (var family in Folder.GetFamiliesAsync(false, CancellationToken.None))
+                            {
+                                families.Add(family);
+                            }
+
+                            return families.OrderBy(f => f.Name)
+                                           .ToList();
+                        }).ConfigureAwait(true).GetAwaiter().GetResult();
+                        _directFamilies = families.Select(family => TryCreateViewModel(family, CreateFamilyViewModel, family.Name))
+                                                  .Where(viewModel => viewModel is not null)
+                                                  .Select(viewModel => viewModel!)
+                                                  .ToList();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Error while loading direct families. Folder: {Folder}", Folder.Name);
+                        _directFamilies = [];
+                    }
+                }
+            }
+
+            return _directFamilies;
+        }
+    }
+
+    /// <summary>
     ///     Gets or sets a value indicating whether the folder is expanded in the UI.
     /// </summary>
     /// <value>
@@ -221,6 +276,11 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
             {
                 // First time expanded. Notify property change to ensure families are loaded.
                 OnPropertyChanged(nameof(Families));
+            }
+
+            if (_directFamilies is null)
+            {
+                OnPropertyChanged(nameof(DirectFamilies));
             }
         }
     }

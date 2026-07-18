@@ -119,20 +119,39 @@
                                   HorizontalScrollBarVisibility="Hidden">
                         <!-- Use ItemsControl with StackPanel as ItemsPanel -->
                         <Grid>
-                            <ItemsControl Width="{Binding ViewportWidth, ElementName=ScrollViewer}"
-                                          ItemsSource="{Binding SelectedFamilySource.SelectedFolder.Subfolders, FallbackValue={x:Null}}"
-                                          Visibility="{Binding IsActiveSearch, Converter={StaticResource FalseToVisibleConverter}}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type viewModels:FolderViewModel}">
-                                        <views:FolderView />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <StackPanel Orientation="Vertical"
+                                        Visibility="{Binding IsActiveSearch, Converter={StaticResource FalseToVisibleConverter}}">
+                                <!-- Families stored directly in the selected folder. Without this section,
+                                     they would have no visual representation at all: the ItemsControl below
+                                     only renders subfolders, and the FolderView inside it only renders the
+                                     families of its own subfolder. -->
+                                <ItemsControl Width="{Binding ViewportWidth, ElementName=ScrollViewer}"
+                                              ItemsSource="{Binding SelectedFamilySource.SelectedFolder.DirectFamilies, FallbackValue={x:Null}}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type viewModels1:IFamilyViewModel}">
+                                            <views1:FamilyView />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <ItemsControl Width="{Binding ViewportWidth, ElementName=ScrollViewer}"
+                                              ItemsSource="{Binding SelectedFamilySource.SelectedFolder.Subfolders, FallbackValue={x:Null}}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type viewModels:FolderViewModel}">
+                                            <views:FolderView />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
                             <ItemsControl Width="{Binding ViewportWidth, ElementName=ScrollViewer}"
                                           ItemsSource="{Binding SearchResult}"
                                           Visibility="{Binding IsActiveSearch, Converter={StaticResource TrueToVisibleConverter}}">
