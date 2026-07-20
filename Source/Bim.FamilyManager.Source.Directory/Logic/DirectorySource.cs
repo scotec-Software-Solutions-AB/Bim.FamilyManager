@@ -99,7 +99,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        _fileCache ??= new DirectoryFileCache(_rootPath);
+        _fileCache ??= new DirectoryFileCache(_rootPath, _logger);
         await _fileCache.InitializeAsync(cancellationToken);
 
         _folders ??= await Task.Run(async () =>
@@ -141,13 +141,15 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// Handles the reload operation for the <see cref="DirectorySource" /> instance.
     /// </summary>
     /// <remarks>
-    /// This method overrides <see cref="FamilySource{TOptions}.OnReload" /> to reset the internal folder structure,
-    /// ensuring that all folders are reinitialized during the next operation.
+    /// This method overrides <see cref="FamilySource{TOptions}.OnReload" /> to reset the internal folder structure
+    /// and the file cache, ensuring that the directory tree is rescanned during the next operation.
     /// </remarks>
     protected override void OnReload()
     {
-        // Reset all folders to force reinitialization.
+        // Reset the folders and the file cache to force a rescan of the directory tree.
+        // Keeping the file cache alive would reload the folder structure from stale data.
         _folders = null;
+        _fileCache = null;
     }
 
     /// <summary>
