@@ -31,7 +31,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     public delegate DirectorySource Factory(DirectorySourceOptions options);
 
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
-    private static readonly Stream PreviewStream;
+    private static readonly byte[] PreviewImage;
     private readonly ILogger<DirectorySource> _logger;
     private readonly string _rootPath;
     private DirectoryFileCache? _fileCache;
@@ -41,7 +41,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// Initializes static members of the <see cref="DirectorySource" /> class.
     /// </summary>
     /// <remarks>
-    /// This static constructor is responsible for initializing the <see cref="PreviewStream" /> field
+    /// This static constructor is responsible for initializing the <see cref="PreviewImage" /> field
     /// by loading a resource stream from a predefined URI.
     /// </remarks>
     static DirectorySource()
@@ -49,7 +49,10 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         const string packUri =
             "pack://application:,,,/Bim.FamilyManager.Source.Directory;component/Resources/Images/FamilySourceStorageNetwork_128x128.png";
 
-        PreviewStream = LoadResourceAsStream(packUri);
+        using var resourceStream = LoadResourceAsStream(packUri);
+        using var buffer = new MemoryStream();
+        resourceStream.CopyTo(buffer);
+        PreviewImage = buffer.ToArray();
     }
 
     /// <summary>
@@ -75,18 +78,12 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// Gets a stream that provides a preview of the Revit family data.
     /// </summary>
     /// <remarks>
-    /// This property overrides <see cref="FamilySource{TOptions}.Preview" /> to return a stream
-    /// positioned at the beginning, allowing for reading the preview data from the start.
+    /// This property overrides <see cref="FamilySource{TOptions}.Preview" /> to return a new read-only stream
+    /// over the cached preview image on each access. Callers may read and dispose the returned stream
+    /// independently without affecting other consumers.
     /// </remarks>
     /// <returns>A <see cref="Stream" /> object containing the preview data for the Revit family.</returns>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
-    }
+    public override Stream Preview => new MemoryStream(PreviewImage, false);
 
     /// <summary>
     /// Gets the collection of folders representing the directory structure for Revit families.

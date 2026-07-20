@@ -37,7 +37,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <returns>A new <see cref="AzureStorageSource" /> instance.</returns>
     public delegate AzureStorageSource Factory(AzureStorageSourceOptions options);
 
-    private static readonly Stream PreviewStream;
+    private static readonly byte[] PreviewImage;
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
     private readonly IAadAuthService _authService;
     private AzureBlobCache? _blobCache;
@@ -57,7 +57,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         const string packUri =
             "pack://application:,,,/Bim.FamilyManager.Source.AzureStorage;component/Resources/Images/Azure_128x128.png";
 
-        PreviewStream = LoadResourceAsStream(packUri);
+        using var resourceStream = LoadResourceAsStream(packUri);
+        using var buffer = new MemoryStream();
+        resourceStream.CopyTo(buffer);
+        PreviewImage = buffer.ToArray();
     }
 
     /// <summary>
@@ -86,16 +89,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     ///     Gets the preview image stream for the Azure storage source.
     /// </summary>
     /// <remarks>
-    ///     Returns a stream positioned at the beginning for reading the preview image.
+    ///     Returns a new read-only stream over the cached preview image on each access. Callers may read and
+    ///     dispose the returned stream independently without affecting other consumers.
     /// </remarks>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
-    }
+    public override Stream Preview => new MemoryStream(PreviewImage, false);
 
     /// <summary>
     ///     Gets the options for the Azure storage source.

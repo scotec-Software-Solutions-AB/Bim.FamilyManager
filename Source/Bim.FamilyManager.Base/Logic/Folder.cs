@@ -42,7 +42,7 @@ public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(bool inc
 /// </remarks>
 public class Folder : IFolder
 {
-    private static readonly Stream PreviewStream;
+    private static readonly byte[] PreviewImage;
     private readonly GetFamiliesAsyncDelegate _families;
     private readonly GetSubfoldersAsyncDelegate _subFolders;
 
@@ -63,7 +63,10 @@ public class Folder : IFolder
     {
         const string packUri = "pack://application:,,,/Bim.FamilyManager.Base;component/Resources/Images/Folder_128x128.png";
 
-        PreviewStream = LoadResourceAsStream(packUri);
+        using var resourceStream = LoadResourceAsStream(packUri);
+        using var buffer = new MemoryStream();
+        resourceStream.CopyTo(buffer);
+        PreviewImage = buffer.ToArray();
     }
 
     /// <summary>
@@ -144,16 +147,10 @@ public class Folder : IFolder
     /// </value>
     /// <remarks>
     ///     The preview image provides a visual representation of the folder in the UI.
-    ///     The stream's position is reset to 0 on each access.
+    ///     A new read-only stream over the cached image is returned on each access, so callers may read and
+    ///     dispose it independently without affecting other consumers.
     /// </remarks>
-    public Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
-    }
+    public Stream Preview => new MemoryStream(PreviewImage, false);
 
     /// <summary>
     ///     Loads a resource as a <see cref="Stream" /> from the specified pack URI.
