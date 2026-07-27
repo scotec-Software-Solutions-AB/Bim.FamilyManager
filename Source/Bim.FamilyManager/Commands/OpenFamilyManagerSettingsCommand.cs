@@ -42,27 +42,8 @@ public class OpenFamilyManagerSettingsCommand : RevitCommand
     /// </remarks>
     protected override string CommandName => StringResources.Command_OpenFamilyManagerSettings_Name;
 
-    /// <summary>
-    ///     Executes the command to open the Family Manager settings window in Autodesk Revit.
-    /// </summary>
-    /// <param name="commandData">
-    ///     Provides access to the Revit application and its associated data.
-    /// </param>
-    /// <param name="services">
-    ///     A service provider that supplies additional services required for the execution of the command.
-    /// </param>
-    /// <returns>
-    ///     A <see cref="Autodesk.Revit.UI.Result" /> indicating the outcome of the command execution.
-    /// </returns>
-    /// <remarks>
-    ///     This method retrieves the factory for creating the
-    ///     <see cref="Bim.FamilyManager.Ui.Views.Settings.SettingsManagerWindow" />
-    ///     and displays the settings window as a modal dialog. The command is executed manually and does not require a
-    ///     transaction.
-    /// </remarks>
-    protected override Result OnExecute(ExternalCommandData commandData, IServiceProvider services)
+    protected Result OnExecute(SettingsManagerWindow.Factory settingsWindowFactory)
     {
-        var settingsWindowFactory = services.GetRequiredService<SettingsManagerWindow.Factory>();
         var window = settingsWindowFactory();
 
         window.ShowDialog();

@@ -1,9 +1,9 @@
 ﻿using System.IO;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Abstractions;
 using Bim.FamilyManager.Abstractions.ViewModels;
@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Revit;
+using Application = System.Windows.Application;
+using Color = System.Windows.Media.Color;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
 
@@ -253,7 +255,7 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     {
         try
         {
-            await _revitTask.Run(uiApplication => { _familyManager.RemoveFamilyFromActiveDocument(Family); });
+            await _revitTask.Run(_ => { _familyManager.RemoveFamilyFromActiveDocument(Family); });
             NotifyChanges();
         }
         catch (Exception e)
@@ -283,7 +285,7 @@ public abstract class FamilyViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     {
         try
         {
-            var family = await _revitTask.Run(uiApplication =>
+            var family = await _revitTask.Run(_ =>
             {
                 _familyManager.TryLoadFamilyIntoActiveDocument(Family, out var loadedFamily);
                 return loadedFamily;

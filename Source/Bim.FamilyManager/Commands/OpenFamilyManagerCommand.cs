@@ -45,26 +45,9 @@ public class OpenFamilyManagerCommand : RevitCommand
     /// </remarks>
     protected override string CommandName => StringResources.Command_OpenFamilyManager_Name;
 
-    /// <summary>
-    ///     Executes the command to open the Family Manager dockable pane in Autodesk Revit.
-    /// </summary>
-    /// <param name="commandData">
-    ///     An object that provides access to the Revit application and its associated data.
-    /// </param>
-    /// <param name="services">
-    ///     A service provider that supplies additional services required for command execution.
-    /// </param>
-    /// <returns>
-    ///     A <see cref="Autodesk.Revit.UI.Result" /> value indicating the success or failure of the command execution.
-    /// </returns>
-    /// <remarks>
-    ///     This method activates and displays the dockable pane associated with the Family Manager,
-    ///     allowing users to manage Revit families. The command is executed manually and does not
-    ///     require a transaction.
-    /// </remarks>
-    protected override Result OnExecute(ExternalCommandData commandData, IServiceProvider services)
+    protected Result OnExecute(UIControlledApplication uiApplication)
     {
-        var dockableWindow = commandData.Application.GetDockablePane(new DockablePaneId(Constants.PaneId));
+        var dockableWindow = uiApplication.GetDockablePane(new DockablePaneId(Constants.PaneId));
         dockableWindow.Show();
 
         return Result.Succeeded;
