@@ -4,6 +4,7 @@ using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.FamilyNavigator.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
@@ -31,12 +32,21 @@ public class FamilySourceViewModel : FamilySourceViewModel<FamilyNavigatorLayout
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilySourceViewModel" /> class.
     /// </summary>
+    /// <param name="familySource">The family source to be managed by this view model.</param>
+    /// <param name="folderFactory">Factory for creating folder view models.</param>
+    /// <param name="panelFactory">Factory for creating family source panel view models.</param>
+    /// <param name="layoutOptions">Monitor for layout options.</param>
+    /// <param name="logger">The logger used to report errors while loading the folder structure.</param>
+    /// <remarks>
+    ///     Sets up the view model with the specified family source and folder factory, and initializes the preview image.
+    /// </remarks>
     public FamilySourceViewModel(
         IFamilySource familySource,
         FolderViewModel.Factory folderFactory,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<FamilyNavigatorLayoutOptions> layoutOptions)
-        : base(familySource, panelFactory, layoutOptions)
+        IOptionsMonitor<FamilyNavigatorLayoutOptions> layoutOptions,
+        ILogger<FamilySourceViewModel<FamilyNavigatorLayoutOptions>> logger)
+        : base(familySource, panelFactory, layoutOptions, logger)
     {
         _familySource = familySource;
         _folderFactory = folderFactory;

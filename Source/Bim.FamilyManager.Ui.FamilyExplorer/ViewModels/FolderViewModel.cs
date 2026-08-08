@@ -2,6 +2,7 @@ using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.FamilyExplorer.Options;
 using Bim.FamilyManager.Ui.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;
@@ -42,6 +43,7 @@ public class FolderViewModel : FolderViewModel<FamilyExplorerLayoutOptions>
     ///     An <see cref="IOptionsMonitor{FamilyExplorerLayoutOptions}" /> for monitoring layout
     ///     options.
     /// </param>
+    /// <param name="logger">The logger used to report errors while loading subfolders and families.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the provided dependencies, enabling management of folder data,
     ///     subfolder instantiation, family instantiation, and layout configuration.
@@ -50,8 +52,9 @@ public class FolderViewModel : FolderViewModel<FamilyExplorerLayoutOptions>
         IFolder folder,
         Factory subfolderFactory,
         FamilyViewModel.Factory familyFactory,
-        IOptionsMonitor<FamilyExplorerLayoutOptions> layoutOptions)
-        : base(folder, layoutOptions)
+        IOptionsMonitor<FamilyExplorerLayoutOptions> layoutOptions,
+        ILogger<FolderViewModel<FamilyExplorerLayoutOptions>> logger)
+        : base(folder, layoutOptions, logger)
     {
         _subfolderFactory = subfolderFactory;
         _familyFactory = familyFactory;

@@ -2,6 +2,7 @@ using System.Windows.Media;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Core.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 
@@ -18,6 +19,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     where TLayoutOptions : LayoutOptions
 {
     private readonly IFamilySource _familySource;
+    private readonly ILogger<FamilySourceViewModel<TLayoutOptions>> _logger;
     private IList<IFolderViewModel>? _folders;
     private bool _foldersLoading;
     private IFolderViewModel? _selectedFolder;
@@ -37,6 +39,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     ///     An <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout
     ///     options.
     /// </param>
+    /// <param name="logger">The logger used to report errors while loading the folder structure.</param>
     /// <remarks>
     ///     This constructor sets up the view model with the specified family source and panel factory, enabling interaction
     ///     with the family source's data and its associated panel.
@@ -44,10 +47,12 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     protected FamilySourceViewModel(
         IFamilySource familySource,
         IFamilySourcePanelViewModel.Factory panelFactory,
-        IOptionsMonitor<TLayoutOptions> layoutOptions)
+        IOptionsMonitor<TLayoutOptions> layoutOptions,
+        ILogger<FamilySourceViewModel<TLayoutOptions>> logger)
         : base(layoutOptions)
     {
         _familySource = familySource;
+        _logger = logger;
 
         StaticWeakEventManager.AddWeakHandler(_familySource, nameof(IFamilySource.Reloaded), OnReloaded);
         Panel = panelFactory.Invoke(familySource);
@@ -94,6 +99,11 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 
             SelectedFolder = _folders.FirstOrDefault();
             OnPropertyChanged(nameof(Folders));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while loading folders. Source: {Source}", _familySource.Name);
+            _folders = [];
         }
         finally
         {
