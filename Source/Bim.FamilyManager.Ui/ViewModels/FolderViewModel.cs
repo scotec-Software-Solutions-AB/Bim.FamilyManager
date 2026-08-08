@@ -15,8 +15,10 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     private static readonly ImageSource? FolderIcon;
 
     private IEnumerable<IFamilyViewModel>? _families;
+    private bool _familiesLoading;
     private bool _isExpanded;
     private IEnumerable<IFolderViewModel>? _subfolders;
+    private bool _subfoldersLoading;
 
     static FolderViewModel()
     {
@@ -82,72 +84,76 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
         {
             if (IsExpanded || IsSelected)
             {
-                if (_subfolders is null)
+                if (_subfolders is null && !_subfoldersLoading)
                 {
-                    var subfolders = Task.Run(async () =>
-                    {
-                        var subfolders = new List<IFolder>();
-                        await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
-                        {
-                            subfolders.Add(subfolder);
-                        }
-
-                        return subfolders.OrderBy(f => f.Name)
-                                         .ToList();
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
-
-                    _subfolders = subfolders.Select(CreateSubfolderViewModel)
-                                            .ToList();
+                    _ = LoadSubfoldersAsync();
                 }
-
-                return _subfolders;
             }
 
-            return null;
+            return _subfolders;
         }
     }
-    // Performance: Do not load the families if the folder is not expanded.
 
-    /// <summary>
-    ///     Gets the collection of families associated with the folder represented by this view model.
-    /// </summary>
-    /// <value>
-    ///     A collection of <see cref="IFamilyViewModel" /> objects representing the families in the folder, or <c>null</c> if
-    ///     the folder is not expanded.
-    /// </value>
-    /// <remarks>
-    ///     This property dynamically loads and returns the families when the folder is expanded or selected. If the folder is
-    ///     not expanded,
-    ///     the property returns <c>null</c>. The families are represented as instances of <see cref="IFamilyViewModel" />.
-    /// </remarks>
+    private async Task LoadSubfoldersAsync()
+    {
+        _subfoldersLoading = true;
+        try
+        {
+            var subfolders = new List<IFolder>();
+            await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+            {
+                subfolders.Add(subfolder);
+            }
+
+            _subfolders = subfolders.OrderBy(f => f.Name)
+                                    .Select(CreateSubfolderViewModel)
+                                    .ToList();
+
+            OnPropertyChanged(nameof(Subfolders));
+        }
+        finally
+        {
+            _subfoldersLoading = false;
+        }
+    }
+
+    // Performance: Families and Subfolders are loaded only when the folder is expanded or selected.
     public IEnumerable<IFamilyViewModel>? Families
     {
         get
         {
-            // Performance: Do not load the families if the folder is not expanded.
             if (IsExpanded || IsSelected)
             {
-                if (_families is null)
+                if (_families is null && !_familiesLoading)
                 {
-                    var families = Task.Run(async () =>
-                    {
-                        var families = new List<IRevitFamily>();
-                        await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
-                        {
-                            families.Add(family);
-                        }
-
-                        return families.OrderBy(f => f.Name)
-                                       .ToList();
-                        
-                        // Probably performace problem. UI blocking.
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
-                    _families = families.Select(CreateFamilyViewModel)
-                                        .ToList();
+                    _ = LoadFamiliesAsync();
                 }
             }
 
             return _families;
+        }
+    }
+
+    private async Task LoadFamiliesAsync()
+    {
+        _familiesLoading = true;
+        try
+        {
+            var families = new List<IRevitFamily>();
+            await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
+            {
+                families.Add(family);
+            }
+
+            _families = families.OrderBy(f => f.Name)
+                                .Select(CreateFamilyViewModel)
+                                .ToList();
+
+            OnPropertyChanged(nameof(Families));
+        }
+        finally
+        {
+            _familiesLoading = false;
         }
     }
 

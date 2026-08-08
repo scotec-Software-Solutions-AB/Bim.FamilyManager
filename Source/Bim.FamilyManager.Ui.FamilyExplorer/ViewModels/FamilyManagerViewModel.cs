@@ -138,7 +138,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
         set
         {
             SetProperty(ref _searchPattern, value);
-            FilterFamilies(_searchPattern);
+            _ = FilterFamiliesAsync(_searchPattern);
         }
     }
 
@@ -277,7 +277,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     {
         if (IsActiveSearch)
         {
-            FilterFamilies(SearchPattern);
+            _ = FilterFamiliesAsync(SearchPattern);
         }
     }
 
@@ -310,31 +310,25 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
     ///     pattern within the selected folder. If the search pattern is invalid or no folder is selected, the search result
     ///     is cleared, and the <see cref="IsActiveSearch" /> property is set to <c>false</c>.
     /// </remarks>
-    private void FilterFamilies(string searchPattern)
+    private async Task FilterFamiliesAsync(string searchPattern)
     {
         var folder = SelectedFamilySource?.SelectedFolder;
         if (!string.IsNullOrWhiteSpace(searchPattern) && folder is not null)
         {
             IsActiveSearch = true;
-            var searchResult = Task.Run(async () =>
+            var families = new List<IRevitFamily>();
+
+            if (_searchPattern.Length >= 3)
             {
-                if (_searchPattern.Length >= 3)
+                await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
                 {
-                    var families = new List<IRevitFamily>();
-                    await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
-                    {
-                        families.Add(family);
-                    }
-
-                    return families.OrderBy(f => f.Name)
-                                   .ToList();
+                    families.Add(family);
                 }
+            }
 
-                return [];
-            }).ConfigureAwait(true).GetAwaiter().GetResult();
-
-            SearchResult = searchResult.Select(family => (IFamilyViewModel)_familyFactory(family))
-                                       .ToList();
+            SearchResult = families.OrderBy(f => f.Name)
+                                   .Select(family => (IFamilyViewModel)_familyFactory(family))
+                                   .ToList();
         }
         else
         {

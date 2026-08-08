@@ -97,7 +97,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                 {
                     StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
                     StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
-                    Disconnect();
+                    _ = DisconnectAsync();
                 }
 
                 _session = value;
@@ -108,7 +108,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                     StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
                     if (_session.IsSignedIn)
                     {
-                        Connect();
+                        _ = ConnectAsync();
                     }
                 }
             }
@@ -324,14 +324,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
     private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
     {
-        try
-        {
-            Disconnect();
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Exception while disconnecting on session sign-out.");
-        }
+        _ = DisconnectAsync();
     }
 
     /// <summary>
@@ -340,13 +333,20 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method resets the blob container client, folder cache, and triggers the <see cref="Disconnected" /> event.
     /// </remarks>
-    private void Disconnect()
+    private async Task DisconnectAsync()
     {
-        _blobContainerClient = null;
-        _folders = null;
-        _blobCache = null;
-        Disconnected?.Invoke(this);
-        ReloadAsync().GetAwaiter().GetResult();
+        try
+        {
+            _blobContainerClient = null;
+            _folders = null;
+            _blobCache = null;
+            Disconnected?.Invoke(this);
+            await ReloadAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Exception while disconnecting on session sign-out.");
+        }
     }
 
     /// <summary>
@@ -359,14 +359,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
     private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
     {
-        try
-        {
-            Connect();
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Exception while connecting on session sign-in.");
-        }
+        _ = ConnectAsync();
     }
 
     /// <summary>
@@ -376,16 +369,23 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method creates a <see cref="BlobContainerClient" /> using the session's token credential.
     /// </remarks>
-    private void Connect()
+    private async Task ConnectAsync()
     {
-        if (Session is null)
+        try
         {
-            throw new InvalidOperationException("Session must not be null.");
-        }
+            if (Session is null)
+            {
+                throw new InvalidOperationException("Session must not be null.");
+            }
 
-        _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
-        Connected?.Invoke(this);
-        ReloadAsync().GetAwaiter().GetResult();
+            _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
+            Connected?.Invoke(this);
+            await ReloadAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Exception while connecting on session sign-in.");
+        }
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 {
     private readonly IFamilySource _familySource;
     private IList<IFolderViewModel>? _folders;
+    private bool _foldersLoading;
     private IFolderViewModel? _selectedFolder;
 
     /// <summary>
@@ -67,27 +68,36 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     {
         get
         {
-            if (_folders is null)
+            if (_folders is null && !_foldersLoading)
             {
-                var folders = Task.Run(async () =>
-                {
-                    var folders = new List<IFolder>();
-                    await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
-                    {
-                        folders.Add(folder);
-                    }
-
-                    return folders.OrderBy(f => f.Name)
-                                  .ToList();
-                }).ConfigureAwait(true).GetAwaiter().GetResult();
-
-                _folders = folders.Select(CreateFolderViewModel)
-                                  .ToList();
-
-                SelectedFolder = _folders?.FirstOrDefault();
+                _ = LoadFoldersAsync();
             }
 
             return _folders;
+        }
+    }
+
+    private async Task LoadFoldersAsync()
+    {
+        _foldersLoading = true;
+        try
+        {
+            var folders = new List<IFolder>();
+            await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
+            {
+                folders.Add(folder);
+            }
+
+            _folders = folders.OrderBy(f => f.Name)
+                              .Select(CreateFolderViewModel)
+                              .ToList();
+
+            SelectedFolder = _folders.FirstOrDefault();
+            OnPropertyChanged(nameof(Folders));
+        }
+        finally
+        {
+            _foldersLoading = false;
         }
     }
 
@@ -149,6 +159,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     protected virtual void OnReloaded(IFamilySource? sender, EventArgs e)
     {
         _folders = null;
+        _foldersLoading = false;
         SelectedFolder = null;
         OnPropertyChanged(nameof(Folders));
     }
