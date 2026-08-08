@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+    <UseWPF>true</UseWPF>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<!--<CompilerGeneratedFilesOutputPath>obj\gen</CompilerGeneratedFilesOutputPath>-->
 	</PropertyGroup>
@@ -83,6 +84,7 @@
 	<Target Name="CopyExtraFilesToPublishRoot" AfterTargets="Publish">
 		<!-- PublishUrl usually ends with a trailing slash -->
 		<PropertyGroup>
+    <UseWPF>true</UseWPF>
 			<_PublishRoot>$([System.IO.Path]::GetFullPath('$(PublishDir)..\'))</_PublishRoot>
 		</PropertyGroup>
 
