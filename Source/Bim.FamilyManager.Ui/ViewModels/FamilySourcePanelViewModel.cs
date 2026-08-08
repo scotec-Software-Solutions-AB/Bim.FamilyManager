@@ -1,7 +1,8 @@
 using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Scotec.Wpf.ViewModels;
 
-namespace Bim.FamilyManager.Ui.Abstractions.ViewModels;
+namespace Bim.FamilyManager.Ui.ViewModels;
 
 /// <summary>
 ///     Provides a base implementation for a view model that represents a panel associated with a family source in
@@ -12,10 +13,10 @@ namespace Bim.FamilyManager.Ui.Abstractions.ViewModels;
 /// </typeparam>
 /// <remarks>
 ///     This abstract class is intended to be used as a base for view models that display or interact with a specific
-///     family source.
-///     It exposes the underlying family source instance for derived classes.
+///     family source. It exposes the underlying family source instance for derived classes.
 /// </remarks>
-public abstract class FamilySourcePanelViewModel<TFamilySource> : ViewModel, IFamilySourcePanelViewModel where TFamilySource : IFamilySource
+public abstract class FamilySourcePanelViewModel<TFamilySource> : ViewModel, IFamilySourcePanelViewModel
+    where TFamilySource : IFamilySource
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="FamilySourcePanelViewModel{TFamilySource}" /> class.
