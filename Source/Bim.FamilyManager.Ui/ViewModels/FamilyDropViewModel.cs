@@ -1,4 +1,4 @@
-﻿using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels;

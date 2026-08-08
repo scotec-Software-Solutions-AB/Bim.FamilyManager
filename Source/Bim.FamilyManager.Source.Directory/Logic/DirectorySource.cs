@@ -1,15 +1,15 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Autodesk.Internal.InfoCenter;
 using Autodesk.Windows;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Base.Logic;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.Directory.Options;
 using Bim.FamilyManager.Ui.Resources;
 using Microsoft.Extensions.Logging;
 using Scotec.Revit.RevitFamily;
-using Folder = Bim.FamilyManager.Base.Logic.Folder;
+using Folder = Bim.FamilyManager.Core.Logic.Folder;
 
 namespace Bim.FamilyManager.Source.Directory.Logic;
     

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Scotec.Queues" />
+		<PackageReference Include="System.Drawing.Common" />
+		<PackageReference Include="YamlDotNet" />
+		<PackageReference Include="OpenMcdf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Resources\Images\*.png" />
+		<Resource Include="Resources\Images\*.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Logic\EStorage\EStorageExtensions.cs" />
+	  <Compile Remove="Settings\SettingsSectionAttribute.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Logic\EStorage\EStorageExtensions.cs" />
+	  <None Include="Settings\SettingsSectionAttribute.cs" />
+	</ItemGroup>
+
+</Project>

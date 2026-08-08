@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-using Bim.FamilyManager.Abstractions.Options;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using System.Windows.Input;
+using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;

@@ -1,7 +1,7 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
-using Bim.FamilyManager.Base.Options;
-using Bim.FamilyManager.Base.Settings;
+using Bim.FamilyManager.Core.Options;
+using Bim.FamilyManager.Core.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

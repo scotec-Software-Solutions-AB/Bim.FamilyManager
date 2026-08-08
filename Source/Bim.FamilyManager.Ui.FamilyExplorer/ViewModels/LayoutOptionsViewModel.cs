@@ -1,5 +1,5 @@
-﻿using Bim.FamilyManager.Abstractions.Options;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Ui.FamilyExplorer.Options;
 using Bim.FamilyManager.Ui.FamilyExplorer.Resources;
 using Scotec.Wpf.ViewModels;

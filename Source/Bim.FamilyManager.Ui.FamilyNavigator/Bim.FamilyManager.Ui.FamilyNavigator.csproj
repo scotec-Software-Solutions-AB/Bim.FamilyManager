@@ -4,8 +4,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.Abstractions\Bim.FamilyManager.Ui.Abstractions.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

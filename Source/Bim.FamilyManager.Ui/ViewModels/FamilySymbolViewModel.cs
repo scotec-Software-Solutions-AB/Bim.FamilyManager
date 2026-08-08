@@ -1,7 +1,7 @@
-﻿using System.Windows.Media;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Base.Logic;
+using System.Windows.Media;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Core.Logic;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.ViewModels;

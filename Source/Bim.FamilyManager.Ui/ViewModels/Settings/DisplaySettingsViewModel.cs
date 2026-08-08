@@ -1,5 +1,5 @@
-﻿using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using Bim.FamilyManager.Base.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
+using Bim.FamilyManager.Core.Options;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.ViewModels.Settings;

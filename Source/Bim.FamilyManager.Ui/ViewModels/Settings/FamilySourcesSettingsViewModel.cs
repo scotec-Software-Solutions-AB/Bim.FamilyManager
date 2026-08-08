@@ -1,8 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Bim.FamilyManager.Abstractions.Options;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using Bim.FamilyManager.Base.Options;
+using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
+using Bim.FamilyManager.Core.Options;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
 

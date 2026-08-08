@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using Bim.FamilyManager.Source.AzureStorage.Options;

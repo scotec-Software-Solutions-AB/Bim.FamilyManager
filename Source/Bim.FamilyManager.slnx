@@ -9,10 +9,10 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Project Path="Bim.FamilyManager.Abstractions/Bim.FamilyManager.Abstractions.csproj">
+  <Project Path="Bim.FamilyManager.Core.Abstractions/Bim.FamilyManager.Core.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
-  <Project Path="Bim.FamilyManager.Base/Bim.FamilyManager.Base.csproj">
+  <Project Path="Bim.FamilyManager.Core/Bim.FamilyManager.Core.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Bim.FamilyManager.Source.AzureStorage/Bim.FamilyManager.Source.AzureStorage.csproj">
@@ -25,6 +25,9 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="Bim.FamilyManager.Ui.FamilyNavigator/Bim.FamilyManager.Ui.FamilyNavigator.csproj">
+    <Platform Project="x64" />
+  </Project>
+    <Project Path="Bim.FamilyManager.Ui.Abstractions/Bim.FamilyManager.Ui.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Bim.FamilyManager.Ui/Bim.FamilyManager.Ui.csproj">

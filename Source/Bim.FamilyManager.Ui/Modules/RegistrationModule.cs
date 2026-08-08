@@ -1,7 +1,7 @@
-﻿using Autofac;
+using Autofac;
 using Autofac.Core;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Ui.ViewModels.Settings;
 using Bim.FamilyManager.Ui.Views;

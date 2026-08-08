@@ -1,9 +1,9 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Base.Logic;
-using Bim.FamilyManager.Base.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Core.Logic;
+using Bim.FamilyManager.Core.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Wpf.ViewModels;
 

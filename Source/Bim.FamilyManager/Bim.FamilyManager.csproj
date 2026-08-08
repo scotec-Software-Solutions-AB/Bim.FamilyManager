@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
@@ -31,8 +31,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj" />
-		<ProjectReference Include="..\Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.AzureStorage\Bim.FamilyManager.Source.AzureStorage.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.Directory\Bim.FamilyManager.Source.Directory.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyExplorer\Bim.FamilyManager.Ui.FamilyExplorer.csproj" />

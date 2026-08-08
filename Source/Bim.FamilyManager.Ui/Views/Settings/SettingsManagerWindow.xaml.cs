@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.UI;
+using Autodesk.Revit.UI;
 using Bim.FamilyManager.Ui.ViewModels.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Scotec.Revit.Wpf;

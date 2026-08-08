@@ -1,11 +1,11 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
-using Bim.FamilyManager.Base.Options;
-using Bim.FamilyManager.Base.Settings;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
+using Bim.FamilyManager.Core.Options;
+using Bim.FamilyManager.Core.Settings;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
 using Scotec.Extensions.Linq;

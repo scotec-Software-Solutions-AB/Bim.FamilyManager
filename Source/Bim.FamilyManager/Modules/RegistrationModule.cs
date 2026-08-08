@@ -1,8 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.Loader;
 using Autofac;
-using Bim.FamilyManager.Base.Options;
-using Bim.FamilyManager.Base.Settings;
+using Bim.FamilyManager.Core.Options;
+using Bim.FamilyManager.Core.Settings;
 using Module = Autofac.Module;
 
 namespace Bim.FamilyManager.Modules;

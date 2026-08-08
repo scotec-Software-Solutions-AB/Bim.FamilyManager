@@ -1,8 +1,8 @@
-﻿using Autodesk.Internal.InfoCenter;
+using Autodesk.Internal.InfoCenter;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Windows;
-using Bim.FamilyManager.Abstractions;
+using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Ui.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Scotec.Revit;

@@ -1,4 +1,4 @@
-﻿using System.Runtime.Loader;
+using System.Runtime.Loader;
 using System.Windows;
 using System.Windows.Controls;
 using Bim.FamilyManager.Ui.FamilyExplorer.ViewModels;

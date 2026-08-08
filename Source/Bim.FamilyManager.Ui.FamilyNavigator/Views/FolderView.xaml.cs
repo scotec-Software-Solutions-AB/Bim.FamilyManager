@@ -1,4 +1,4 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 using Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 namespace Bim.FamilyManager.Ui.FamilyNavigator.Views;
