@@ -86,9 +86,6 @@ public class RegistrationModule : Module
                .As<IViewModelDescriptor>()
                .SingleInstance();
 
-        builder.RegisterType<SettingsManager>()
-               .SingleInstance();
-
         builder.Register<IFamilySourceSettingsViewModel.Factory>(context =>
         {
             var componentContext = context.Resolve<IComponentContext>();
