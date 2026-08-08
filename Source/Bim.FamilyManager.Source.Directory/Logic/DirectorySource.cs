@@ -6,7 +6,7 @@ using Autodesk.Windows;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.Directory.Options;
-using Bim.FamilyManager.Ui.Resources;
+using Bim.FamilyManager.Source.Directory.Resources;
 using Microsoft.Extensions.Logging;
 using Scotec.Revit.RevitFamily;
 using Folder = Bim.FamilyManager.Core.Logic.Folder;

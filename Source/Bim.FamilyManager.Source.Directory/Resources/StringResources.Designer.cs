@@ -122,5 +122,32 @@ namespace Bim.FamilyManager.Source.Directory.Resources {
                 return ResourceManager.GetString("DirectorySourceSettings.Text.Name.Watermark", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save the family to the family source. Please ensure the destination is accessible and writable.
+        /// </summary>
+        public static string DirectorySource_Message_Save_Error {
+            get {
+                return ResourceManager.GetString("DirectorySource.Message.Save.Error", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The family was saved to the family source.
+        /// </summary>
+        public static string DirectorySource_Message_Save_Success {
+            get {
+                return ResourceManager.GetString("DirectorySource.Message.Save.Success", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bim.FamilyManager.
+        /// </summary>
+        public static string FamilyManager_Name {
+            get {
+                return ResourceManager.GetString("FamilyManager.Name", resourceCulture);
+            }
+        }
     }
 }
