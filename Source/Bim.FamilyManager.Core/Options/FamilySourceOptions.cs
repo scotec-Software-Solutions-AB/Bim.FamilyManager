@@ -9,8 +9,8 @@ namespace Bim.FamilyManager.Core.Options;
 /// </summary>
 /// <remarks>
 ///     This abstract class provides common properties and functionality for configuring different types of family sources.
-///     Derived classes can extend this base class to include additional properties specific to their respective family
-///     source types.
+///     Derived classes must be annotated with <see cref="FamilySourceOptionsAttribute" /> to declare their
+///     <see cref="Type" /> key. This ensures the type identifier is explicit and rename-safe.
 /// </remarks>
 public abstract class FamilySourceOptions : IFamilySourceOptions
 {
@@ -18,10 +18,13 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
     ///     Initializes a new instance of the <see cref="FamilySourceOptions" /> class.
     /// </summary>
     /// <remarks>
-    ///     This constructor sets the <see cref="Type" /> property to the name of the derived class,
-    ///     excluding the "Options" suffix. It ensures that the <see cref="Type" /> property is initialized
-    ///     with a meaningful value based on the specific implementation.
+    ///     Reads the <see cref="Type" /> identifier from the <see cref="FamilySourceOptionsAttribute" /> applied to the
+    ///     concrete derived class. Throws <see cref="InvalidOperationException" /> if the attribute is missing, ensuring
+    ///     that every family source options class is explicitly registered with a stable type key.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when the concrete class is not annotated with <see cref="FamilySourceOptionsAttribute" />.
+    /// </exception>
     protected FamilySourceOptions()
     {
         if (Id == Guid.Empty)
@@ -29,7 +32,13 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
             Id = Guid.NewGuid();
         }
 
-        Type = GetType().Name.Replace("Options", "");
+        var attribute = GetType().GetCustomAttributes(typeof(FamilySourceOptionsAttribute), inherit: false)
+                                 .OfType<FamilySourceOptionsAttribute>()
+                                 .FirstOrDefault()
+                        ?? throw new InvalidOperationException(
+                            $"'{GetType().Name}' must be annotated with [{nameof(FamilySourceOptionsAttribute)}] to declare its source type key.");
+
+        Type = attribute.OptionsName;
     }
 
     /// <summary>
@@ -44,7 +53,8 @@ public abstract class FamilySourceOptions : IFamilySourceOptions
     ///     Gets or sets the type of the family source.
     /// </summary>
     /// <value>
-    ///     A <see cref="string" /> representing the type of the family source.
+    ///     A <see cref="string" /> representing the type of the family source. Derived from the
+    ///     <see cref="FamilySourceOptionsAttribute.OptionsName" /> declared on the concrete class.
     /// </value>
     public string Type { get; set; }
 
