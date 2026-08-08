@@ -73,7 +73,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     public AzureStorageSource(
         AzureStorageSourceOptions options,
         IFamilyManager familyManager,
-        IRevitFamily.Factory familyFactory,
+        RevitFamilyFactory familyFactory,
         IAadAuthService authService)
         : base(options, familyManager, familyFactory)
     {

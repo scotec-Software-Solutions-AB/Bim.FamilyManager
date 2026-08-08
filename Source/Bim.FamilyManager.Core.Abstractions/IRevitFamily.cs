@@ -14,15 +14,6 @@ namespace Bim.FamilyManager.Core.Abstractions;
 public interface IRevitFamily
 {
     /// <summary>
-    ///     Delegate for creating an <see cref="IRevitFamily" /> instance.
-    /// </summary>
-    /// <param name="name">The name of the Revit family.</param>
-    /// <param name="familyInfo">The <see cref="RevitFamilyInfo" /> containing metadata and configuration.</param>
-    /// <param name="saveAction">The action used to save the family to a stream.</param>
-    /// <returns>An instance of <see cref="IRevitFamily" />.</returns>
-    public delegate IRevitFamily Factory(string name, RevitFamilyInfo familyInfo, Action<IRevitFamily, Stream> saveAction);
-
-    /// <summary>
     ///     Gets a value indicating whether the Revit family is initialized and ready for use.
     /// </summary>
     bool IsInitialized { get; }

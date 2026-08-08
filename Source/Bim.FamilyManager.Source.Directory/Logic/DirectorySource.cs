@@ -63,7 +63,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// This constructor initializes the directory source with the specified options, family manager, and family factory.
     /// It also sets the root path for the directory source based on the provided options.
     /// </remarks>
-    public DirectorySource(DirectorySourceOptions options, IFamilyManager familyManager, IRevitFamily.Factory familyFactory,
+    public DirectorySource(DirectorySourceOptions options, IFamilyManager familyManager, RevitFamilyFactory familyFactory,
                            ILogger<DirectorySource> logger)
         : base(options, familyManager, familyFactory)
     {

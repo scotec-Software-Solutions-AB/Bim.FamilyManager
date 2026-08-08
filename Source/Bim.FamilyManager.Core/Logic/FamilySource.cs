@@ -40,7 +40,7 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     ///     This constructor sets up the family source by associating it with a family manager, applying the provided options,
     ///     and initializing the family factory. It also assigns the name of the family source based on the provided options.
     /// </remarks>
-    protected FamilySource(TOptions options, IFamilyManager familyManager, IRevitFamily.Factory familyFactory)
+    protected FamilySource(TOptions options, IFamilyManager familyManager, RevitFamilyFactory familyFactory)
     {
         Options = options;
         FamilyManager = familyManager;
@@ -91,7 +91,7 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     ///     and save actions. The factory method ensures consistency in the creation process and integrates with
     ///     the <see cref="IFamilyManager" /> for registration.
     /// </remarks>
-    protected IRevitFamily.Factory FamilyFactory { get; }
+    protected RevitFamilyFactory FamilyFactory { get; }
 
     /// <summary>
     ///     Releases the resources used by the <see cref="FamilySource{TOptions}" /> instance.

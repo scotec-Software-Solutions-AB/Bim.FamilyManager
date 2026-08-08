@@ -40,7 +40,7 @@ public class RegistrationModule : Module
 
         builder.RegisterType<RevitFamily>()
                .InstancePerDependency();
-        builder.Register<IRevitFamily.Factory>(context =>
+        builder.Register<RevitFamilyFactory>(context =>
                {
                    var componentContext = context.Resolve<IComponentContext>();
                    return (name, familyInfo, saveAction) =>
