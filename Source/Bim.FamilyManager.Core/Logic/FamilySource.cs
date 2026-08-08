@@ -1,5 +1,4 @@
 using System.IO;
-using System.Windows;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Abstractions.Options;
 using Bim.FamilyManager.Core.Options;
@@ -177,18 +176,6 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     public string Type => Options.Type;
 
     /// <summary>
-    ///     Gets a stream that provides a preview of the family data.
-    /// </summary>
-    /// <remarks>
-    ///     The returned <see cref="Stream" /> may contain data specific to the implementation of the family source.
-    ///     It is the caller's responsibility to ensure proper disposal of the stream after use.
-    /// </remarks>
-    /// <returns>
-    ///     A <see cref="Stream" /> object containing the preview data, or <c>null</c> if no preview is available.
-    /// </returns>
-    public abstract Stream? Preview { get; }
-
-    /// <summary>
     ///     Occurs when an error is raised in the family source.
     /// </summary>
     /// <remarks>
@@ -285,50 +272,6 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
         if (disposing)
         {
         }
-    }
-
-    /// <summary>
-    ///     Loads a resource from the application's resources as a stream using the specified pack URI.
-    /// </summary>
-    /// <param name="packUri">
-    ///     The pack URI of the resource to load. This should be a valid pack URI pointing to an embedded resource
-    ///     within the application's resources.
-    /// </param>
-    /// <returns>
-    ///     A <see cref="Stream" /> containing the resource data. The returned stream is a memory stream containing
-    ///     a copy of the resource's content, positioned at the beginning.
-    /// </returns>
-    /// <exception cref="System.ArgumentException">
-    ///     Thrown if <paramref name="packUri" /> is null or empty.
-    /// </exception>
-    /// <exception cref="System.IO.FileNotFoundException">
-    ///     Thrown if the resource cannot be found at the specified <paramref name="packUri" />.
-    /// </exception>
-    /// <remarks>
-    ///     This method is intended for use in WPF applications where resources are embedded and accessed via pack URIs.
-    ///     It retrieves the resource as a stream, copies its contents into a new <see cref="MemoryStream" />, and returns
-    ///     the memory stream positioned at the beginning. The caller is responsible for disposing the returned stream.
-    /// </remarks>
-    protected static Stream LoadResourceAsStream(string packUri)
-    {
-        if (string.IsNullOrEmpty(packUri))
-        {
-            throw new ArgumentException("Pack URI cannot be null or empty.", nameof(packUri));
-        }
-
-        // Get the resource stream
-        var resourceInfo = Application.GetResourceStream(new Uri(packUri, UriKind.RelativeOrAbsolute));
-        if (resourceInfo == null)
-        {
-            throw new FileNotFoundException($"Resource not found at {packUri}");
-        }
-
-        using var resourceStream = resourceInfo.Stream;
-        var memoryStream = new MemoryStream();
-        resourceStream.CopyTo(memoryStream);
-        memoryStream.Position = 0;
-
-        return memoryStream;
     }
 
     /// <summary>

@@ -9,39 +9,29 @@ namespace Bim.FamilyManager.Ui.ViewModels;
 /// <summary>
 ///     Represents the view model for a folder in the Revit Family Manager application.
 /// </summary>
-/// <remarks>
-///     This class provides properties and commands to interact with folder data, such as its name and path.
-///     It is designed to work with the <see cref="IFolder" /> abstraction and integrates with WPF commands for UI
-///     interaction.
-/// </remarks>
 public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewModel<TLayoutOptions>, IFolderViewModel
     where TLayoutOptions : LayoutOptions
 {
+    private static readonly ImageSource? FolderIcon;
+
     private IEnumerable<IFamilyViewModel>? _families;
     private bool _isExpanded;
     private IEnumerable<IFolderViewModel>? _subfolders;
 
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="FolderViewModel{TLayoutOptions}" /> class with the specified folder
-    ///     and layout options.
-    /// </summary>
-    /// <param name="folder">
-    ///     An instance of <see cref="IFolder" /> representing the folder data to be encapsulated by the view model.
-    /// </param>
-    /// <param name="layoutOptions">
-    ///     The <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout options.
-    /// </param>
-    /// <remarks>
-    ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and
-    ///     layout options, enabling
-    ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and
-    ///     supports dynamic creation of subfolder and family view models.
-    /// </remarks>
+    static FolderViewModel()
+    {
+        const string packUri = "pack://application:,,,/Bim.FamilyManager.Ui;component/Resources/Images/Folder_128x128.png";
+        FolderIcon = GetPreviewImage(LoadPackUriAsStream(packUri));
+        FolderIcon?.Freeze();
+    }
+
     protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
         : base(layoutOptions)
     {
         Folder = folder;
-        Preview = folder.Preview is null ? null : GetPreviewImage(folder.Preview);
+        Preview = folder.Preview is not null
+            ? GetPreviewImage(folder.Preview)
+            : FolderIcon;
     }
 
     /// <summary>
@@ -57,16 +47,9 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     public override string Name => Folder.Name;
 
     /// <summary>
-    ///     Gets the preview image associated with the folder.
+    ///     Gets the preview image for this folder. Returns the source-provided image when available;
+    ///     falls back to the shared default folder icon otherwise.
     /// </summary>
-    /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image of the folder, or <c>null</c> if no preview is
-    ///     available.
-    /// </value>
-    /// <remarks>
-    ///     The preview image is typically used to visually represent the folder in the user interface.
-    ///     It is loaded from the underlying <see cref="IFolder" /> instance.
-    /// </remarks>
     public override ImageSource? Preview { get; }
 
     /// <summary>

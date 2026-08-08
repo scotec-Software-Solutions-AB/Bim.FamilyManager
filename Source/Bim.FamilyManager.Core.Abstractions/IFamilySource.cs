@@ -1,14 +1,11 @@
-using System.IO;
-
 namespace Bim.FamilyManager.Core.Abstractions;
 
 /// <summary>
 ///     Defines the contract for a source of Revit families in Bim.FamilyManager.
 /// </summary>
 /// <remarks>
-///     Provides access to the source's name, associated folders, preview image, type, and events for error and reload
-///     notifications.
-///     Supports reloading the source to reflect changes and saving family data.
+///     Provides access to the source's name, associated folders, type, and events for error and reload notifications.
+///     Supports reloading the source to reflect changes.
 /// </remarks>
 public interface IFamilySource
 {
@@ -19,14 +16,6 @@ public interface IFamilySource
     ///     Uniquely identifies the source and can be used for display or organizational purposes.
     /// </remarks>
     string Name { get; }
-
-    /// <summary>
-    ///     Gets a stream containing the preview image of the family source.
-    /// </summary>
-    /// <value>
-    ///     A <see cref="Stream" /> representing the preview image, or <c>null</c> if no preview is available.
-    /// </value>
-    Stream? Preview { get; }
 
     /// <summary>
     ///     Gets the type identifier of the family source.

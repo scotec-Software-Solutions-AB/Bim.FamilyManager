@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows;
 using System.Windows.Media;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.Utilities;
@@ -166,14 +167,26 @@ public abstract class FamilyManagerItemViewModel<TLayoutOptions> : ViewModel, IF
     }
 
     /// <summary>
-    ///     Applies the specified layout options to the view model's display-related properties.
+    ///     Loads a WPF pack URI resource as a <see cref="Stream" />.
     /// </summary>
-    /// <param name="options">The <typeparamref name="TLayoutOptions" /> to apply.</param>
-    /// <remarks>
-    ///     This method updates <see cref="ContentHeight" />, <see cref="ShowPreviewImage" />, and
-    ///     <see cref="ShowItemName" />
-    ///     based on the provided options, and then calls <see cref="OnSetDisplayOptions" /> for further customization.
-    /// </remarks>
+    /// <param name="packUri">A valid WPF pack URI pointing to an assembly resource.</param>
+    /// <returns>A <see cref="MemoryStream" /> containing the resource data, or <c>null</c> if not found.</returns>
+    protected static Stream? LoadPackUriAsStream(string packUri)
+    {
+        var resourceInfo = Application.GetResourceStream(new Uri(packUri, UriKind.RelativeOrAbsolute));
+        if (resourceInfo is null)
+        {
+            return null;
+        }
+
+        using var resourceStream = resourceInfo.Stream;
+        var memoryStream = new MemoryStream();
+        resourceStream.CopyTo(memoryStream);
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
     private void SetDisplayOptions(TLayoutOptions options)
     {
         ContentHeight = options.ContentHeight;

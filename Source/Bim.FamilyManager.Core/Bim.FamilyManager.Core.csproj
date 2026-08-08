@@ -15,13 +15,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Resources\Images\*.png" />
-		<Resource Include="Resources\Images\*.png" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Logic\EStorage\EStorageExtensions.cs" />
-	  <Compile Remove="Settings\SettingsSectionAttribute.cs" />
+		<Compile Remove="Logic\EStorage\EStorageExtensions.cs" />
+		<Compile Remove="Settings\SettingsSectionAttribute.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -50,7 +50,6 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 
         StaticWeakEventManager.AddWeakHandler(_familySource, nameof(IFamilySource.Reloaded), OnReloaded);
         Panel = panelFactory.Invoke(familySource);
-        Preview = familySource.Preview is null ? null : GetPreviewImage(familySource.Preview);
     }
 
     /// <summary>
@@ -104,12 +103,10 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     public override string Name => _familySource.Name;
 
     /// <summary>
-    ///     Gets the preview image associated with the family source.
+    ///     Gets the preview image for this family source.
+    ///     Derived classes in each source plugin supply a static icon that represents their source type.
     /// </summary>
-    /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image, or <c>null</c> if unavailable.
-    /// </value>
-    public override ImageSource? Preview { get; }
+    public abstract override ImageSource? Preview { get; }
 
     /// <summary>
     ///     Gets or sets the currently selected folder in the family source.

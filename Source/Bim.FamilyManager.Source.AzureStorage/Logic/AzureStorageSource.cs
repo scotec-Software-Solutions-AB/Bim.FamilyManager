@@ -5,6 +5,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Logic;
+using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
@@ -47,19 +48,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private CancellationTokenSource _tokenSource = new();
 
     /// <summary>
-    ///     Static constructor. Loads the preview image resource for Azure storage source.
-    /// </summary>
-    /// <remarks>
-    ///     Loads a PNG image from resources for use as a preview icon.
-    /// </remarks>
-    static AzureStorageSource()
-    {
-        const string packUri =
-            "pack://application:,,,/Bim.FamilyManager.Source.AzureStorage;component/Resources/Images/Azure_128x128.png";
-
-        PreviewStream = LoadResourceAsStream(packUri);
-    }
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="AzureStorageSource" /> class.
     /// </summary>
@@ -80,21 +68,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         _authService = authService;
 
         _ = ConnectToAzureStorageSilentAsync(CancellationToken.None);
-    }
-
-    /// <summary>
-    ///     Gets the preview image stream for the Azure storage source.
-    /// </summary>
-    /// <remarks>
-    ///     Returns a stream positioned at the beginning for reading the preview image.
-    /// </remarks>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
     }
 
     /// <summary>
