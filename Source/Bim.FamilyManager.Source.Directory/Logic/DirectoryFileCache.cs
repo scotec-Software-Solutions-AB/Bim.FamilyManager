@@ -16,8 +16,8 @@ namespace Bim.FamilyManager.Source.Directory.Logic;
 public sealed class DirectoryFileCache
 {
     private readonly string _rootPath;
-    private HashSet<string>? _allFiles;
     private Dictionary<string, List<string>>? _folderFileMap;
+    private Dictionary<string, List<string>>? _descriptionFileMap;
 
     public DirectoryFileCache(string rootPath)
     {
@@ -37,13 +37,13 @@ public sealed class DirectoryFileCache
     /// </remarks>
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (_folderFileMap != null && _allFiles != null)
+        if (_folderFileMap != null && _descriptionFileMap != null)
         {
             return;
         }
 
         _folderFileMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        _allFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        _descriptionFileMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         await Task.Run(() =>
         {
@@ -63,23 +63,43 @@ public sealed class DirectoryFileCache
 
             foreach (var dir in directories)
             {
-                List<string> files;
+                List<string> familyFiles;
                 try
                 {
-                    files = System.IO.Directory.GetFiles(dir, "*.rfa", SearchOption.TopDirectoryOnly).ToList();
+                    familyFiles = System.IO.Directory.GetFiles(dir, "*.rfa", SearchOption.TopDirectoryOnly).ToList();
                 }
                 catch
                 {
-                    files = new List<string>();
+                    familyFiles = [];
                 }
 
-                _folderFileMap[dir] = files;
-                foreach (var file in files)
+                _folderFileMap[dir] = familyFiles;
+
+                List<string> descriptionFiles;
+                try
                 {
-                    _allFiles.Add(file);
+                    descriptionFiles = System.IO.Directory.GetFiles(dir, "*.yaml", SearchOption.TopDirectoryOnly).ToList();
                 }
+                catch
+                {
+                    descriptionFiles = [];
+                }
+
+                _descriptionFileMap[dir] = descriptionFiles;
             }
         }, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Resets the cache so that the next call to <see cref="InitializeAsync" /> performs a fresh scan.
+    /// </summary>
+    /// <remarks>
+    ///     Call this method before re-initializing the cache, for example after a reload is triggered.
+    /// </remarks>
+    public void Reset()
+    {
+        _folderFileMap = null;
+        _descriptionFileMap = null;
     }
 
     /// <summary>
@@ -98,16 +118,12 @@ public sealed class DirectoryFileCache
             return [];
         }
 
-        try
-        {
-            return System.IO.Directory.Exists(directory)
-                ? System.IO.Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly)
-                : Enumerable.Empty<string>();
-        }
-        catch
-        {
-            return [];
-        }
+        // Derive subfolders from the cached directory keys — no disk access required.
+        return _folderFileMap.Keys
+                             .Where(k => string.Equals(
+                                 Path.GetDirectoryName(k),
+                                 directory,
+                                 StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -124,17 +140,20 @@ public sealed class DirectoryFileCache
     /// </remarks>
     public IEnumerable<string> GetFamilyFiles(string directory, bool includeSubfolders)
     {
-        if (_folderFileMap == null || _allFiles == null)
+        if (_folderFileMap == null)
         {
             return [];
         }
 
+        var dirPrefix = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
         if (includeSubfolders)
         {
-            // Only return files under the directory (recursively)
-            var dirPrefix = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-            return _allFiles.Where(f =>
-                Path.GetFullPath(f).StartsWith(dirPrefix, StringComparison.OrdinalIgnoreCase));
+            // Match the directory itself and all descendants.
+            return _folderFileMap
+                   .Where(kvp => string.Equals(kvp.Key, directory, StringComparison.OrdinalIgnoreCase)
+                                 || kvp.Key.StartsWith(dirPrefix, StringComparison.OrdinalIgnoreCase))
+                   .SelectMany(kvp => kvp.Value);
         }
 
         return _folderFileMap.TryGetValue(directory, out var files) ? files : Enumerable.Empty<string>();
@@ -147,21 +166,27 @@ public sealed class DirectoryFileCache
     /// <param name="includeSubfolders">If true, includes files in all subfolders; otherwise, only direct children.</param>
     /// <returns>An enumerable of description file paths matching the criteria.</returns>
     /// <remarks>
-    ///     This method performs a file system query for description files (*.yaml) under the specified directory.
-    ///     If the directory does not exist or is inaccessible, an empty sequence is returned.
+    ///     This method serves description files from the in-memory cache populated during <see cref="InitializeAsync" />.
+    ///     No additional disk access is performed after the cache has been initialized.
     /// </remarks>
     public IEnumerable<string> GetDescriptionFiles(string directory, bool includeSubfolders)
     {
-        try
-        {
-            var searchOption = includeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            return System.IO.Directory.Exists(directory)
-                ? System.IO.Directory.GetFiles(directory, "*.yaml", searchOption)
-                : Enumerable.Empty<string>();
-        }
-        catch
+        if (_descriptionFileMap == null)
         {
             return [];
         }
+
+        var dirPrefix = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+        if (includeSubfolders)
+        {
+            // Match the directory itself and all descendants.
+            return _descriptionFileMap
+                   .Where(kvp => string.Equals(kvp.Key, directory, StringComparison.OrdinalIgnoreCase)
+                                 || kvp.Key.StartsWith(dirPrefix, StringComparison.OrdinalIgnoreCase))
+                   .SelectMany(kvp => kvp.Value);
+        }
+
+        return _descriptionFileMap.TryGetValue(directory, out var files) ? files : Enumerable.Empty<string>();
     }
 }

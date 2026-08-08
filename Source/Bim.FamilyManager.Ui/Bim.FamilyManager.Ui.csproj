@@ -25,7 +25,6 @@
 	<PackageReference Include="ScaleHQ.DotScreen" />
 	<PackageReference Include="Scotec.Events.WeakEvents" />
 	<PackageReference Include="Scotec.Wpf" />
-	<PackageReference Include="Scotec.Wpf.Controls" />
 	<PackageReference Include="System.Drawing.Common" />
 
   </ItemGroup>
