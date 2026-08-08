@@ -1,4 +1,4 @@
-namespace Bim.FamilyManager.Core.Options;
+namespace Bim.FamilyManager.Core.Abstractions.Options;
 
 /// <summary>
 ///     Represents the Revit-specific configuration options for the Scotec Revit Family Manager application.
@@ -25,16 +25,14 @@ public class RevitOptions
     public string? TabName { get; set; }
 
     /// <summary>
-    ///     Gets or sets the name of the panel within the Revit user interface associated with the Scotec Revit Family Manager.
+    ///     Gets or sets the name of the panel in the Revit user interface associated with the Scotec Revit Family Manager.
     /// </summary>
     /// <value>
     ///     A <see cref="string" /> representing the name of the panel. This value can be <c>null</c> if no panel name is
     ///     specified.
     /// </value>
     /// <remarks>
-    ///     This property is used to define or retrieve the name of the panel where the Family Manager's tools and features
-    ///     will be displayed within the Revit UI. It allows for customization of the panel's label to align with user
-    ///     preferences or project requirements.
+    ///     This property determines the panel within the Revit UI tab where the Family Manager's tools are displayed.
     /// </remarks>
     public string? PanelName { get; set; }
 }

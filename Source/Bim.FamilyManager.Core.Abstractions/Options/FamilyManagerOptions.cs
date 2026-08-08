@@ -1,4 +1,4 @@
-namespace Bim.FamilyManager.Core.Options;
+namespace Bim.FamilyManager.Core.Abstractions.Options;
 
 /// <summary>
 ///     Represents the configuration options for the Family Manager in the Scotec Revit Family Manager application.
@@ -40,7 +40,7 @@ public class FamilyManagerOptions
     ///     Gets or sets the Revit-specific configuration options for the Family Manager.
     /// </summary>
     /// <value>
-    ///     An instance of <see cref="Base.Options.RevitOptions" /> that contains
+    ///     An instance of <see cref="RevitOptions" /> that contains
     ///     Revit-specific settings, such as the tab and panel names.
     /// </value>
     /// <remarks>

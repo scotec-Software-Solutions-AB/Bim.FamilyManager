@@ -1,6 +1,8 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Core.Options;
 
 namespace Bim.FamilyManager.Core.Settings;
 
@@ -122,8 +124,14 @@ public class JsonLayoutOptionsConverter : JsonConverter<List<ILayoutOptions>>
         writer.WriteStartObject();
         foreach (var layout in value)
         {
-            var typeName = layout.GetType().Name.Replace("Options", "");
-            writer.WritePropertyName(typeName);
+            var attribute = layout.GetType()
+                                  .GetCustomAttributes(typeof(LayoutOptionsAttribute), false)
+                                  .OfType<LayoutOptionsAttribute>()
+                                  .FirstOrDefault()
+                            ?? throw new JsonException(
+                                $"Type '{layout.GetType().Name}' is missing the required [{nameof(LayoutOptionsAttribute)}].");
+
+            writer.WritePropertyName(attribute.OptionsName);
             JsonSerializer.Serialize(writer, layout, layout.GetType(), options);
         }
 

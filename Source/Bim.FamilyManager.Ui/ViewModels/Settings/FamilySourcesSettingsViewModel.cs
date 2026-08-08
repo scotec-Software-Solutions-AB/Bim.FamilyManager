@@ -30,7 +30,7 @@ public class FamilySourcesSettingsViewModel : SettingsBaseViewModel
     private readonly FamilySourceSelectionViewModel.Factory _familySourceSelectionViewModelFactory;
     private readonly IFamilySourceSettingsViewModel.Factory _familySourceviewModelFactory;
     private readonly FamilySourcesOptions _options;
-    private readonly IFamilySourceOptions.Factory _optionsFactory;
+    private readonly FamilySourceOptionsFactory _optionsFactory;
     private readonly RelayCommand _removeCommand;
     private readonly ObservableCollection<IFamilySourceSettingsViewModel> _sourceSettings = new();
     private FamilySourceSettingsEditViewModel? _editViewModel;
@@ -50,7 +50,7 @@ public class FamilySourcesSettingsViewModel : SettingsBaseViewModel
     /// <param name="familySourceSelectionViewModelFactory">Factory for creating selection view models.</param>
     public FamilySourcesSettingsViewModel(
         IOptionsSnapshot<FamilySourcesOptions> options,
-        IFamilySourceOptions.Factory optionsFactory,
+        FamilySourceOptionsFactory optionsFactory,
         IFamilySourceSettingsViewModel.Factory familySourceviewModelFactory,
         FamilySourceSettingsEditViewModel.Factory editViewModelFactory,
         FamilySourceSelectionViewModel.Factory familySourceSelectionViewModelFactory)

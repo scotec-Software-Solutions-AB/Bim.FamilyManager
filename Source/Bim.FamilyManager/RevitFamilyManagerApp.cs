@@ -4,6 +4,7 @@ using System.Runtime.Loader;
 using Autodesk.Revit.UI;
 using Autofac;
 using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Abstractions.Options;
 using Bim.FamilyManager.Core.Options;
 using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;

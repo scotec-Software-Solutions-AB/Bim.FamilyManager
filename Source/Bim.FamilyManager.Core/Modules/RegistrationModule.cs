@@ -1,6 +1,8 @@
 using Autofac;
 using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Abstractions.Descriptors;
 using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Core.Descriptors;
 using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Core.Options;
 using Bim.FamilyManager.Core.Settings;
@@ -52,6 +54,10 @@ public class RegistrationModule : Module
                .As<IFamilyManager>()
                .SingleInstance();
 
+        builder.RegisterType<DescriptorYamlSerializer>()
+               .As<IDescriptorYamlSerializer>()
+               .SingleInstance();
+
         builder.RegisterType<ViewImageExporter>()
                .As<IViewImageExporter>()
                .SingleInstance();
@@ -67,26 +73,16 @@ public class RegistrationModule : Module
         builder.RegisterType<SettingsManager>()
                .SingleInstance();
 
-        builder.Register<IFamilySourceOptions.Factory>(context =>
+        builder.Register<FamilySourceOptionsFactory>(context =>
         {
             var componentContext = context.Resolve<IComponentContext>();
-            return key =>
-            {
-                var service = componentContext.ResolveKeyed<IFamilySourceOptions>(key);
-
-                return service;
-            };
+            return key => componentContext.ResolveKeyed<IFamilySourceOptions>(key);
         });
 
-        builder.Register<ILayoutOptions.Factory>(context =>
+        builder.Register<LayoutOptionsFactory>(context =>
         {
             var componentContext = context.Resolve<IComponentContext>();
-            return key =>
-            {
-                var service = componentContext.ResolveKeyed<ILayoutOptions>(key);
-
-                return service;
-            };
+            return key => componentContext.ResolveKeyed<ILayoutOptions>(key);
         });
     }
 }

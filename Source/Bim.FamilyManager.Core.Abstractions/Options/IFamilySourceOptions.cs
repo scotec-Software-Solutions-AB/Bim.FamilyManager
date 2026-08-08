@@ -11,13 +11,6 @@ namespace Bim.FamilyManager.Core.Abstractions.Options;
 public interface IFamilySourceOptions
 {
     /// <summary>
-    ///     Delegate for creating <see cref="IFamilySourceOptions" /> instances based on a key.
-    /// </summary>
-    /// <param name="key">A unique key identifying the family source configuration.</param>
-    /// <returns>An instance of <see cref="IFamilySourceOptions" />.</returns>
-    public delegate IFamilySourceOptions Factory(string key);
-
-    /// <summary>
     ///     Gets the unique identifier for the family source configuration.
     /// </summary>
     Guid Id { get; }

@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Abstractions.Options;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Core.Options;
 using Bim.FamilyManager.Ui.Views.Settings;

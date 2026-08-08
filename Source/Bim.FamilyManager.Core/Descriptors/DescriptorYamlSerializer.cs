@@ -6,34 +6,41 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Bim.FamilyManager.Core.Descriptors;
 
-public static class DescriptorYamlSerializer
+/// <summary>
+///     Serializes and deserializes family descriptor objects to and from YAML format.
+/// </summary>
+public class DescriptorYamlSerializer : IDescriptorYamlSerializer
 {
-    private static readonly IDeserializer Deserializer = new DeserializerBuilder()
-                                                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                                                         .Build();
+    private readonly IDeserializer _deserializer = new DeserializerBuilder()
+                                                   .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                                   .Build();
 
-    private static readonly ISerializer Serializer = new SerializerBuilder()
-                                                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                                                     .Build();
+    private readonly ISerializer _serializer = new SerializerBuilder()
+                                               .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                               .Build();
 
-    public static T Deserialize<T>(string yaml) where T : IItemDescriptor
+    /// <inheritdoc />
+    public T Deserialize<T>(string yaml) where T : IItemDescriptor
     {
-        return Deserializer.Deserialize<T>(yaml);
+        return _deserializer.Deserialize<T>(yaml);
     }
 
-    public static string Serialize<T>(T descriptor) where T : IItemDescriptor
+    /// <inheritdoc />
+    public string Serialize<T>(T descriptor) where T : IItemDescriptor
     {
-        return Serializer.Serialize(descriptor);
+        return _serializer.Serialize(descriptor);
     }
 
-    public static T DeserializeFromStream<T>(Stream stream) where T : IItemDescriptor
+    /// <inheritdoc />
+    public T DeserializeFromStream<T>(Stream stream) where T : IItemDescriptor
     {
         using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
         var yaml = reader.ReadToEnd();
         return Deserialize<T>(yaml);
     }
 
-    public static void SerializeToStream<T>(T descriptor, Stream stream) where T : IItemDescriptor
+    /// <inheritdoc />
+    public void SerializeToStream<T>(T descriptor, Stream stream) where T : IItemDescriptor
     {
         var yaml = Serialize(descriptor);
         using var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: true);
