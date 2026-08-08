@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace Bim.FamilyManager.Source.Directory.Logic;
 
@@ -16,12 +17,14 @@ namespace Bim.FamilyManager.Source.Directory.Logic;
 public sealed class DirectoryFileCache
 {
     private readonly string _rootPath;
+    private readonly ILogger? _logger;
     private Dictionary<string, List<string>>? _folderFileMap;
     private Dictionary<string, List<string>>? _descriptionFileMap;
 
-    public DirectoryFileCache(string rootPath)
+    public DirectoryFileCache(string rootPath, ILogger? logger = null)
     {
         _rootPath = rootPath;
+        _logger = logger;
     }
 
     /// <summary>
@@ -55,9 +58,10 @@ public sealed class DirectoryFileCache
                 {
                     directories.AddRange(System.IO.Directory.GetDirectories(_rootPath, "*", SearchOption.AllDirectories));
                 }
-                catch
+                catch (Exception e)
                 {
-                    // Ignore errors for inaccessible subdirectories.
+                    // Continue with the directories enumerated so far.
+                    _logger?.LogWarning(e, "Failed to enumerate subdirectories. Root: {RootPath}", _rootPath);
                 }
             }
 
@@ -68,8 +72,9 @@ public sealed class DirectoryFileCache
                 {
                     familyFiles = System.IO.Directory.GetFiles(dir, "*.rfa", SearchOption.TopDirectoryOnly).ToList();
                 }
-                catch
+                catch (Exception e)
                 {
+                    _logger?.LogWarning(e, "Failed to enumerate family files. Directory: {Directory}", dir);
                     familyFiles = [];
                 }
 
@@ -80,8 +85,9 @@ public sealed class DirectoryFileCache
                 {
                     descriptionFiles = System.IO.Directory.GetFiles(dir, "*.yaml", SearchOption.TopDirectoryOnly).ToList();
                 }
-                catch
+                catch (Exception e)
                 {
+                    _logger?.LogWarning(e, "Failed to enumerate description files. Directory: {Directory}", dir);
                     descriptionFiles = [];
                 }
 

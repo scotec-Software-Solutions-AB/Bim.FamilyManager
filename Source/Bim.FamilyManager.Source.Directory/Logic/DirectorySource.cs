@@ -62,7 +62,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
     public override async IAsyncEnumerable<IFolder> GetFoldersAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        _fileCache ??= new DirectoryFileCache(_rootPath);
+        _fileCache ??= new DirectoryFileCache(_rootPath, _logger);
         await _fileCache.InitializeAsync(cancellationToken);
 
         if (_folders == null)
