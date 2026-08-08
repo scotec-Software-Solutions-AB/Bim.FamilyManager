@@ -822,9 +822,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         if (_familyMetadataEStorage.TryGet(document.OwnerFamily, out var familyInfo))
         {
             var version = familyInfo.Version;
-            familyInfo.Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision);
-            familyInfo.LastModified = DateTime.UtcNow;
-            familyInfo.ModifiedBy = userName;
+            familyInfo = familyInfo with
+            {
+                Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision),
+                LastModified = DateTime.UtcNow,
+                ModifiedBy = userName
+            };
         }
         else
         {
@@ -926,9 +929,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
         if (_familyMetadataEStorage.TryGet(document.OwnerFamily, out var familyInfo))
         {
             var version = familyInfo.Version;
-            familyInfo.Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision);
-            familyInfo.LastModified = DateTime.UtcNow;
-            familyInfo.ModifiedBy = userName;
+            familyInfo = familyInfo with
+            {
+                Version = new Version(version.Major, version.Minor, version.Build + 1, version.Revision),
+                LastModified = DateTime.UtcNow,
+                ModifiedBy = userName
+            };
         }
         else
         {

@@ -3,25 +3,25 @@ namespace Bim.FamilyManager.Core.Logic;
 /// <summary>
 ///     Represents metadata information for a family, including description, version, modification details, and author.
 /// </summary>
-public class FamilyMetadata
+public sealed record FamilyMetadata
 {
     /// <summary>
-    ///     Gets or sets the description of the family.
+    ///     Gets the description of the family.
     /// </summary>
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 
     /// <summary>
-    ///     Gets or sets the version of the family.
+    ///     Gets the version of the family.
     /// </summary>
-    public required Version Version { get; set; }
+    public required Version Version { get; init; }
 
     /// <summary>
-    ///     Gets or sets the date and time when the family was last modified.
+    ///     Gets the date and time when the family was last modified.
     /// </summary>
-    public required DateTime LastModified { get; set; }
+    public required DateTime LastModified { get; init; }
 
     /// <summary>
-    ///     Gets or sets the name of the user who last modified the family.
+    ///     Gets the name of the user who last modified the family.
     /// </summary>
-    public required string ModifiedBy { get; set; }
+    public required string ModifiedBy { get; init; }
 }
