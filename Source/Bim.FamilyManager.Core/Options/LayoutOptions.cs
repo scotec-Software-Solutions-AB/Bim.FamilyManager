@@ -10,7 +10,8 @@ namespace Bim.FamilyManager.Core.Options;
 /// <remarks>
 ///     This abstract class provides common properties and functionality for configuring layout options,
 ///     such as the key identifier, text block height, and visibility settings for preview images and item names.
-///     Derived classes can extend this functionality to define specific layout configurations.
+///     Derived classes must be annotated with <see cref="LayoutOptionsAttribute" /> to declare their
+///     <see cref="Key" /> identifier. This ensures the key is explicit and rename-safe.
 /// </remarks>
 public abstract class LayoutOptions : ILayoutOptions
 {
@@ -18,13 +19,22 @@ public abstract class LayoutOptions : ILayoutOptions
     ///     Initializes a new instance of the <see cref="LayoutOptions" /> class.
     /// </summary>
     /// <remarks>
-    ///     This constructor sets the <see cref="Key" /> property to the name of the derived class,
-    ///     with the "Options" suffix removed. It ensures that the <see cref="Key" /> property
-    ///     is initialized with a meaningful default value based on the class name.
+    ///     Reads the <see cref="Key" /> identifier from the <see cref="LayoutOptionsAttribute" /> applied to the
+    ///     concrete derived class. Throws <see cref="InvalidOperationException" /> if the attribute is missing,
+    ///     ensuring that every layout options class is explicitly registered with a stable key.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when the concrete class is not annotated with <see cref="LayoutOptionsAttribute" />.
+    /// </exception>
     protected LayoutOptions()
     {
-        Key = GetType().Name.Replace("Options", "");
+        var attribute = GetType().GetCustomAttributes(typeof(LayoutOptionsAttribute), inherit: false)
+                                 .OfType<LayoutOptionsAttribute>()
+                                 .FirstOrDefault()
+                        ?? throw new InvalidOperationException(
+                            $"'{GetType().Name}' must be annotated with [{nameof(LayoutOptionsAttribute)}] to declare its layout key.");
+
+        Key = attribute.OptionsName;
     }
 
     /// <summary>
@@ -33,10 +43,6 @@ public abstract class LayoutOptions : ILayoutOptions
     /// <value>
     ///     The height of the content area, measured in pixels. The default value is 64.
     /// </value>
-    /// <remarks>
-    ///     This property is used to configure the vertical size of content areas within the layout.
-    ///     It is commonly utilized in UI components to ensure consistent content area dimensions.
-    /// </remarks>
     public int ContentHeight { get; set; } = 64;
 
     /// <summary>
@@ -45,10 +51,6 @@ public abstract class LayoutOptions : ILayoutOptions
     /// <value>
     ///     <c>true</c> if the preview image is displayed; otherwise, <c>false</c>.
     /// </value>
-    /// <remarks>
-    ///     This property allows enabling or disabling the visibility of the preview image in the layout.
-    ///     It is set to <c>true</c> by default.
-    /// </remarks>
     public bool ShowPreviewImage { get; set; } = true;
 
     /// <summary>
@@ -57,23 +59,15 @@ public abstract class LayoutOptions : ILayoutOptions
     /// <value>
     ///     <c>true</c> if the item name should be displayed; otherwise, <c>false</c>.
     /// </value>
-    /// <remarks>
-    ///     This property is used to control the visibility of item names in the layout configuration.
-    ///     It is particularly useful for customizing the display settings in various UI components
-    ///     of the Revit Family Manager.
-    /// </remarks>
     public bool ShowItemName { get; set; } = true;
 
     /// <summary>
-    ///     Gets or sets the unique identifier for the layout options.
+    ///     Gets or sets the unique key that identifies this layout configuration.
     /// </summary>
     /// <value>
-    ///     A <see cref="string" /> representing the key that identifies the layout options.
+    ///     A <see cref="string" /> derived from the <see cref="LayoutOptionsAttribute.OptionsName" />
+    ///     declared on the concrete class.
     /// </value>
-    /// <remarks>
-    ///     The <see cref="Key" /> property is automatically initialized to the name of the derived class
-    ///     with the "Options" suffix removed. This ensures that the key is meaningful and corresponds
-    ///     to the specific layout configuration.
-    /// </remarks>
     public string Key { get; set; }
 }
+
