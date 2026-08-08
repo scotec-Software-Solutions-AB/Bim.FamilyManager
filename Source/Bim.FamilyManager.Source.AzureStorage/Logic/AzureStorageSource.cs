@@ -39,7 +39,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <returns>A new <see cref="AzureStorageSource" /> instance.</returns>
     public delegate AzureStorageSource Factory(AzureStorageSourceOptions options);
 
-    private static readonly Stream PreviewStream;
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
     private readonly IAadAuthService _authService;
     private readonly ILogger<AzureStorageSource> _logger;
