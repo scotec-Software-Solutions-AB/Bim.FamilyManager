@@ -230,7 +230,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         var notification = string.Empty;
         try
         {
-            if (!FileBackupHelper.CanWriteToFolder(path))
+            if (!FileBackupHelper.CanWriteToFolder(path, _logger))
             {
                 notification = StringResources.DirectorySource_Message_Save_Error;
 

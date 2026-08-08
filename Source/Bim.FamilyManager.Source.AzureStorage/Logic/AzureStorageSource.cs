@@ -7,6 +7,7 @@ using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
+using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
@@ -41,6 +42,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private static readonly Stream PreviewStream;
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
     private readonly IAadAuthService _authService;
+    private readonly ILogger<AzureStorageSource> _logger;
     private AzureBlobCache? _blobCache;
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
@@ -62,10 +64,12 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         AzureStorageSourceOptions options,
         IFamilyManager familyManager,
         RevitFamilyFactory familyFactory,
-        IAadAuthService authService)
+        IAadAuthService authService,
+        ILogger<AzureStorageSource> logger)
         : base(options, familyManager, familyFactory)
     {
         _authService = authService;
+        _logger = logger;
 
         _ = ConnectToAzureStorageSilentAsync(CancellationToken.None);
     }
@@ -191,6 +195,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
+            _logger.LogError(e, "Failed to connect to Azure Storage silently.");
             RaiseError(e);
         }
     }
@@ -323,9 +328,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         {
             Disconnect();
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            //TODO:
+            _logger.LogWarning(e, "Exception while disconnecting on session sign-out.");
         }
     }
 
@@ -358,9 +363,9 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         {
             Connect();
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            //TODO
+            _logger.LogWarning(e, "Exception while connecting on session sign-in.");
         }
     }
 
@@ -435,6 +440,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
+            _logger.LogError(e, "Failed to connect to Azure Storage.");
             RaiseError(e);
         }
     }

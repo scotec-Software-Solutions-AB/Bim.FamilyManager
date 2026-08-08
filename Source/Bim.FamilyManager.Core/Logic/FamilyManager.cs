@@ -1046,10 +1046,10 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             {
                 File.Delete(documentPath);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // This is not critical.
-                _logger.LogDebug($"Could not delete file: {documentPath}");
+                _logger.LogDebug(ex, $"Could not delete file: {documentPath}");
             }
         }
     }
@@ -1130,9 +1130,10 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // Any exception shall be interpreted as a change.
+                // Any exception during comparison is interpreted as a change.
+                _logger.LogDebug(e, "Exception while comparing family source options; treating as changed.");
                 return false;
             }
         }
