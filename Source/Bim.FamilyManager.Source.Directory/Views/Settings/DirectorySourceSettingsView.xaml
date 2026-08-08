@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:Scotec.Wpf.Controls;assembly=Scotec.Wpf.Controls"
-             xmlns:controls1="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
+             xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
              xmlns:resources="clr-namespace:Bim.FamilyManager.Source.Directory.Resources"
              xmlns:settings="clr-namespace:Bim.FamilyManager.Source.Directory.ViewModels.Settings"
              mc:Ignorable="d"
@@ -39,7 +38,8 @@
                 <Style TargetType="TextBox">
                     <Setter Property="Margin" Value="10,5,10,0" />
                 </Style>
-                <Style TargetType="controls:ExtendedTextBox">
+                <Style TargetType="controls:ExtendedTextBox"
+                       BasedOn="{StaticResource {x:Type controls:ExtendedTextBox}}">
                     <Setter Property="Margin" Value="10,5,10,0" />
                 </Style>
 
@@ -69,7 +69,7 @@
                                       x:Name="FolderTextBox"
                                       Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
                                       Watermark="Select source directory" />
-            <controls1:MaterialIconButton Grid.Column="1" IconSize="21" Foreground="{StaticResource ButtonFolderBrush}"
+            <controls:MaterialIconButton Grid.Column="1" IconSize="21" Foreground="{StaticResource ButtonFolderBrush}"
                                           Background="{StaticResource PrimaryBackgroundBrush}"
                                           Click="OnSelectFolder" Kind="{StaticResource IconFolder}"
                                           ToolTip="{x:Static resources:StringResources.DirectorySourceSettings_Button_SelectFolder}"

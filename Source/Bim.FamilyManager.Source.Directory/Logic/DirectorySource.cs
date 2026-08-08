@@ -65,7 +65,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         _fileCache ??= new DirectoryFileCache(_rootPath);
         await _fileCache.InitializeAsync(cancellationToken);
 
-        _folders ??= await Task.Run(async () =>
+        if (_folders == null)
         {
             var folders = new List<IFolder>();
             await foreach (var folder in GetFoldersFromCache(_rootPath, cancellationToken))
@@ -74,8 +74,8 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
                 folders.Add(folder);
             }
 
-            return folders;
-        }, cancellationToken);
+            _folders = folders;
+        }
 
         foreach (var folder in _folders)
         {
@@ -109,8 +109,9 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
     protected override void OnReload()
     {
-        // Reset all folders to force reinitialization.
+        // Reset folders and the file cache to force a full reinitialization on next access.
         _folders = null;
+        _fileCache?.Reset();
     }
 
     /// <summary>
@@ -225,7 +226,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
     private void SaveFamily(IRevitFamily family, Stream stream, string path)
     {
-        _logger.LogInformation($"Save family to the family source. Source: {Name}, Family: {family.Name}, Path: {path}");
+        _logger.LogInformation("Save family to the family source. Source: {SourceName}, Family: {FamilyName}, Path: {Path}", Name, family.Name, path);
 
         var notification = string.Empty;
         try
@@ -344,7 +345,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         // Build a lookup for .fm files by filename without extension
         var fmLookup = descriptionFiles
 #pragma warning disable IDE0200
-            .ToDictionary(fm => Path.GetFileNameWithoutExtension(fm), fm => fm, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(Path.GetFileNameWithoutExtension, fm => fm, StringComparer.OrdinalIgnoreCase);
 #pragma warning restore IDE0200
 
         var set = familyFiles

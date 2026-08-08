@@ -5,10 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:material="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:viewModels="clr-namespace:Bim.FamilyManager.Ui.Abstractions.ViewModels;assembly=Bim.FamilyManager.Ui.Abstractions"
-             xmlns:converter="clr-namespace:Scotec.Wpf.Converter;assembly=Scotec.Wpf.Controls"
              xmlns:converters="clr-namespace:Bim.FamilyManager.Ui.Views.Converters"
              xmlns:resources="clr-namespace:Bim.FamilyManager.Ui.Resources"
              xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls"
+             xmlns:converter1="clr-namespace:Bim.FamilyManager.Ui.Converter"
              d:DataContext="{d:DesignInstance viewModels:IFamilyViewModel, IsDesignTimeCreatable=false}"
              mc:Ignorable="d">
 
@@ -20,9 +20,9 @@
                     Source="pack://application:,,,/Bim.FamilyManager.Ui;component/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <converter:BooleanToVisibilityConverter x:Key="TrueToVisibleConverterKey" FalseVisibility="Collapsed"
+            <converter1:BooleanToVisibilityConverter x:Key="TrueToVisibleConverterKey" FalseVisibility="Collapsed"
                                                     TrueVisibility="Visible" />
-            <converter:BooleanToVisibilityConverter x:Key="FalseToVisibleConverterKey" FalseVisibility="Visible"
+            <converter1:BooleanToVisibilityConverter x:Key="FalseToVisibleConverterKey" FalseVisibility="Visible"
                                                     TrueVisibility="Collapsed" />
             <converters:RectConverter x:Key="RectConverter" />
 

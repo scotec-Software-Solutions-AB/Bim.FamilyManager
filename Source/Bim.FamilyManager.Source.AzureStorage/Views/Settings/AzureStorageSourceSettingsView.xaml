@@ -3,10 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:Scotec.Wpf.Controls;assembly=Scotec.Wpf.Controls"
              xmlns:resources="clr-namespace:Bim.FamilyManager.Source.AzureStorage.Resources"
              xmlns:settings="clr-namespace:Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings"
-             xmlns:controls1="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
+             xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="600"
              d:DataContext="{d:DesignInstance settings:AzureStorageSourceSettingsViewModel, IsDesignTimeCreatable=false}">
@@ -43,7 +42,7 @@
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Setter Property="Margin" Value="10,10,10,0" />
                 </Style>
-                <Style TargetType="controls:ExtendedTextBox">
+                <Style TargetType="controls:ExtendedTextBox" BasedOn="{StaticResource {x:Type controls:ExtendedTextBox}}">
                     <Setter Property="Margin" Value="10,5,10,0" />
                     <Setter Property="Width" Value="250" />
                 </Style>
@@ -102,7 +101,7 @@
 
 
         <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="1" Margin="10,10,0,0">
-            <controls1:MaterialIconButton Kind="{StaticResource IconAccount}"
+            <controls:MaterialIconButton Kind="{StaticResource IconAccount}"
                                           IconSize="40" Padding="0" Margin="0"
                                           HorizontalContentAlignment="Center"
                                           HorizontalAlignment="Left"
