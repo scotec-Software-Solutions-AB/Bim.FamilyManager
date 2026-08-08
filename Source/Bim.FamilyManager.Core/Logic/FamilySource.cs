@@ -133,8 +133,13 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     public abstract IAsyncEnumerable<IFolder> GetFoldersAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Reloads the family source, triggering any necessary updates and notifying subscribers of the reload event.
+    ///     Asynchronously reloads the family source, triggering any necessary updates and notifying subscribers of the
+    ///     reload event.
     /// </summary>
+    /// <param name="cancellationToken">
+    ///     A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous reload operation.</returns>
     /// <remarks>
     ///     This method invokes the <see cref="OnReload" /> method to perform the actual reload logic
     ///     and then raises the <see cref="Reloaded" /> event to notify listeners that the reload operation has completed.
@@ -142,10 +147,11 @@ public abstract class FamilySource<TOptions> : IFamilySource, IDisposable where 
     /// <exception cref="ObjectDisposedException">
     ///     Thrown if the method is called on a disposed instance of the family source.
     /// </exception>
-    public void Reload()
+    public Task ReloadAsync(CancellationToken cancellationToken = default)
     {
         OnReload();
         Reloaded?.Invoke(this, EventArgs.Empty);
+        return Task.CompletedTask;
     }
 
     /// <summary>

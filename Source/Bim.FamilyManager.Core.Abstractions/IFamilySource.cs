@@ -56,21 +56,26 @@ public interface IFamilySource
     event EventHandler<FamilySourceErrorEventArgs> Error;
 
     /// <summary>
-    ///     Reloads the family source, updating its state to reflect any changes to the underlying data or structure.
+    ///     Asynchronously reloads the family source, updating its state to reflect any changes to the underlying data or
+    ///     structure.
     /// </summary>
+    /// <param name="cancellationToken">
+    ///     A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous reload operation.</returns>
     /// <remarks>
     ///     Used to refresh the source after external modifications. May trigger the <see cref="Reloaded" /> event.
     /// </remarks>
     /// <exception cref="ObjectDisposedException">
     ///     Thrown if called on a disposed instance.
     /// </exception>
-    void Reload();
+    Task ReloadAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Occurs when the family source has been reloaded.
     /// </summary>
     /// <remarks>
-    ///     Triggered after <see cref="Reload" /> is called, indicating the source has been refreshed.
+    ///     Triggered after <see cref="ReloadAsync" /> is called, indicating the source has been refreshed.
     ///     Subscribers can update UI or reload dependent data in response.
     /// </remarks>
     event EventHandler<EventArgs> Reloaded;

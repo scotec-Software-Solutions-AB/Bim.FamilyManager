@@ -368,7 +368,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         _folders = null;
         _blobCache = null;
         Disconnected?.Invoke(this);
-        Reload();
+        ReloadAsync().GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -407,7 +407,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
         Connected?.Invoke(this);
-        Reload();
+        ReloadAsync().GetAwaiter().GetResult();
     }
 
     /// <summary>
