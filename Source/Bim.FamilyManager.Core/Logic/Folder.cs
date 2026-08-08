@@ -25,6 +25,7 @@ public class Folder : IFolder
 {
     private readonly GetFamiliesAsyncDelegate _families;
     private readonly GetSubfoldersAsyncDelegate _subFolders;
+    private readonly byte[]? _previewImage;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="Folder" /> class.
@@ -35,20 +36,31 @@ public class Folder : IFolder
     /// <param name="preview">
     ///     An optional stream containing a source-provided preview image. Pass <c>null</c> when the
     ///     source has no custom image; the UI will fall back to its default folder icon.
+    ///     The stream is read once during construction; the caller may dispose it afterwards.
     /// </param>
     public Folder(string name, GetSubfoldersAsyncDelegate subFolders, GetFamiliesAsyncDelegate families, Stream? preview = null)
     {
         _subFolders = subFolders;
         _families = families;
         Name = name;
-        Preview = preview;
+
+        if (preview is not null)
+        {
+            using var buffer = new MemoryStream();
+            preview.CopyTo(buffer);
+            _previewImage = buffer.ToArray();
+        }
     }
 
     /// <inheritdoc />
     public string Name { get; }
 
     /// <inheritdoc />
-    public Stream? Preview { get; }
+    /// <remarks>
+    ///     Returns a new read-only stream over the cached preview image on each access.
+    ///     Callers may read and dispose the returned stream independently without affecting other consumers.
+    /// </remarks>
+    public Stream? Preview => _previewImage is not null ? new MemoryStream(_previewImage, false) : null;
 
     /// <inheritdoc />
     public IAsyncEnumerable<IFolder> GetSubfoldersAsync(CancellationToken cancellationToken)
