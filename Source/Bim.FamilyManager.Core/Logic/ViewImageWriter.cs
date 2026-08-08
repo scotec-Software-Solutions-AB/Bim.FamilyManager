@@ -1,12 +1,14 @@
 using System.IO;
+using Bim.FamilyManager.Core.Abstractions;
 using OpenMcdf;
 
 namespace Bim.FamilyManager.Core.Logic;
 
-public class ViewImageWriter
+/// <inheritdoc cref="IViewImageWriter" />
+public sealed class ViewImageWriter : IViewImageWriter
 {
-    //public static void WritePreviewImage(PreviewImageEStorage eStorage, Stream documentStream, Stream imageStream)
-    public static void WritePreviewImages(Stream documentStream, string familyPreviewImageName, IDictionary<string, Stream> typePreviewImageStreams)
+    /// <inheritdoc />
+    public void WritePreviewImages(Stream documentStream, string familyPreviewImageName, IDictionary<string, Stream> typePreviewImageStreams)
     {
         if (!typePreviewImageStreams.Any())
         {

@@ -46,6 +46,8 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     private readonly PreviewImageEStorage _previewImageEStorage = new();
     private readonly UIControlledApplication _revitApplication;
     private readonly IServiceProvider _services;
+    private readonly IViewImageExporter _viewImageExporter;
+    private readonly IViewImageWriter _viewImageWriter;
     private Document? _activeDocument;
     private Dictionary<ElementId, string> _familyElementIds = [];
     private List<IFamilySourceOptions> _familySourceOptions;
@@ -82,11 +84,13 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     ///     them when necessary.
     /// </remarks>
     public FamilyManager(IOptions<FamilyManagerOptions> defaultOptions, IOptionsMonitor<FamilySourcesOptions> options, UIControlledApplication revitApplication,
-                         IServiceProvider services, ILogger<FamilyManager> logger)
+                         IServiceProvider services, IViewImageExporter viewImageExporter, IViewImageWriter viewImageWriter, ILogger<FamilyManager> logger)
     {
         _defaultOptions = defaultOptions;
         _revitApplication = revitApplication;
         _services = services;
+        _viewImageExporter = viewImageExporter;
+        _viewImageWriter = viewImageWriter;
         _logger = logger;
 
         _familySourceOptions = GetAllSourcesFromOptions(options.CurrentValue);
@@ -438,7 +442,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             foreach (var familyType in familyManager.Types.Cast<FamilyType>())
             {
                 SetCurrentFamilyType(familyType);
-                var previewImage = ViewImageExporter.ExportViewPng(document, view);
+                var previewImage = _viewImageExporter.ExportViewPng(document, view);
 
                 //using var t = new Transaction(document, "Attach preview to family");
                 //t.Start();
@@ -961,7 +965,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     {
         if (_previewImageEStorage.TryGet(document.OwnerFamily, out var familyPreviewImageName, out var previewStreams))
         {
-            ViewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
+            _viewImageWriter.WritePreviewImages(stream, familyPreviewImageName, previewStreams);
         }
 
         //using (var root = RootStorage.Open(stream, StorageModeFlags.LeaveOpen))

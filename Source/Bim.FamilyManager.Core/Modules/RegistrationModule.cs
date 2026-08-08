@@ -52,6 +52,14 @@ public class RegistrationModule : Module
                .As<IFamilyManager>()
                .SingleInstance();
 
+        builder.RegisterType<ViewImageExporter>()
+               .As<IViewImageExporter>()
+               .SingleInstance();
+
+        builder.RegisterType<ViewImageWriter>()
+               .As<IViewImageWriter>()
+               .SingleInstance();
+
         builder.Register(context => typeof(DisplayOptions))
                .Keyed<Type>("DisplayOptions")
                .SingleInstance();

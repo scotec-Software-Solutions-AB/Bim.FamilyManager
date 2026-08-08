@@ -1,11 +1,14 @@
 using System.IO;
 using Autodesk.Revit.DB;
+using Bim.FamilyManager.Core.Abstractions;
 
 namespace Bim.FamilyManager.Core.Logic;
 
-public static class ViewImageExporter
+/// <inheritdoc cref="IViewImageExporter" />
+public sealed class ViewImageExporter : IViewImageExporter
 {
-    public static Stream ExportViewPng(Document document, View view, int pixelSize = 256)
+    /// <inheritdoc />
+    public Stream ExportViewPng(Document document, View view, int pixelSize = 256)
     {
         // Use a transaction group to temporarily hide elements and then roll it back.
         // Within the transaction group, a transaction is used to perform the temporary hiding.
