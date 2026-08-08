@@ -1,8 +1,7 @@
 using System.IO;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
-using Bim.FamilyManager.Core.Logic;
+using Bim.FamilyManager.Ui.Utilities;
 using Bim.FamilyManager.Core.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Wpf.ViewModels;
@@ -163,7 +162,7 @@ public abstract class FamilyManagerItemViewModel<TLayoutOptions> : ViewModel, IF
             return null;
         }
 
-        return Helper.CreateBitmapFromStream(preview, transparentColor);
+        return ImageHelper.CreateBitmapFromStream(preview, transparentColor);
     }
 
     /// <summary>
