@@ -1,15 +1,15 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Autodesk.Internal.InfoCenter;
 using Autodesk.Windows;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Base.Logic;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.Directory.Options;
-using Bim.FamilyManager.Ui.Resources;
+using Bim.FamilyManager.Source.Directory.Resources;
 using Microsoft.Extensions.Logging;
 using Scotec.Revit.RevitFamily;
-using Folder = Bim.FamilyManager.Base.Logic.Folder;
+using Folder = Bim.FamilyManager.Core.Logic.Folder;
 
 namespace Bim.FamilyManager.Source.Directory.Logic;
     
@@ -31,26 +31,10 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     public delegate DirectorySource Factory(DirectorySourceOptions options);
 
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
-    private static readonly Stream PreviewStream;
     private readonly ILogger<DirectorySource> _logger;
     private readonly string _rootPath;
     private DirectoryFileCache? _fileCache;
     private IEnumerable<IFolder>? _folders;
-
-    /// <summary>
-    /// Initializes static members of the <see cref="DirectorySource" /> class.
-    /// </summary>
-    /// <remarks>
-    /// This static constructor is responsible for initializing the <see cref="PreviewStream" /> field
-    /// by loading a resource stream from a predefined URI.
-    /// </remarks>
-    static DirectorySource()
-    {
-        const string packUri =
-            "pack://application:,,,/Bim.FamilyManager.Source.Directory;component/Resources/Images/FamilySourceStorageNetwork_128x128.png";
-
-        PreviewStream = LoadResourceAsStream(packUri);
-    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DirectorySource" /> class.
@@ -59,33 +43,12 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// <param name="familyManager">An implementation of the <see cref="IFamilyManager" /> interface used to manage Revit families.</param>
     /// <param name="familyFactory">A factory delegate for creating instances of <see cref="RevitFamily" />.</param>
     /// <param name="logger">An instance of <see cref="ILogger{DirectorySource}" /> used for logging.</param>
-    /// <remarks>
-    /// This constructor initializes the directory source with the specified options, family manager, and family factory.
-    /// It also sets the root path for the directory source based on the provided options.
-    /// </remarks>
-    public DirectorySource(DirectorySourceOptions options, IFamilyManager familyManager, IRevitFamily.Factory familyFactory,
+    public DirectorySource(DirectorySourceOptions options, IFamilyManager familyManager, RevitFamilyFactory familyFactory,
                            ILogger<DirectorySource> logger)
         : base(options, familyManager, familyFactory)
     {
         _logger = logger;
         _rootPath = Options.Path;
-    }
-
-    /// <summary>
-    /// Gets a stream that provides a preview of the Revit family data.
-    /// </summary>
-    /// <remarks>
-    /// This property overrides <see cref="FamilySource{TOptions}.Preview" /> to return a stream
-    /// positioned at the beginning, allowing for reading the preview data from the start.
-    /// </remarks>
-    /// <returns>A <see cref="Stream" /> object containing the preview data for the Revit family.</returns>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
     }
 
     /// <summary>
@@ -174,9 +137,33 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
             yield return new Folder(
                 Path.GetFileName(subfolder),
                 c => GetFoldersFromCache(subfolder, c),
-                (i, c) => GetFamiliesFromCache(subfolder, i, c)
+                (i, c) => GetFamiliesFromCache(subfolder, i, c),
+                LoadFolderPreview(subfolder)
             );
         }
+    }
+
+    /// <summary>
+    ///     Loads a custom preview image for a folder if a <c>_folder.preview.png</c> file exists in it.
+    /// </summary>
+    /// <param name="folderPath">The file-system path of the folder.</param>
+    /// <returns>
+    ///     A <see cref="MemoryStream" /> containing the image data, or <c>null</c> if no preview file is present.
+    /// </returns>
+    private static Stream? LoadFolderPreview(string folderPath)
+    {
+        var previewFile = Path.Combine(folderPath, "_folder.preview.png");
+        if (!File.Exists(previewFile))
+        {
+            return null;
+        }
+
+        var memoryStream = new MemoryStream();
+        using var fileStream = new FileStream(previewFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+        fileStream.CopyTo(memoryStream);
+        memoryStream.Position = 0;
+
+        return memoryStream;
     }
 
     /// <summary>
@@ -243,7 +230,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         var notification = string.Empty;
         try
         {
-            if (!FileBackupHelper.CanWriteToFolder(path))
+            if (!FileBackupHelper.CanWriteToFolder(path, _logger))
             {
                 notification = StringResources.DirectorySource_Message_Save_Error;
 

@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Bim.FamilyManager.Resources;
 using Bim.FamilyManager.Ui.Views.Settings;

@@ -1,7 +1,7 @@
-﻿using System.Windows.Media;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Base.Options;
+using System.Windows.Media;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Core.Options;
 using Microsoft.Extensions.Options;
 
 namespace Bim.FamilyManager.Ui.ViewModels;
@@ -9,39 +9,31 @@ namespace Bim.FamilyManager.Ui.ViewModels;
 /// <summary>
 ///     Represents the view model for a folder in the Revit Family Manager application.
 /// </summary>
-/// <remarks>
-///     This class provides properties and commands to interact with folder data, such as its name and path.
-///     It is designed to work with the <see cref="IFolder" /> abstraction and integrates with WPF commands for UI
-///     interaction.
-/// </remarks>
 public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewModel<TLayoutOptions>, IFolderViewModel
     where TLayoutOptions : LayoutOptions
 {
+    private static readonly ImageSource? FolderIcon;
+
     private IEnumerable<IFamilyViewModel>? _families;
+    private bool _familiesLoading;
     private bool _isExpanded;
     private IEnumerable<IFolderViewModel>? _subfolders;
+    private bool _subfoldersLoading;
 
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="FolderViewModel{TLayoutOptions}" /> class with the specified folder
-    ///     and layout options.
-    /// </summary>
-    /// <param name="folder">
-    ///     An instance of <see cref="IFolder" /> representing the folder data to be encapsulated by the view model.
-    /// </param>
-    /// <param name="layoutOptions">
-    ///     The <see cref="IOptionsMonitor{TLayoutOptions}" /> providing the current and updated layout options.
-    /// </param>
-    /// <remarks>
-    ///     This constructor sets up the <see cref="FolderViewModel{TLayoutOptions}" /> with the provided folder data and
-    ///     layout options, enabling
-    ///     interaction with folder properties and preview image. It integrates with the <see cref="IFolder" /> abstraction and
-    ///     supports dynamic creation of subfolder and family view models.
-    /// </remarks>
+    static FolderViewModel()
+    {
+        const string packUri = "pack://application:,,,/Bim.FamilyManager.Ui;component/Resources/Images/Folder_128x128.png";
+        FolderIcon = GetPreviewImage(LoadPackUriAsStream(packUri));
+        FolderIcon?.Freeze();
+    }
+
     protected FolderViewModel(IFolder folder, IOptionsMonitor<TLayoutOptions> layoutOptions)
         : base(layoutOptions)
     {
         Folder = folder;
-        Preview = folder.Preview is null ? null : GetPreviewImage(folder.Preview);
+        Preview = folder.Preview is not null
+            ? GetPreviewImage(folder.Preview)
+            : FolderIcon;
     }
 
     /// <summary>
@@ -57,16 +49,9 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
     public override string Name => Folder.Name;
 
     /// <summary>
-    ///     Gets the preview image associated with the folder.
+    ///     Gets the preview image for this folder. Returns the source-provided image when available;
+    ///     falls back to the shared default folder icon otherwise.
     /// </summary>
-    /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image of the folder, or <c>null</c> if no preview is
-    ///     available.
-    /// </value>
-    /// <remarks>
-    ///     The preview image is typically used to visually represent the folder in the user interface.
-    ///     It is loaded from the underlying <see cref="IFolder" /> instance.
-    /// </remarks>
     public override ImageSource? Preview { get; }
 
     /// <summary>
@@ -99,72 +84,76 @@ public abstract class FolderViewModel<TLayoutOptions> : FamilyManagerItemViewMod
         {
             if (IsExpanded || IsSelected)
             {
-                if (_subfolders is null)
+                if (_subfolders is null && !_subfoldersLoading)
                 {
-                    var subfolders = Task.Run(async () =>
-                    {
-                        var subfolders = new List<IFolder>();
-                        await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
-                        {
-                            subfolders.Add(subfolder);
-                        }
-
-                        return subfolders.OrderBy(f => f.Name)
-                                         .ToList();
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
-
-                    _subfolders = subfolders.Select(CreateSubfolderViewModel)
-                                            .ToList();
+                    _ = LoadSubfoldersAsync();
                 }
-
-                return _subfolders;
             }
 
-            return null;
+            return _subfolders;
         }
     }
-    // Performance: Do not load the families if the folder is not expanded.
 
-    /// <summary>
-    ///     Gets the collection of families associated with the folder represented by this view model.
-    /// </summary>
-    /// <value>
-    ///     A collection of <see cref="IFamilyViewModel" /> objects representing the families in the folder, or <c>null</c> if
-    ///     the folder is not expanded.
-    /// </value>
-    /// <remarks>
-    ///     This property dynamically loads and returns the families when the folder is expanded or selected. If the folder is
-    ///     not expanded,
-    ///     the property returns <c>null</c>. The families are represented as instances of <see cref="IFamilyViewModel" />.
-    /// </remarks>
+    private async Task LoadSubfoldersAsync()
+    {
+        _subfoldersLoading = true;
+        try
+        {
+            var subfolders = new List<IFolder>();
+            await foreach (var subfolder in Folder.GetSubfoldersAsync(CancellationToken.None))
+            {
+                subfolders.Add(subfolder);
+            }
+
+            _subfolders = subfolders.OrderBy(f => f.Name)
+                                    .Select(CreateSubfolderViewModel)
+                                    .ToList();
+
+            OnPropertyChanged(nameof(Subfolders));
+        }
+        finally
+        {
+            _subfoldersLoading = false;
+        }
+    }
+
+    // Performance: Families and Subfolders are loaded only when the folder is expanded or selected.
     public IEnumerable<IFamilyViewModel>? Families
     {
         get
         {
-            // Performance: Do not load the families if the folder is not expanded.
             if (IsExpanded || IsSelected)
             {
-                if (_families is null)
+                if (_families is null && !_familiesLoading)
                 {
-                    var families = Task.Run(async () =>
-                    {
-                        var families = new List<IRevitFamily>();
-                        await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
-                        {
-                            families.Add(family);
-                        }
-
-                        return families.OrderBy(f => f.Name)
-                                       .ToList();
-                        
-                        // Probably performace problem. UI blocking.
-                    }).ConfigureAwait(true).GetAwaiter().GetResult();
-                    _families = families.Select(CreateFamilyViewModel)
-                                        .ToList();
+                    _ = LoadFamiliesAsync();
                 }
             }
 
             return _families;
+        }
+    }
+
+    private async Task LoadFamiliesAsync()
+    {
+        _familiesLoading = true;
+        try
+        {
+            var families = new List<IRevitFamily>();
+            await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
+            {
+                families.Add(family);
+            }
+
+            _families = families.OrderBy(f => f.Name)
+                                .Select(CreateFamilyViewModel)
+                                .ToList();
+
+            OnPropertyChanged(nameof(Families));
+        }
+        finally
+        {
+            _familiesLoading = false;
         }
     }
 

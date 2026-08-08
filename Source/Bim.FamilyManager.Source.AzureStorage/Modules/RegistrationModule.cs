@@ -1,7 +1,7 @@
-﻿using Autofac;
-using Bim.FamilyManager.Abstractions.Options;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Abstractions.ViewModels.Settings;
+using Autofac;
+using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels.Settings;
 using Bim.FamilyManager.Source.AzureStorage.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Bim.FamilyManager.Source.AzureStorage.ViewModels;

@@ -1,6 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+    <UseWPF>true</UseWPF>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<!--<CompilerGeneratedFilesOutputPath>obj\gen</CompilerGeneratedFilesOutputPath>-->
 	</PropertyGroup>
@@ -31,8 +32,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj" />
-		<ProjectReference Include="..\Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.AzureStorage\Bim.FamilyManager.Source.AzureStorage.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Source.Directory\Bim.FamilyManager.Source.Directory.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyExplorer\Bim.FamilyManager.Ui.FamilyExplorer.csproj" />
@@ -83,6 +84,7 @@
 	<Target Name="CopyExtraFilesToPublishRoot" AfterTargets="Publish">
 		<!-- PublishUrl usually ends with a trailing slash -->
 		<PropertyGroup>
+    <UseWPF>true</UseWPF>
 			<_PublishRoot>$([System.IO.Path]::GetFullPath('$(PublishDir)..\'))</_PublishRoot>
 		</PropertyGroup>
 

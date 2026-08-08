@@ -132,6 +132,15 @@
   <data name="DirectorySourceSettings.Text.Directory.Watermark" xml:space="preserve">
     <value>Select source directory</value>
   </data>
+  <data name="DirectorySource.Message.Save.Error" xml:space="preserve">
+    <value>Could not save the family to the family source. Please ensure the destination is accessible and writable.</value>
+  </data>
+  <data name="DirectorySource.Message.Save.Success" xml:space="preserve">
+    <value>The family was saved to the family source.</value>
+  </data>
+  <data name="FamilyManager.Name" xml:space="preserve">
+    <value>Bim.FamilyManager</value>
+  </data>
   <data name="DirectorySourceSettings.Text.Active" xml:space="preserve">
     <value>Active</value>
   </data>

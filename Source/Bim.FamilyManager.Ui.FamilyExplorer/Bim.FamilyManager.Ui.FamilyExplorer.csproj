@@ -1,12 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+    <UseWPF>true</UseWPF>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Bim.FamilyManager.Abstractions\Bim.FamilyManager.Abstractions.csproj" />
-		<ProjectReference Include="..\Bim.FamilyManager.Base\Bim.FamilyManager.Base.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
 		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.Abstractions\Bim.FamilyManager.Ui.Abstractions.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

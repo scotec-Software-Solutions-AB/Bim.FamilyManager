@@ -1,4 +1,4 @@
-﻿using Bim.FamilyManager.Source.Directory.Options;
+using Bim.FamilyManager.Source.Directory.Options;
 using Bim.FamilyManager.Ui.ViewModels.Settings;
 
 namespace Bim.FamilyManager.Source.Directory.ViewModels.Settings;

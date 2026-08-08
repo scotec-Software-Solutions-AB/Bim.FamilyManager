@@ -1,4 +1,4 @@
-﻿namespace Bim.FamilyManager.Ui.Views.Settings;
+namespace Bim.FamilyManager.Ui.Views.Settings;
 
 /// <summary>
 ///     Represents a dialog for editing family source settings in the Revit Family Manager.

@@ -1,7 +1,7 @@
-﻿using System.Windows.Media;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Abstractions.ViewModels;
-using Bim.FamilyManager.Base.Options;
+using System.Windows.Media;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Core.Options;
 using Microsoft.Extensions.Options;
 using Scotec.Events.WeakEvents;
 
@@ -19,6 +19,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 {
     private readonly IFamilySource _familySource;
     private IList<IFolderViewModel>? _folders;
+    private bool _foldersLoading;
     private IFolderViewModel? _selectedFolder;
 
     /// <summary>
@@ -50,7 +51,6 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
 
         StaticWeakEventManager.AddWeakHandler(_familySource, nameof(IFamilySource.Reloaded), OnReloaded);
         Panel = panelFactory.Invoke(familySource);
-        Preview = familySource.Preview is null ? null : GetPreviewImage(familySource.Preview);
     }
 
     /// <summary>
@@ -68,27 +68,36 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     {
         get
         {
-            if (_folders is null)
+            if (_folders is null && !_foldersLoading)
             {
-                var folders = Task.Run(async () =>
-                {
-                    var folders = new List<IFolder>();
-                    await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
-                    {
-                        folders.Add(folder);
-                    }
-
-                    return folders.OrderBy(f => f.Name)
-                                  .ToList();
-                }).ConfigureAwait(true).GetAwaiter().GetResult();
-
-                _folders = folders.Select(CreateFolderViewModel)
-                                  .ToList();
-
-                SelectedFolder = _folders?.FirstOrDefault();
+                _ = LoadFoldersAsync();
             }
 
             return _folders;
+        }
+    }
+
+    private async Task LoadFoldersAsync()
+    {
+        _foldersLoading = true;
+        try
+        {
+            var folders = new List<IFolder>();
+            await foreach (var folder in _familySource.GetFoldersAsync(CancellationToken.None))
+            {
+                folders.Add(folder);
+            }
+
+            _folders = folders.OrderBy(f => f.Name)
+                              .Select(CreateFolderViewModel)
+                              .ToList();
+
+            SelectedFolder = _folders.FirstOrDefault();
+            OnPropertyChanged(nameof(Folders));
+        }
+        finally
+        {
+            _foldersLoading = false;
         }
     }
 
@@ -104,12 +113,10 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     public override string Name => _familySource.Name;
 
     /// <summary>
-    ///     Gets the preview image associated with the family source.
+    ///     Gets the preview image for this family source.
+    ///     Derived classes in each source plugin supply a static icon that represents their source type.
     /// </summary>
-    /// <value>
-    ///     An <see cref="ImageSource" /> representing the preview image, or <c>null</c> if unavailable.
-    /// </value>
-    public override ImageSource? Preview { get; }
+    public abstract override ImageSource? Preview { get; }
 
     /// <summary>
     ///     Gets or sets the currently selected folder in the family source.
@@ -152,6 +159,7 @@ public abstract class FamilySourceViewModel<TLayoutOptions> : FamilyManagerItemV
     protected virtual void OnReloaded(IFamilySource? sender, EventArgs e)
     {
         _folders = null;
+        _foldersLoading = false;
         SelectedFolder = null;
         OnPropertyChanged(nameof(Folders));
     }

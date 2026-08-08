@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Bim.FamilyManager.Ui.ViewModels.Settings;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using TokenCache = Scotec.Identity.AzureActiveDirectory.TokenCache;
@@ -21,6 +22,7 @@ namespace Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings;
 public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel<AzureStorageSourceOptions>
 {
     private readonly IAadAuthService _authService;
+    private readonly ILogger<AzureStorageSourceSettingsViewModel> _logger;
     private readonly RelayCommand _signInCommand;
     private string _clientId;
     private string _containerName;
@@ -34,10 +36,11 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
     /// </summary>
     /// <param name="authService">The Azure AD authentication service.</param>
     /// <param name="options">The Azure Storage source options.</param>
-    public AzureStorageSourceSettingsViewModel(IAadAuthService authService, AzureStorageSourceOptions options)
+    public AzureStorageSourceSettingsViewModel(IAadAuthService authService, AzureStorageSourceOptions options, ILogger<AzureStorageSourceSettingsViewModel> logger)
         : base(options)
     {
         _authService = authService;
+        _logger = logger;
         _rootPath = options.RootPath;
         _containerName = options.ContainerName;
         _clientId = options.ClientId?.ToString("D") ?? string.Empty;
@@ -278,8 +281,9 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
 
             Session = session;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            _logger.LogWarning(e, "Silent sign-in to Azure AD failed.");
             Session = null;
             OnPropertyChanged(nameof(SignedInAs));
         }
@@ -334,8 +338,9 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
         //catch (MsalUiRequiredException)
         //{
         //}
-        catch (Exception)
+        catch (Exception e)
         {
+            _logger.LogWarning(e, "Interactive sign-in to Azure AD failed.");
             Session = null;
         }
     }

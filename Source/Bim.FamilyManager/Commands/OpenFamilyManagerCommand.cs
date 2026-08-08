@@ -1,6 +1,6 @@
-﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Bim.FamilyManager.Abstractions;
+using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Resources;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;

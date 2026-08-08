@@ -3,9 +3,11 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Base.Logic;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Logic;
+using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
+using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 using Scotec.Revit.RevitFamily;
@@ -40,6 +42,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private static readonly Stream PreviewStream;
     private static readonly Regex BackupRegex = new(@"\.\d{4}\.rfa$", RegexOptions.Compiled);
     private readonly IAadAuthService _authService;
+    private readonly ILogger<AzureStorageSource> _logger;
     private AzureBlobCache? _blobCache;
     private BlobContainerClient? _blobContainerClient;
     private IEnumerable<IFolder>? _folders;
@@ -47,19 +50,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     private CancellationTokenSource _tokenSource = new();
 
     /// <summary>
-    ///     Static constructor. Loads the preview image resource for Azure storage source.
-    /// </summary>
-    /// <remarks>
-    ///     Loads a PNG image from resources for use as a preview icon.
-    /// </remarks>
-    static AzureStorageSource()
-    {
-        const string packUri =
-            "pack://application:,,,/Bim.FamilyManager.Source.AzureStorage;component/Resources/Images/Azure_128x128.png";
-
-        PreviewStream = LoadResourceAsStream(packUri);
-    }
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="AzureStorageSource" /> class.
     /// </summary>
@@ -73,28 +63,15 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     public AzureStorageSource(
         AzureStorageSourceOptions options,
         IFamilyManager familyManager,
-        IRevitFamily.Factory familyFactory,
-        IAadAuthService authService)
+        RevitFamilyFactory familyFactory,
+        IAadAuthService authService,
+        ILogger<AzureStorageSource> logger)
         : base(options, familyManager, familyFactory)
     {
         _authService = authService;
+        _logger = logger;
 
         _ = ConnectToAzureStorageSilentAsync(CancellationToken.None);
-    }
-
-    /// <summary>
-    ///     Gets the preview image stream for the Azure storage source.
-    /// </summary>
-    /// <remarks>
-    ///     Returns a stream positioned at the beginning for reading the preview image.
-    /// </remarks>
-    public override Stream Preview
-    {
-        get
-        {
-            PreviewStream.Position = 0;
-            return PreviewStream;
-        }
     }
 
     /// <summary>
@@ -120,7 +97,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                 {
                     StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedIn), OnSessionSignedIn);
                     StaticWeakEventManager.RemoveWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
-                    Disconnect();
+                    _ = DisconnectAsync();
                 }
 
                 _session = value;
@@ -131,7 +108,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
                     StaticWeakEventManager.AddWeakHandler(_session, nameof(_session.SignedOut), OnSessionSignedOut);
                     if (_session.IsSignedIn)
                     {
-                        Connect();
+                        _ = ConnectAsync();
                     }
                 }
             }
@@ -218,6 +195,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
+            _logger.LogError(e, "Failed to connect to Azure Storage silently.");
             RaiseError(e);
         }
     }
@@ -346,14 +324,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
     private void OnSessionSignedOut(IAadAuthSession session, EventArgs args)
     {
-        try
-        {
-            Disconnect();
-        }
-        catch (Exception)
-        {
-            //TODO:
-        }
+        _ = DisconnectAsync();
     }
 
     /// <summary>
@@ -362,13 +333,20 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method resets the blob container client, folder cache, and triggers the <see cref="Disconnected" /> event.
     /// </remarks>
-    private void Disconnect()
+    private async Task DisconnectAsync()
     {
-        _blobContainerClient = null;
-        _folders = null;
-        _blobCache = null;
-        Disconnected?.Invoke(this);
-        Reload();
+        try
+        {
+            _blobContainerClient = null;
+            _folders = null;
+            _blobCache = null;
+            Disconnected?.Invoke(this);
+            await ReloadAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Exception while disconnecting on session sign-out.");
+        }
     }
 
     /// <summary>
@@ -381,14 +359,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
     private void OnSessionSignedIn(IAadAuthSession session, EventArgs args)
     {
-        try
-        {
-            Connect();
-        }
-        catch (Exception)
-        {
-            //TODO
-        }
+        _ = ConnectAsync();
     }
 
     /// <summary>
@@ -398,16 +369,23 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method creates a <see cref="BlobContainerClient" /> using the session's token credential.
     /// </remarks>
-    private void Connect()
+    private async Task ConnectAsync()
     {
-        if (Session is null)
+        try
         {
-            throw new InvalidOperationException("Session must not be null.");
-        }
+            if (Session is null)
+            {
+                throw new InvalidOperationException("Session must not be null.");
+            }
 
-        _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
-        Connected?.Invoke(this);
-        Reload();
+            _blobContainerClient = new BlobContainerClient(new Uri($"{Options.Endpoint}/{Options.ContainerName}"), Session.GetTokenCredential());
+            Connected?.Invoke(this);
+            await ReloadAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Exception while connecting on session sign-in.");
+        }
     }
 
     /// <summary>
@@ -462,6 +440,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
+            _logger.LogError(e, "Failed to connect to Azure Storage.");
             RaiseError(e);
         }
     }

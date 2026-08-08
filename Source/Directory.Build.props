@@ -2,7 +2,6 @@
   <PropertyGroup>
     <Version>$(GITVERSION_SEMVER)</Version>
 		<TargetFramework>net8.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x64</Platforms>

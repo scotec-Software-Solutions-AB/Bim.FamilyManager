@@ -1,10 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Media;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Ui.Views;
 using Microsoft.Extensions.Logging;

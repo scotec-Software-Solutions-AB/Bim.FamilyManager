@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using Scotec.Wpf.ViewModels;
 
 namespace Bim.FamilyManager.Ui.Views.Settings;

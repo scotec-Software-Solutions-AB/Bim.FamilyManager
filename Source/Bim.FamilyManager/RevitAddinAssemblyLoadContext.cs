@@ -1,4 +1,4 @@
-﻿namespace Bim.FamilyManager;
+namespace Bim.FamilyManager;
 
 internal partial class RevitAddinAssemblyLoadContext
 {

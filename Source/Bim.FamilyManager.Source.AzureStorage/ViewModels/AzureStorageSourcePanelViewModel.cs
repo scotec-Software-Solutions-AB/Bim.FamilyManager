@@ -1,9 +1,11 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows.Input;
-using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.ViewModels;
 using Bim.FamilyManager.Source.AzureStorage.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
 using Scotec.Identity.AzureActiveDirectory;
 
@@ -16,6 +18,7 @@ namespace Bim.FamilyManager.Source.AzureStorage.ViewModels;
 public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<AzureStorageSource>
 {
     private readonly IAadAuthService _authService;
+    private readonly ILogger<AzureStorageSourcePanelViewModel> _logger;
     private readonly IAadAuthSession _session;
     private readonly RelayCommand _signInCommand;
 
@@ -26,9 +29,10 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     /// <param name="authService">The Azure AD authentication service.</param>
     /// <exception cref="System.ArgumentException">Thrown if tenant ID or client ID is null.</exception>
     /// <exception cref="System.InvalidOperationException">Thrown if no valid authentication session is found.</exception>
-    public AzureStorageSourcePanelViewModel(AzureStorageSource familySource, IAadAuthService authService) : base(familySource)
+    public AzureStorageSourcePanelViewModel(AzureStorageSource familySource, IAadAuthService authService, ILogger<AzureStorageSourcePanelViewModel> logger) : base(familySource)
     {
         _authService = authService;
+        _logger = logger;
         _signInCommand = new RelayCommand(SignInAsync, () => true);
 
         _session = GetAadAuthSession(familySource.SourceOptions);
@@ -103,9 +107,9 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
 
             OnPropertyChanged(nameof(SignedInAs));
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // Exception handling can be extended for logging or user feedback.
+            _logger.LogWarning(e, "Sign-in to Azure AD failed.");
         }
     }
 }

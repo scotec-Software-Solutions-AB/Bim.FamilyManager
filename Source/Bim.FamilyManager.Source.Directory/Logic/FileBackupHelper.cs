@@ -1,7 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Bim.FamilyManager.Source.Directory.Logic;
 
@@ -86,7 +87,7 @@ public class FileBackupHelper
     /// <exception cref="System.IO.DirectoryNotFoundException">
     ///     Thrown if the specified folder does not exist.
     /// </exception>
-    public static bool CanWriteToFolder(string folderPath)
+    public static bool CanWriteToFolder(string folderPath, ILogger? logger = null)
     {
         try
         {
@@ -121,7 +122,7 @@ public class FileBackupHelper
         }
         catch (Exception e)
         {
-            Console.WriteLine($@"Error checking folder access: {e.Message}");
+            logger?.LogWarning(e, "Error checking write access for folder '{FolderPath}'.", folderPath);
             return false;
         }
     }

@@ -1,7 +1,7 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Bim.FamilyManager.Abstractions.ViewModels;
+using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Ui.FamilyNavigator.ViewModels;
 
 namespace Bim.FamilyManager.Ui.FamilyNavigator.Views;

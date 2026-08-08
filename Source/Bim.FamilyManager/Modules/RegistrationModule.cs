@@ -1,8 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.Loader;
 using Autofac;
-using Bim.FamilyManager.Base.Options;
-using Bim.FamilyManager.Base.Settings;
 using Module = Autofac.Module;
 
 namespace Bim.FamilyManager.Modules;
@@ -32,13 +30,6 @@ public class RegistrationModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-
-        builder.Register(context => typeof(DisplayOptions))
-               .Keyed<Type>("DisplayOptions")
-               .SingleInstance();
-
-        builder.RegisterType<SettingsManager>()
-               .SingleInstance();
 
         LoadOtherModules(builder);
     }

@@ -1,10 +1,11 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using Autodesk.Revit.UI;
 using Autofac;
-using Bim.FamilyManager.Abstractions;
-using Bim.FamilyManager.Base.Options;
+using Bim.FamilyManager.Core.Abstractions;
+using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Core.Options;
 using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;
 using Bim.FamilyManager.Ui.Resources;

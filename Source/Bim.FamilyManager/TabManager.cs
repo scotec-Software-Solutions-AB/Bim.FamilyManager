@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.UI;
+using Autodesk.Revit.UI;
 using Autodesk.Windows;
 using Bim.FamilyManager.Resources;
 using RibbonPanel = Autodesk.Revit.UI.RibbonPanel;
