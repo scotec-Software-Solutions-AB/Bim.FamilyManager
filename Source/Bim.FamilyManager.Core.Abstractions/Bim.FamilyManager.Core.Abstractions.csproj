@@ -4,8 +4,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" />
-		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" />
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" ExcludeAssets="runtime" />
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" ExcludeAssets="runtime" />
 		<PackageReference Include="Scotec.Revit" />
 	</ItemGroup>
 

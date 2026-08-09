@@ -8,7 +8,8 @@ namespace Bim.FamilyManager.Commands;
 [RevitCommandAvailabilityIsolation(ContextName = "Bim.FamilyManager")]
 public class CreatePreviewImageCommandAvailability : RevitCommandAvailability
 {
-    protected override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories, IServiceProvider services)
+    [RevitCommandAvailabilityCheck]
+    protected bool IsCommandAvailable(UIApplication applicationData)
     {
         var view = applicationData.ActiveUIDocument?.ActiveView;
         if (view is null)

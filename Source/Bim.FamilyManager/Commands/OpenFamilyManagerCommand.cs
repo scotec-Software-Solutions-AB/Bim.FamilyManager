@@ -43,8 +43,9 @@ public class OpenFamilyManagerCommand : RevitCommand
     ///     This property provides the display name of the command as defined in the resource file.
     ///     It is used to identify the command in the user interface.
     /// </remarks>
-    protected override string CommandName => StringResources.Command_OpenFamilyManager_Name;
+    protected override string TransactionName => StringResources.Command_OpenFamilyManager_Name;
 
+    [RevitCommandExecute]
     protected Result OnExecute(UIControlledApplication uiApplication)
     {
         var dockableWindow = uiApplication.GetDockablePane(new DockablePaneId(Constants.PaneId));

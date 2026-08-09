@@ -1,12 +1,10 @@
-using System.IO;
-using System.Reflection;
-using System.Runtime.Loader;
+using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.UI;
 using Autofac;
+using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Abstractions.Options;
 using Bim.FamilyManager.Core.Options;
-using Bim.FamilyManager.Commands;
 using Bim.FamilyManager.Modules;
 using Bim.FamilyManager.Ui.Resources;
 using Bim.FamilyManager.Ui.Views;
@@ -21,6 +19,9 @@ using Scotec.Revit;
 using Scotec.Revit.Isolation;
 using Scotec.Revit.Ui;
 using Scotec.Wpf.ViewModels;
+using System.IO;
+using System.Reflection;
+using System.Runtime.Loader;
 
 [assembly: RevitAddinIsolationContext(ContextName = "Bim.FamilyManager")]
 
@@ -89,14 +90,15 @@ public class RevitFamilyManagerApp : RevitApp
     ///     using <see cref="TabManager" /> and registering the <see cref="FamilyManagerPane" /> as a dockable pane.
     ///     It also initializes the required services from the dependency injection container.
     /// </remarks>
-    protected override bool OnStartup()
+    [RevitApplicationStartup]
+    protected bool OnStartup(IOptions<FamilyManagerOptions>  options, ILogger<RevitFamilyManagerApp> logger, FamilyManagerPane pane)
     {
-        _logger = Services.GetRequiredService<ILogger<RevitFamilyManagerApp>>();
+        _pane = pane;
+        _logger = logger;
         _logger.LogInformation("Running startup for family manager add-in.");
 
-        var options = Services.GetRequiredService<IOptions<FamilyManagerOptions>>().Value;
-        var tabName = options.RevitOptions?.TabName;
-        var panelName = options.RevitOptions?.PanelName ?? "Bim.FamilyManager";
+        var tabName = options.Value.RevitOptions?.TabName;
+        var panelName = options.Value.RevitOptions?.PanelName ?? "Bim.FamilyManager";
 
         // Create tabs, panels ond buttons
         //RevitTabManager.CreateTab(Application ?? throw new InvalidOperationException("Application is null."), StringResources.Tab_Name);
@@ -116,7 +118,6 @@ public class RevitFamilyManagerApp : RevitApp
         panel.AddItem(CreateSettingsButtonData());
         panel.AddItem(CreatePreviewImageButtonData());
 
-        _pane = Services.GetRequiredService<FamilyManagerPane>();
 
         Application!.RegisterDockablePane(new DockablePaneId(Constants.PaneId), StringResources.Pane_Name, _pane);
 

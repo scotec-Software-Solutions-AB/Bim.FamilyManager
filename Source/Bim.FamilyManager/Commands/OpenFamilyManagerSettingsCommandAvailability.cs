@@ -1,5 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using Scotec.Revit;
 using Scotec.Revit.Isolation;
 
@@ -19,13 +17,11 @@ public class OpenFamilyManagerSettingsCommandAvailability : RevitCommandAvailabi
     /// <summary>
     ///     Checks if the OpenFamilyManagerSettings command is available.
     /// </summary>
-    /// <param name="applicationData">The current <see cref="UIApplication" /> instance.</param>
-    /// <param name="selectedCategories">The set of selected <see cref="Category" /> objects.</param>
-    /// <param name="services">The service provider for dependency resolution.</param>
     /// <returns>
     ///     Always returns <c>true</c>, indicating the command is available in all contexts.
     /// </returns>
-    protected override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories, IServiceProvider services)
+    [RevitCommandAvailabilityCheck]
+    protected bool IsCommandAvailable()
     {
         return true;
     }

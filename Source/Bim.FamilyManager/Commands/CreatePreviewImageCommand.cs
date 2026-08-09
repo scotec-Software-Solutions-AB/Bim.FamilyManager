@@ -18,14 +18,18 @@ public class CreatePreviewImageCommand : RevitCommand
     {
     }
 
-    protected override string CommandName => StringResources.Command_CreatePreviewImages_Name;
+    protected override string TransactionName => StringResources.Command_CreatePreviewImages_Name;
 
-    protected override Result OnExecute(ExternalCommandData commandData, IServiceProvider services)
+    [RevitCommandExecute]
+    protected Result OnExecute(IFamilyManager familyManager, IRevitUiContext context)
     {
-        var familyManager = services.GetRequiredService<IFamilyManager>();
+        var view = context.ActiveView;
+        if(view is null)
+        {
+            return Result.Failed;
+        }   
 
-        var view = commandData.View;
-        var application = commandData.Application;
+        var application = context.UiApplication;
 
         familyManager.CreatePreviewImage(application, view);
 

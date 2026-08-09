@@ -40,8 +40,9 @@ public class OpenFamilyManagerSettingsCommand : RevitCommand
     ///     from the <see cref="Bim.FamilyManager.Resources.StringResources.Command_OpenFamilyManagerSettings_Name" />
     ///     resource.
     /// </remarks>
-    protected override string CommandName => StringResources.Command_OpenFamilyManagerSettings_Name;
+    protected override string TransactionName => StringResources.Command_OpenFamilyManagerSettings_Name;
 
+    [RevitCommandExecute]
     protected Result OnExecute(SettingsManagerWindow.Factory settingsWindowFactory)
     {
         var window = settingsWindowFactory();

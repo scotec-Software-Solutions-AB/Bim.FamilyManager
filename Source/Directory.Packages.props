@@ -8,27 +8,27 @@
         <PackageVersion Include="Nice3point.Revit.Api.AdWindows" Version="2025.4.41" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPI" Version="2025.4.41" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.4.41" />
-        <PackageVersion Include="Scotec.Revit" Version="[2025.3.3-dev.13,2026)" />
-        <PackageVersion Include="Scotec.Revit.Ui" Version="[2025.3.3-dev.13,2026)" />
-        <PackageVersion Include="Scotec.Revit.Wpf" Version="[2025.3.3-dev.13,2026)" />
+        <PackageVersion Include="Scotec.Revit" Version="2025.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Ui" Version="2025.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Wpf" Version="2025.4.0-dev.19" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(RevitYear)'=='2026'">
         <PackageVersion Include="Nice3point.Revit.Api.AdWindows" Version="2026.4.0" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPI" Version="2026.4.0" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPIUI" Version="2026.4.0" />
-        <PackageVersion Include="Scotec.Revit" Version="[2026.3.3-dev.13,2027)" />
-        <PackageVersion Include="Scotec.Revit.Ui" Version="[2026.3.3-dev.13,2027)" />
-        <PackageVersion Include="Scotec.Revit.Wpf" Version="[2026.3.3-dev.13,2027)" />
+        <PackageVersion Include="Scotec.Revit" Version="2026.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Ui" Version="2026.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Wpf" Version="2026.4.0-dev.19" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(RevitYear)'=='2027'">
         <PackageVersion Include="Nice3point.Revit.Api.AdWindows" Version="2027.0.10" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPI" Version="2027.0.10" />
         <PackageVersion Include="Nice3point.Revit.Api.RevitAPIUI" Version="2027.0.10" />
-        <PackageVersion Include="Scotec.Revit" Version="[2027.3.3-dev.13,2028)" />
-        <PackageVersion Include="Scotec.Revit.Ui" Version="[2027.3.3-dev.13,2028)" />
-        <PackageVersion Include="Scotec.Revit.Wpf" Version="[2027.3.3-dev.13,2028)" />
+        <PackageVersion Include="Scotec.Revit" Version="2027.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Ui" Version="2027.4.0-dev.19" />
+        <PackageVersion Include="Scotec.Revit.Wpf" Version="2027.4.0-dev.19" />
     </ItemGroup>
 
     <ItemGroup>
