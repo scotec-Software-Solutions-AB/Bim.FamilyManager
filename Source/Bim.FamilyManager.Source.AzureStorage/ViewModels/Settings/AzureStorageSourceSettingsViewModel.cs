@@ -267,19 +267,22 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
 
             var clientId = Guid.Parse(_clientId);
             var tenantId = Guid.Parse(_tenantId);
-            if (_authService.TryGetSession(tenantId, clientId, out var session) && !session.IsSignedIn)
+            if (_authService.TryGetSession(tenantId, clientId, out var session))
             {
-                var authOptions = new AadAuthOptions
+                if (!session.IsSignedIn)
                 {
-                    ClientId = clientId,
-                    TenantId = tenantId,
-                    Scopes = ["https://storage.azure.com/.default"],
-                    TokenCache = new TokenCache(cacheFile)
-                };
-                session = await _authService.SignInSilentAsync(authOptions, CancellationToken.None);
-            }
+                    var authOptions = new AadAuthOptions
+                    {
+                        ClientId = clientId,
+                        TenantId = tenantId,
+                        Scopes = ["https://storage.azure.com/.default"],
+                        TokenCache = new TokenCache(cacheFile)
+                    };
+                    session = await _authService.SignInSilentAsync(authOptions, CancellationToken.None);
+                }
 
-            Session = session;
+                Session = session;
+            }
         }
         catch (Exception e)
         {
@@ -328,7 +331,7 @@ public class AzureStorageSourceSettingsViewModel : FamilySourceSettingsViewModel
             };
 
             var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
             var session = await _authService.SignInAsync(authOptions,
                 builder => builder.WithParentActivityOrWindow(windowHandle),
                 cts.Token);

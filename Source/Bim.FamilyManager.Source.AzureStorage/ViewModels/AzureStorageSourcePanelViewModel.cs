@@ -21,6 +21,7 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     private readonly ILogger<AzureStorageSourcePanelViewModel> _logger;
     private readonly IAadAuthSession _session;
     private readonly RelayCommand _signInCommand;
+    private readonly RelayCommand _signOutCommand;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="AzureStorageSourcePanelViewModel" /> class.
@@ -33,9 +34,11 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     {
         _authService = authService;
         _logger = logger;
-        _signInCommand = new RelayCommand(SignInAsync, () => true);
 
         _session = GetAadAuthSession(familySource.SourceOptions);
+
+        _signInCommand = new RelayCommand(SignInAsync, () => !_session.IsSignedIn);
+        _signOutCommand = new RelayCommand(SignOutAsync, () => _session.IsSignedIn);
 
         // Subscribe using WeakEventManager
         StaticWeakEventManager.AddWeakHandler<IAadAuthSession, EventArgs>(_session, nameof(_session.SignedIn), OnSignedIn);
@@ -46,6 +49,11 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     ///     Gets the command used to initiate sign-in to Azure AD.
     /// </summary>
     public ICommand SignInCommand => _signInCommand;
+
+    /// <summary>
+    ///     Gets the command used to sign out of Azure AD.
+    /// </summary>
+    public ICommand SignOutCommand => _signOutCommand;
 
     /// <summary>
     ///     Gets the username of the currently signed-in Azure AD account, or "not signed in" if no session is active.
@@ -60,6 +68,8 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     private void OnSignedOut(IAadAuthSession session, EventArgs args)
     {
         OnPropertyChanged(nameof(SignedInAs));
+        _signInCommand.NotifyCanExecuteChanged();
+        _signOutCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -70,6 +80,8 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
     private void OnSignedIn(IAadAuthSession session, EventArgs args)
     {
         OnPropertyChanged(nameof(SignedInAs));
+        _signInCommand.NotifyCanExecuteChanged();
+        _signOutCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -102,14 +114,29 @@ public class AzureStorageSourcePanelViewModel : FamilySourcePanelViewModel<Azure
         try
         {
             var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
-            _ = await _session.SignInAsync(builder => builder.WithParentActivityOrWindow(windowHandle), cts.Token);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3600));
+            await _session.SignInAsync(builder => builder.WithParentActivityOrWindow(windowHandle), cts.Token);
 
             OnPropertyChanged(nameof(SignedInAs));
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Sign-in to Azure AD failed.");
+        }
+    }
+
+    /// <summary>
+    ///     Signs out of the current Azure AD session.
+    /// </summary>
+    private async void SignOutAsync()
+    {
+        try
+        {
+            await _session.SignOutAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Sign-out from Azure AD failed.");
         }
     }
 }

@@ -5,7 +5,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Logic;
-using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
@@ -133,7 +132,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         if (_folders is null)
         {
             var folders = new List<IFolder>();
-            var token = _tokenSource.Token;
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_tokenSource.Token, cancellationToken);
+            var token = linkedCts.Token;
 
             _blobCache ??= new AzureBlobCache(_blobContainerClient);
             await _blobCache.InitializeAsync(token);
@@ -236,6 +236,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         _folders = null;
         _blobCache = null;
         _tokenSource.Cancel(true);
+        _tokenSource.Dispose();
         _tokenSource = new CancellationTokenSource();
     }
 
@@ -417,6 +418,19 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method attempts to sign in using cached credentials, falling back to interactive sign-in if necessary.
     /// </remarks>
+    /// <summary>
+    ///     Releases managed resources held by this instance.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tokenSource.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
+
     private async Task ConnectToAzureStorageSilentAsync(CancellationToken cancellationToken)
     {
         try
@@ -439,7 +453,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
-            _logger.LogError(e, "Failed to connect to Azure Storage.");
+            _logger.LogWarning(e, "Failed to connect to Azure Storage silently.");
             RaiseError(e);
         }
     }
