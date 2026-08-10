@@ -112,14 +112,17 @@
                         <material:MaterialIcon Kind="{StaticResource IconCheckbox}"
                                                Foreground="{StaticResource ButtonCheckedBrush}"
                                                Margin="2,0,0,0"
+                                               Width="24" Height="24"
                                                ToolTip="{x:Static resources:StringResources.Family_Icon_Imported}"
                                                Visibility="{Binding IsLoadedInDocument, Converter={StaticResource TrueToVisibleConverterKey}}" />
                         <material:MaterialIcon Kind="{StaticResource IconCheckboxBlank}"
                                                Foreground="{StaticResource ButtonUncheckedBrush}"
                                                ToolTip="{x:Static resources:StringResources.Family_Icon_NotImported}"
+                                               Width="24" Height="24"
                                                Visibility="{Binding IsLoadedInDocument, Converter={StaticResource FalseToVisibleConverterKey}}" />
                         <material:MaterialIcon Kind="{StaticResource IconListBulleted}"
-                                               Foreground="{StaticResource ButtonListBrush}" Margin="2,0,0,0">
+                                               Foreground="{StaticResource ButtonListBrush}" Margin="2,0,0,0"
+                                               Width="24" Height="24">
                             <material:MaterialIcon.ToolTip>
                                 <ToolTip Padding="0">
                                     <StackPanel Orientation="Vertical"

@@ -38,9 +38,9 @@
         <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.275" />
         <PackageVersion Include="OpenMcdf" Version="3.1.4" />
         <PackageVersion Include="ScaleHQ.DotScreen" Version="1.0.0-rc.2" />
-        <PackageVersion Include="Scotec.Events.WeakEvents" Version="1.1.1" />
-        <PackageVersion Include="Scotec.Identity.AzureActiveDirectory" Version="1.1.1" />
-        <PackageVersion Include="Scotec.Queues" Version="1.1.1" />
+        <PackageVersion Include="Scotec.Events.WeakEvents" Version="1.1.2-dev.1" />
+        <PackageVersion Include="Scotec.Identity.AzureActiveDirectory" Version="1.1.2-dev.1" />
+        <PackageVersion Include="Scotec.Queues" Version="1.1.2-dev.1" />
         <PackageVersion Include="Scotec.Wpf" Version="1.0.4-dev.1" />
         <PackageVersion Include="System.Drawing.Common" Version="8.0.17" />
         <PackageVersion Include="YamlDotNet" Version="17.1.0" />
