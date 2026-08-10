@@ -38,7 +38,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <returns>A new <see cref="AzureStorageSource" /> instance.</returns>
     public delegate AzureStorageSource Factory(AzureStorageSourceOptions options);
 
-    private static readonly Regex BackupRegex = new(@"\.\d{4,}\.rfa$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly IAadAuthService _authService;
     private readonly ILogger<AzureStorageSource> _logger;
     private AzureBlobCache? _blobCache;
@@ -302,7 +301,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         foreach (var blobName in _blobCache.GetBlobNamesByPrefix(prefix, includeSubfolders))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            if (!blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
