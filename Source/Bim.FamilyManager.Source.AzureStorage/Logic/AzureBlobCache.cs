@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -10,10 +11,18 @@ namespace Bim.FamilyManager.Source.AzureStorage.Logic;
 /// This class efficiently caches and organizes blobs from an Azure Blob container for fast, in-memory lookup and enumeration.
 /// The cache is initialized once via <see cref="InitializeAsync"/>, after which all queries are performed without additional network calls.
 /// Folder prefixes are determined by the position of '/' in blob names, emulating a hierarchical structure.
+/// Backup blobs — files matching the pattern <c>.NNNN.rfa</c> — are excluded during initialization and will
+/// never appear in query results.
 /// This approach is highly performant for large containers and minimizes Azure API usage.
 /// </remarks>
 public sealed class AzureBlobCache
 {
+    /// <summary>
+    /// Matches versioned Revit family backup files of the form <c>FamilyName.0001.rfa</c>.
+    /// Four or more digits are required between the last two dots to distinguish backups from regular files.
+    /// </summary>
+    private static readonly Regex BackupRegex = new(@"\.\d{4,}\.rfa$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     private readonly BlobContainerClient _blobContainerClient;
     private Dictionary<string, BlobItem>? _blobItemCache;
     private Dictionary<string, List<string>>? _folderBlobMap;
@@ -33,14 +42,22 @@ public sealed class AzureBlobCache
     /// <summary>
     /// Asynchronously initializes the cache by loading all blobs and organizing them by folder prefix.
     /// </summary>
+    /// <param name="prefix">
+    ///     An optional blob name prefix used to limit enumeration to a specific virtual folder.
+    ///     Pass <see langword="null" /> or an empty string to enumerate the entire container.
+    /// </param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <remarks>
     /// This method enumerates all blobs in the container and builds the internal dictionaries for fast lookup.
     /// It should be called once before using any other methods.
     /// For large containers, this operation may take time proportional to the number of blobs.
+    /// Supplying a <paramref name="prefix"/> significantly reduces network traffic when the container
+    /// holds blobs outside the configured root path.
+    /// Backup blobs (matching <c>.NNNN.rfa</c>) are excluded during population so they never appear
+    /// in any query result.
     /// </remarks>
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string? prefix, CancellationToken cancellationToken)
     {
         if (_blobItemCache != null && _folderBlobMap != null)
         {
@@ -50,8 +67,19 @@ public sealed class AzureBlobCache
         _blobItemCache = new Dictionary<string, BlobItem>(StringComparer.OrdinalIgnoreCase);
         _folderBlobMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-        await foreach (var blob in _blobContainerClient.GetBlobsAsync(cancellationToken: cancellationToken))
+        var options = string.IsNullOrEmpty(prefix)
+            ? null
+            : new GetBlobsOptions { Prefix = prefix };
+
+        await foreach (var blob in _blobContainerClient.GetBlobsAsync(options, cancellationToken))
         {
+            // Exclude versioned backup files (e.g. FamilyName.0001.rfa) at population time
+            // so they are invisible to all callers without requiring per-call filtering.
+            if (BackupRegex.IsMatch(blob.Name))
+            {
+                continue;
+            }
+
             _blobItemCache[blob.Name] = blob;
 
             var folderPrefix = GetFolderPrefix(blob.Name);

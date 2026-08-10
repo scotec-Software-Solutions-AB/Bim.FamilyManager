@@ -160,7 +160,7 @@ private bool _familiesLoading;
         try
         {
             var families = new List<IRevitFamily>();
-            await foreach (var family in Folder.GetFamiliesAsync(true, CancellationToken.None))
+            await foreach (var family in Folder.GetFamiliesAsync(true, NullFamilyNameFilter.Instance, CancellationToken.None))
             {
                 families.Add(family);
             }
@@ -219,7 +219,7 @@ private bool _familiesLoading;
         try
         {
             var families = new List<IRevitFamily>();
-            await foreach (var family in Folder.GetFamiliesAsync(false, CancellationToken.None))
+            await foreach (var family in Folder.GetFamiliesAsync(false, NullFamilyNameFilter.Instance, CancellationToken.None))
             {
                 families.Add(family);
             }

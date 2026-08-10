@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Abstractions.Options;
+using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Ui.Abstractions.ViewModels;
 using Bim.FamilyManager.Core.Options;
 using Bim.FamilyManager.Ui.Views.Settings;
@@ -320,7 +321,7 @@ public class FamilyManagerViewModel : ViewModel, IFamilyManagerViewModel
 
             if (_searchPattern.Length >= 3)
             {
-                await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, searchPattern, CancellationToken.None))
+                await foreach (var family in _familyManager.SearchRevitFamiliesAsync(folder.Folder, new ContainsFamilyNameFilter(searchPattern), CancellationToken.None))
                 {
                     families.Add(family);
                 }

@@ -11,7 +11,7 @@ public delegate IAsyncEnumerable<IFolder> GetSubfoldersAsyncDelegate(Cancellatio
 /// <summary>
 ///     Represents a delegate for asynchronously retrieving families in the Revit Family Manager hierarchy.
 /// </summary>
-public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(bool includeSubfolders, CancellationToken cancellationToken);
+public delegate IAsyncEnumerable<IRevitFamily> GetFamiliesAsyncDelegate(bool includeSubfolders, IFamilyNameFilter filter, CancellationToken cancellationToken);
 
 /// <summary>
 ///     Represents a folder in the Revit Family Manager hierarchy.
@@ -69,8 +69,8 @@ public class Folder : IFolder
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, CancellationToken cancellationToken)
+    public IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, IFamilyNameFilter filter, CancellationToken cancellationToken)
     {
-        return _families(includeSubfolders, cancellationToken);
+        return _families(includeSubfolders, filter, cancellationToken);
     }
 }

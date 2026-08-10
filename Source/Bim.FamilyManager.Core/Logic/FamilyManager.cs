@@ -210,30 +210,26 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     public event EventHandler<EventArgs>? Reloaded;
 
     /// <summary>
-    ///     Asynchronously searches for Revit families within the specified folder that match the given search pattern.
+    ///     Asynchronously searches for Revit families within the specified folder that match the given filter.
     /// </summary>
     /// <param name="folder">
     ///     The folder to search within. This folder may contain subfolders and Revit families.
     /// </param>
-    /// <param name="searchPattern">
-    ///     The search pattern to filter Revit families by their names. The search is case-insensitive.
-    ///     If the search pattern is <see langword="null" /> or empty, no filtering is applied.
+    /// <param name="filter">
+    ///     The <see cref="IFamilyNameFilter" /> applied by the source before <see cref="IRevitFamily" /> instances
+    ///     are allocated. Use <see cref="ContainsFamilyNameFilter" /> for a case-insensitive substring match.
     /// </param>
     /// <param name="cancellationToken">
     ///     A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    ///     An asynchronous stream of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> objects
-    ///     that match the specified search pattern. If no families match, the stream will be empty.
+    ///     An asynchronous stream of <see cref="IRevitFamily" /> objects whose names satisfy
+    ///     <paramref name="filter" />. If no families match, the stream will be empty.
     /// </returns>
-    /// <remarks>
-    ///     This method retrieves all Revit families from the leaf folders of the specified folder
-    ///     and filters them based on the provided search pattern.
-    /// </remarks>
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="folder" /> parameter is <see langword="null" />.
     /// </exception>
-    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern,
+    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, IFamilyNameFilter filter,
                                                                          [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (folder == null)
@@ -241,18 +237,10 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             throw new ArgumentNullException(nameof(folder));
         }
 
-        if (string.IsNullOrEmpty(searchPattern))
-        {
-            yield break;
-        }
-
-        await foreach (var family in GetAllFamiliesFromLeafFoldersAsync(folder, cancellationToken))
+        await foreach (var family in GetAllFamiliesAsync(folder, filter, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (family.Name.Contains(searchPattern, StringComparison.OrdinalIgnoreCase))
-            {
-                yield return family;
-            }
+            yield return family;
         }
     }
 
@@ -1311,18 +1299,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="rootFolder" /> is <c>null</c>.
     /// </exception>
-    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesFromLeafFoldersAsync(IFolder rootFolder,
-                                                                                           [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesAsync(IFolder rootFolder, IFamilyNameFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var leafFolders = GetLeafFoldersAsync(rootFolder, cancellationToken);
-        await foreach (var folder in leafFolders)
+        await foreach (var family in rootFolder.GetFamiliesAsync(true, filter, cancellationToken))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            await foreach (var family in folder.GetFamiliesAsync(true, cancellationToken))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return family;
-            }
+            yield return family;
         }
     }
 

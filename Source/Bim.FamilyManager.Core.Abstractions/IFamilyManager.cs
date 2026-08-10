@@ -36,29 +36,31 @@ public interface IFamilyManager
     event EventHandler<EventArgs> Reloaded;
 
     /// <summary>
-    ///     Asynchronously searches for Revit families within the specified folder that match the given search pattern.
+    ///     Asynchronously searches for Revit families within the specified folder that match the given filter.
     /// </summary>
     /// <param name="folder">
     ///     The folder in which to search for Revit families. This folder can include subfolders and families.
     /// </param>
-    /// <param name="searchPattern">
-    ///     The search pattern used to filter Revit families. This can include wildcards or specific naming criteria.
+    /// <param name="filter">
+    ///     The <see cref="IFamilyNameFilter" /> used to decide which families are included in the result.
+    ///     Use <see cref="ContainsFamilyNameFilter" /> for a case-insensitive substring match, or supply
+    ///     a custom implementation for other matching strategies.
     /// </param>
     /// <param name="cancellationToken">
     ///     A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a collection of
-    ///     <see cref="IRevitFamily" /> objects that match the search criteria within the specified folder.
+    ///     An asynchronous stream of <see cref="IRevitFamily" /> objects whose names satisfy
+    ///     <paramref name="filter" /> within the specified folder.
     /// </returns>
     /// <remarks>
-    ///     This method allows for efficient searching of Revit families based on a folder hierarchy and a search pattern.
-    ///     It is commonly used to locate specific families in large datasets.
+    ///     The filter is pushed down to the family source so that <see cref="IRevitFamily" /> instances
+    ///     are never allocated for non-matching entries.
     /// </remarks>
     /// <exception cref="System.ArgumentNullException">
-    ///     Thrown if the <paramref name="folder" /> or <paramref name="searchPattern" /> is <c>null</c>.
+    ///     Thrown if <paramref name="folder" /> is <see langword="null" />.
     /// </exception>
-    IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern, CancellationToken cancellationToken);
+    IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, IFamilyNameFilter filter, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Opens the specified Revit family for editing.

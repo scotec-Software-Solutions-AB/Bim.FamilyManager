@@ -138,7 +138,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
             yield return new Folder(
                 Path.GetFileName(subfolder),
                 c => GetFoldersFromCache(subfolder, c),
-                (i, c) => GetFamiliesFromCache(subfolder, i, c),
+                (i, filter, c) => GetFamiliesFromCache(subfolder, i, filter, c),
                 LoadFolderPreview(subfolder)
             );
         }
@@ -180,6 +180,7 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
     /// </remarks>
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string directory, bool includeSubfolders,
+                                                                      IFamilyNameFilter filter,
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
                                                                       [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -200,6 +201,13 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            // Apply name filter before allocating a family object so that IRevitFamily instances
+            // are never created for non-matching entries.
+            if (!filter.IsMatch(set.Name))
+            {
+                continue;
+            }
+
             // A single unreadable family file must not abort the enumeration. Without this guard,
             // an exception thrown here would silently discard all families of the folder, because
             // WPF data binding swallows exceptions escaping the bound property getters.
@@ -211,6 +219,8 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
                 {
                     family = CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
                         (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+
+                    FamilyManager.RegisterRevitFamily(family);
                 }
             }
             catch (Exception e)

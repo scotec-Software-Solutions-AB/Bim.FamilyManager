@@ -5,7 +5,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Bim.FamilyManager.Core.Abstractions;
 using Bim.FamilyManager.Core.Logic;
-using Bim.FamilyManager.Core.Logic;
 using Bim.FamilyManager.Source.AzureStorage.Options;
 using Microsoft.Extensions.Logging;
 using Scotec.Events.WeakEvents;
@@ -39,7 +38,6 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <returns>A new <see cref="AzureStorageSource" /> instance.</returns>
     public delegate AzureStorageSource Factory(AzureStorageSourceOptions options);
 
-    private static readonly Regex BackupRegex = new(@"\.\d{4,}\.rfa$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly IAadAuthService _authService;
     private readonly ILogger<AzureStorageSource> _logger;
     private AzureBlobCache? _blobCache;
@@ -132,11 +130,21 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         if (_folders is null)
         {
+            // All folders are eagerly materialized into a list on the first call before any folder
+            // is yielded to the caller. This is intentional: the list is kept as the in-memory cache
+            // (_folders) so that subsequent calls skip the network round-trip entirely and iterate
+            // the already-populated list directly.
+            //
+            // The first-call latency penalty is accepted as a deliberate trade-off against the cost
+            // of re-enumerating blobs on every request. A concurrent call guard (e.g. SemaphoreSlim)
+            // would be required before changing this to a streaming approach, to prevent double
+            // initialization when multiple callers reach this branch simultaneously.
             var folders = new List<IFolder>();
-            var token = _tokenSource.Token;
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_tokenSource.Token, cancellationToken);
+            var token = linkedCts.Token;
 
             _blobCache ??= new AzureBlobCache(_blobContainerClient);
-            await _blobCache.InitializeAsync(token);
+            await _blobCache.InitializeAsync(Options.RootPath, token);
 
             await foreach (var folder in GetFoldersFromCache(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
             {
@@ -194,7 +202,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
-            _logger.LogError(e, "Failed to connect to Azure Storage silently.");
+            _logger.LogError(e, "Failed to connect to Azure Storage.");
             RaiseError(e);
         }
     }
@@ -236,6 +244,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         _folders = null;
         _blobCache = null;
         _tokenSource.Cancel(true);
+        _tokenSource.Dispose();
         _tokenSource = new CancellationTokenSource();
     }
 
@@ -263,7 +272,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             yield return new Folder(
                 Path.GetFileName(itemPrefix.Trim('/')),
                 c => GetFoldersFromCache(itemPrefix, c),
-                (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
+                (i, filter, c) => GetFamiliesFromCache(itemPrefix, i, filter, c)
             );
         }
     }
@@ -281,6 +290,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders,
+                                                                      IFamilyNameFilter filter,
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
                                                                       [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -292,23 +302,33 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         foreach (var blobName in _blobCache.GetBlobNamesByPrefix(prefix, includeSubfolders))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (BackupRegex.IsMatch(blobName) || !blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
+            if (!blobName.EndsWith(".rfa", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
             var familyName = Path.GetFileNameWithoutExtension(blobName);
+
+            // Apply name filter before allocating a family object so that IRevitFamily instances
+            // are never created for non-matching entries.
+            if (!filter.IsMatch(familyName))
+            {
+                continue;
+            }
+
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {
                 yield return family;
             }
             else
             {
-                yield return CreateRevitFamily(
+                family = CreateRevitFamily(
                     familyName,
                     CreateFamilyInfo(blobName),
-                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName)
-                );
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName));
+
+                FamilyManager.RegisterRevitFamily(family);
+                yield return family;
             }
         }
     }
@@ -401,8 +421,8 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
 
         var authOptions = new AadAuthOptions
         {
-            ClientId = Options.ClientId,
-            TenantId = Options.TenantId,
+            ClientId = Options.ClientId ?? throw new InvalidOperationException("ClientId must not be null."),
+            TenantId = Options.TenantId ?? throw new InvalidOperationException("TenantId must not be null."),
             Scopes = ["https://storage.azure.com/.default"],
             TokenCache = new TokenCache(cacheFile)
         };
@@ -417,6 +437,19 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <remarks>
     ///     This method attempts to sign in using cached credentials, falling back to interactive sign-in if necessary.
     /// </remarks>
+    /// <summary>
+    ///     Releases managed resources held by this instance.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tokenSource.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
+
     private async Task ConnectToAzureStorageSilentAsync(CancellationToken cancellationToken)
     {
         try
@@ -439,7 +472,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
         catch (Exception e)
         {
             Session = null;
-            _logger.LogError(e, "Failed to connect to Azure Storage.");
+            _logger.LogWarning(e, "Failed to connect to Azure Storage silently.");
             RaiseError(e);
         }
     }
@@ -451,7 +484,10 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// <returns>A <see cref="RevitFamilyInfo" /> instance containing metadata and file information.</returns>
     /// <exception cref="System.InvalidOperationException">Thrown if the blob container client is not initialized.</exception>
     /// <remarks>
-    ///     This method downloads the blob to a memory stream and creates a <see cref="RevitFamilyInfo" /> for it.
+    ///     The download is deferred: the returned <see cref="RevitFamilyInfo" /> stores a <see cref="Func{Stream}" />
+    ///     that is invoked only when <see cref="RevitFamilyInfo.Initialize" /> is called by the family initialization
+    ///     queue. The <see cref="BlobContainerClient" /> is captured by value at creation time so that a subsequent
+    ///     sign-out that nulls <see cref="_blobContainerClient" /> does not affect pending downloads.
     /// </remarks>
     private RevitFamilyInfo CreateFamilyInfo(string blobName)
     {
@@ -460,16 +496,23 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             throw new InvalidOperationException("BlobContainerClient is not initialized.");
         }
 
-        // RevitFamilyInfo attempts to retrieve additional information from the "BIM.FamilyManager" storage, if it is present within the family file.
-        var familyInfo = CreateFamilyInfo(LoadFileStream);
-        return familyInfo;
+        // Capture the client instance now, not the field, so a sign-out that sets
+        // _blobContainerClient = null after enumeration does not affect this loader.
+        var blobContainerClient = _blobContainerClient;
+
+        // RevitFamilyInfo stores the Func<Stream> and only invokes it when Initialize() is called.
+        return CreateFamilyInfo(LoadFileStream);
 
         Stream LoadFileStream()
         {
-            // TODO: Consider streaming to file for large blobs to reduce memory usage.
-            var blobClient = _blobContainerClient.GetBlobClient(blobName);
+            // DownloadToAsync is used via GetAwaiter().GetResult() because RevitFamilyInfo only
+            // accepts a Func<Stream>. This is safe here: Initialize() is called from the
+            // FamilyManager TaskQueue on a ThreadPool thread that has no SynchronizationContext,
+            // so there is no deadlock risk. The async path avoids the overhead of the SDK's
+            // internal synchronous implementation.
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
             var memoryStream = new MemoryStream();
-            blobClient.DownloadTo(memoryStream);
+            blobClient.DownloadToAsync(memoryStream).GetAwaiter().GetResult();
             memoryStream.Position = 0;
             return memoryStream;
         }
