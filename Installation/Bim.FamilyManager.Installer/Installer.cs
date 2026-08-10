@@ -10,7 +10,9 @@ namespace Bim.FamilyManager.Installer
     {
         public static void Main(string[] args)
         {
-            var project = new ManagedProject($"BIM.FamilyManager {GetRevitVersion()}", GetDirectories())
+            var revitVersion = GetRevitVersion();
+
+            var project = new ManagedProject($"BIM.FamilyManager {revitVersion}", GetDirectories(revitVersion))
             {
                 GUID = Guid.NewGuid(),
                 Platform = Platform.x64,
@@ -23,38 +25,31 @@ namespace Bim.FamilyManager.Installer
 
                 Properties = new[]
                 {
-                    new Property("REVIT_VERSION", GetRevitVersion())
+                    new Property("REVIT_VERSION", revitVersion),
+                    // Always install per-user. Revit 2027+ does not support ProgramData add-in discovery.
+                    new Property("MSIINSTALLPERUSER", "1"),
                 }
             };
 
             var ui = project.ManagedUI = new ManagedUI();
             ui.InstallDialogs.Add<WelcomeDialog>()
-              //.Add<InstallDirDialog>()
-              .Add<CustomDialogWith<InstallScopeControl>>()
               .Add<ProgressDialog>()
               .Add<ExitDialog>();
-
-            project.UIInitialized += e =>
-            {
-                // Since the default MSI localization data has no entry for 'CustomDlgTitle' (and other custom labels) we
-                // need to add this new content dynamically. Alternatively, you can use WiX localization files (wxl).
-
-                var runtime = e.ManagedUI.Shell.MsiRuntime();
-
-                runtime.UIText["CustomDlgTitle"] = "Select Installation Scope";
-                runtime.UIText["CustomDlgTitleDescription"] = "Choose whether you want to install this application for all users on this computer or only for your current Windows account";
-
-            };
 
             Compiler.BuildMsi(project);
         }
 
-        private static Dir GetDirectories()
+        private static Dir GetDirectories(string revitVersion)
         {
-            return new Dir(new Id("INSTALLDIR"), @"%ProgramFiles%\Bim.FamilyManager",
-                // Special file in the root of INSTALLDIR
+            // [AppDataFolder] resolves to %APPDATA%\ for per-user installs (MSIINSTALLPERUSER=1).
+            // The .addin file sits directly in the Revit Addins folder; all binaries go in the subfolder
+            // referenced by the <Assembly> path inside the .addin manifest.
+            var revitAddinsPath = $@"[AppDataFolder]Autodesk\Revit\Addins\{revitVersion}";
+
+            return new Dir(new Id("INSTALLDIR"), revitAddinsPath,
+                // .addin manifest sits in the root of the Revit Addins folder
                 new File(@"..\..\..\..\Publish\Bim.FamilyManager.addin"),
-                // Subfolder for all other files
+                // Binaries go in the subfolder matching the <Assembly> path in the .addin manifest
                 new Dir("Bim.FamilyManager",
                     new Files(@"..\..\..\..\Publish\Bim.FamilyManager\*.*")));
         }
