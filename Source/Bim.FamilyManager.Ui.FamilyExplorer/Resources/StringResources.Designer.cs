@@ -167,5 +167,14 @@ namespace Bim.FamilyManager.Ui.FamilyExplorer.Resources {
                 return ResourceManager.GetString("LayoutSettings.Text.ShowName", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No family sources configured. Please add a family source in Settings.
+        /// </summary>
+        public static string FamilySources_Empty_Message {
+            get {
+                return ResourceManager.GetString("FamilySources.Empty.Message", resourceCulture);
+            }
+        }
     }
 }

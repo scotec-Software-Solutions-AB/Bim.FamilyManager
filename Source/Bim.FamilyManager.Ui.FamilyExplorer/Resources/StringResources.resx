@@ -153,4 +153,7 @@
   <data name="LayoutSettings.Text.ContentHeight" xml:space="preserve">
     <value>Content height</value>
   </data>
+  <data name="FamilySources.Empty.Message" xml:space="preserve">
+    <value>No family sources configured. Please add a family source in Settings.</value>
+  </data>
 </root>

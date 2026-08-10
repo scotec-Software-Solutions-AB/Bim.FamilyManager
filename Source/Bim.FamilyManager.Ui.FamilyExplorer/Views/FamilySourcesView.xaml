@@ -5,8 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModels1="clr-namespace:Bim.FamilyManager.Ui.Abstractions.ViewModels;assembly=Bim.FamilyManager.Ui.Abstractions"
              xmlns:viewModels="clr-namespace:Bim.FamilyManager.Ui.FamilyExplorer.ViewModels"
+             xmlns:res="clr-namespace:Bim.FamilyManager.Ui.FamilyExplorer.Resources"
              mc:Ignorable="d"
-             d:DesignHeight="200" d:DesignWidth="300"
+             d:DesignHeight="50" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance viewModels1:IFamilyManagerViewModel, IsDesignTimeCreatable=false}">
 
     <UserControl.Resources>
@@ -75,20 +76,48 @@
     </UserControl.Resources>
 
 
-    <ItemsControl x:Name="ItemsControl" HorizontalAlignment="Stretch"
-                  ItemsSource="{Binding FamilySources}">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type viewModels:FamilySourceViewModel}">
-                <RadioButton Style="{StaticResource FamilySourceRadioButtonStyle}"
-                             Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0, 5, 10, 0"
-                             GroupName="Groups" />
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel IsItemsHost="False" Orientation="Horizontal" />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-    </ItemsControl>
+    <Grid>
+        <ItemsControl x:Name="ItemsControl" HorizontalAlignment="Stretch"
+                      ItemsSource="{Binding FamilySources}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type viewModels:FamilySourceViewModel}">
+                    <RadioButton Style="{StaticResource FamilySourceRadioButtonStyle}"
+                                 Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0, 5, 10, 0"
+                                 GroupName="Groups" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel IsItemsHost="False" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.Style>
+                <Style TargetType="ItemsControl">
+                    <Style.Triggers>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ItemsControl.Style>
+        </ItemsControl>
+
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#e0f3e8" Padding="5"
+                VerticalAlignment="Stretch">
+            <TextBlock Text="{x:Static res:StringResources.FamilySources_Empty_Message}"
+                       TextWrapping="Wrap" Margin="0" />
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=ItemsControl, Path=HasItems}" Value="False">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
+        
+    </Grid>
 
 </UserControl>
