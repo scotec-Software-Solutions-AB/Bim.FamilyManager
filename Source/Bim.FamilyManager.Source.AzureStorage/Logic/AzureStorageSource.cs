@@ -136,7 +136,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             var token = linkedCts.Token;
 
             _blobCache ??= new AzureBlobCache(_blobContainerClient);
-            await _blobCache.InitializeAsync(token);
+            await _blobCache.InitializeAsync(Options.RootPath, token);
 
             await foreach (var folder in GetFoldersFromCache(Options.RootPath.EndsWith("/") ? Options.RootPath : Options.RootPath + "/", token))
             {

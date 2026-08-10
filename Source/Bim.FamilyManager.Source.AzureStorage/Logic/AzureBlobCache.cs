@@ -33,14 +33,20 @@ public sealed class AzureBlobCache
     /// <summary>
     /// Asynchronously initializes the cache by loading all blobs and organizing them by folder prefix.
     /// </summary>
+    /// <param name="prefix">
+    ///     An optional blob name prefix used to limit enumeration to a specific virtual folder.
+    ///     Pass <see langword="null" /> or an empty string to enumerate the entire container.
+    /// </param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <remarks>
     /// This method enumerates all blobs in the container and builds the internal dictionaries for fast lookup.
     /// It should be called once before using any other methods.
     /// For large containers, this operation may take time proportional to the number of blobs.
+    /// Supplying a <paramref name="prefix"/> significantly reduces network traffic when the container
+    /// holds blobs outside the configured root path.
     /// </remarks>
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string? prefix, CancellationToken cancellationToken)
     {
         if (_blobItemCache != null && _folderBlobMap != null)
         {
@@ -50,7 +56,11 @@ public sealed class AzureBlobCache
         _blobItemCache = new Dictionary<string, BlobItem>(StringComparer.OrdinalIgnoreCase);
         _folderBlobMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-        await foreach (var blob in _blobContainerClient.GetBlobsAsync(cancellationToken: cancellationToken))
+        var options = string.IsNullOrEmpty(prefix)
+            ? null
+            : new GetBlobsOptions { Prefix = prefix };
+
+        await foreach (var blob in _blobContainerClient.GetBlobsAsync(options, cancellationToken))
         {
             _blobItemCache[blob.Name] = blob;
 
