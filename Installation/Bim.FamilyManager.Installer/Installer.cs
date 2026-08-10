@@ -61,7 +61,9 @@ namespace Bim.FamilyManager.Installer
 
         private static Guid GetUpgradeCode()
         {
-#if REVIT2026
+#if REVIT2027
+            return new Guid("{72DC508A-1091-40F8-9632-DCE3F0C8F64A}");
+#elif REVIT2026
             return new Guid("40FC4669-353A-4610-8F95-505FC8EFFBD2");
 #else
             return new Guid("6B4E2EEC-E9E3-4AC1-9A1F-83F605B543BE");

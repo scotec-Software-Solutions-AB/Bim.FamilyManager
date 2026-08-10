@@ -6,6 +6,19 @@
     <Project Path="../Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path="../.gitignore" />
+    <File Path="../CONTRIBUTING.md" />
+    <File Path="../GitVersion.yml" />
+    <File Path="../license.txt" />
+    <File Path="../Logo.png" />
+    <File Path="../NuGet.config" />
+    <File Path="../README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflow/">
+    <File Path="../.github/workflows/Build.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/Source/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
