@@ -18,7 +18,7 @@
 	    <Version>$(GITVERSION_SEMVER)</Version>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Platforms>x64</Platforms>
+		<Platform>x64</Platform>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<IsPackable>false</IsPackable>
     	<LangVersion>14.0</LangVersion>
