@@ -36,5 +36,15 @@ public interface IFolder
     /// <summary>
     ///     Asynchronously retrieves the collection of Revit families contained within this folder.
     /// </summary>
-    IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, CancellationToken cancellationToken);
+    /// <param name="includeSubfolders">
+    ///     When <see langword="true" />, families in all descendant folders are included;
+    ///     otherwise only direct children are returned.
+    /// </param>
+    /// <param name="filter">
+    ///     An <see cref="IFamilyNameFilter" /> applied by the source before
+    ///     <see cref="IRevitFamily" /> instances are allocated.
+    ///     Pass <see cref="NullFamilyNameFilter.Instance" /> to return all families without filtering.
+    /// </param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    IAsyncEnumerable<IRevitFamily> GetFamiliesAsync(bool includeSubfolders, IFamilyNameFilter filter, CancellationToken cancellationToken);
 }

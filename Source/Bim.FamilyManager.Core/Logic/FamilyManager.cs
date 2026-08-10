@@ -246,13 +246,12 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             yield break;
         }
 
-        await foreach (var family in GetAllFamiliesAsync(folder, cancellationToken))
+        var filter = new ContainsFamilyNameFilter(searchPattern);
+
+        await foreach (var family in GetAllFamiliesAsync(folder, filter, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (family.Name.Contains(searchPattern, StringComparison.OrdinalIgnoreCase))
-            {
-                yield return family;
-            }
+            yield return family;
         }
     }
 
@@ -1311,9 +1310,9 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="rootFolder" /> is <c>null</c>.
     /// </exception>
-    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesAsync(IFolder rootFolder, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesAsync(IFolder rootFolder, IFamilyNameFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var family in rootFolder.GetFamiliesAsync(true, cancellationToken))
+        await foreach (var family in rootFolder.GetFamiliesAsync(true, filter, cancellationToken))
         {
             yield return family;
         }

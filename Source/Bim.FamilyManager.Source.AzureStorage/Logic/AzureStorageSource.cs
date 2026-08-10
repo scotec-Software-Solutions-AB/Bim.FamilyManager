@@ -272,7 +272,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             yield return new Folder(
                 Path.GetFileName(itemPrefix.Trim('/')),
                 c => GetFoldersFromCache(itemPrefix, c),
-                (i, c) => GetFamiliesFromCache(itemPrefix, i, c)
+                (i, filter, c) => GetFamiliesFromCache(itemPrefix, i, filter, c)
             );
         }
     }
@@ -290,6 +290,7 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
     /// </remarks>
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private async IAsyncEnumerable<IRevitFamily> GetFamiliesFromCache(string prefix, bool includeSubfolders,
+                                                                      IFamilyNameFilter filter,
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
                                                                       [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -307,6 +308,14 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             }
 
             var familyName = Path.GetFileNameWithoutExtension(blobName);
+
+            // Apply name filter before allocating a family object so that IRevitFamily instances
+            // are never created for non-matching entries.
+            if (!filter.IsMatch(familyName))
+            {
+                continue;
+            }
+
             if (FamilyManager.TryGetRevitFamily(familyName, out var family))
             {
                 yield return family;
