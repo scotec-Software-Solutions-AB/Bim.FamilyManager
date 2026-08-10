@@ -313,11 +313,13 @@ public sealed class AzureStorageSource : FamilySource<AzureStorageSourceOptions>
             }
             else
             {
-                yield return CreateRevitFamily(
+                family = CreateRevitFamily(
                     familyName,
                     CreateFamilyInfo(blobName),
-                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName)
-                );
+                    (revitFamily, stream) => SaveFamily(revitFamily, stream, blobName));
+
+                FamilyManager.RegisterRevitFamily(family);
+                yield return family;
             }
         }
     }

@@ -246,7 +246,7 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
             yield break;
         }
 
-        await foreach (var family in GetAllFamiliesFromLeafFoldersAsync(folder, cancellationToken))
+        await foreach (var family in GetAllFamiliesAsync(folder, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (family.Name.Contains(searchPattern, StringComparison.OrdinalIgnoreCase))
@@ -1311,18 +1311,11 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="rootFolder" /> is <c>null</c>.
     /// </exception>
-    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesFromLeafFoldersAsync(IFolder rootFolder,
-                                                                                           [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<IRevitFamily> GetAllFamiliesAsync(IFolder rootFolder, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var leafFolders = GetLeafFoldersAsync(rootFolder, cancellationToken);
-        await foreach (var folder in leafFolders)
+        await foreach (var family in rootFolder.GetFamiliesAsync(true, cancellationToken))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            await foreach (var family in folder.GetFamiliesAsync(true, cancellationToken))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return family;
-            }
+            yield return family;
         }
     }
 

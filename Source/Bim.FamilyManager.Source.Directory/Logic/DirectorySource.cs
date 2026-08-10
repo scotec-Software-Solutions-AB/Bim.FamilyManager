@@ -211,6 +211,8 @@ public sealed class DirectorySource : FamilySource<DirectorySourceOptions>
                 {
                     family = CreateRevitFamily(familyName, CreateFamilyInfo(set.FamilyFile),
                         (revitFamily, stream) => SaveFamily(revitFamily, stream, set.FamilyFile));
+
+                    FamilyManager.RegisterRevitFamily(family);
                 }
             }
             catch (Exception e)
