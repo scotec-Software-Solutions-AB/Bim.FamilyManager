@@ -210,43 +210,32 @@ public sealed class FamilyManager : IFamilyManager, IDisposable
     public event EventHandler<EventArgs>? Reloaded;
 
     /// <summary>
-    ///     Asynchronously searches for Revit families within the specified folder that match the given search pattern.
+    ///     Asynchronously searches for Revit families within the specified folder that match the given filter.
     /// </summary>
     /// <param name="folder">
     ///     The folder to search within. This folder may contain subfolders and Revit families.
     /// </param>
-    /// <param name="searchPattern">
-    ///     The search pattern to filter Revit families by their names. The search is case-insensitive.
-    ///     If the search pattern is <see langword="null" /> or empty, no filtering is applied.
+    /// <param name="filter">
+    ///     The <see cref="IFamilyNameFilter" /> applied by the source before <see cref="IRevitFamily" /> instances
+    ///     are allocated. Use <see cref="ContainsFamilyNameFilter" /> for a case-insensitive substring match.
     /// </param>
     /// <param name="cancellationToken">
     ///     A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    ///     An asynchronous stream of <see cref="Bim.FamilyManager.Abstractions.IRevitFamily" /> objects
-    ///     that match the specified search pattern. If no families match, the stream will be empty.
+    ///     An asynchronous stream of <see cref="IRevitFamily" /> objects whose names satisfy
+    ///     <paramref name="filter" />. If no families match, the stream will be empty.
     /// </returns>
-    /// <remarks>
-    ///     This method retrieves all Revit families from the leaf folders of the specified folder
-    ///     and filters them based on the provided search pattern.
-    /// </remarks>
     /// <exception cref="System.ArgumentNullException">
     ///     Thrown if the <paramref name="folder" /> parameter is <see langword="null" />.
     /// </exception>
-    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, string searchPattern,
+    public async IAsyncEnumerable<IRevitFamily> SearchRevitFamiliesAsync(IFolder folder, IFamilyNameFilter filter,
                                                                          [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (folder == null)
         {
             throw new ArgumentNullException(nameof(folder));
         }
-
-        if (string.IsNullOrEmpty(searchPattern))
-        {
-            yield break;
-        }
-
-        var filter = new ContainsFamilyNameFilter(searchPattern);
 
         await foreach (var family in GetAllFamiliesAsync(folder, filter, cancellationToken))
         {
