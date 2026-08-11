@@ -142,35 +142,29 @@ jobs:
     - name: Build installer project
       run: dotnet build ./Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj
         -c Release
+        -p:Platform=x64
         -p:Version="$env:PkgVersion"
 
     - name: Install WiX v4 tool (wix.exe)
       shell: pwsh
       run: |
-        dotnet tool install --global wix --version 7.0.0-rc.1
+        dotnet tool install --global wix --version 6.0.2
         wix --version
-        wix eula accept wix7
 
     - name: Run WixSharp .exe to produce the .msi
       shell: pwsh
       run: |
-        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\Release\Bim.FamilyManager.Installer.exe"
+        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\x64\Release\Bim.FamilyManager.Installer.exe"
+        $env:BIM_FAMILYMANAGER_PUBLISH_ROOT = (Resolve-Path ".\Publish").Path
+        $outputDir = Split-Path $exe -Parent
+        $env:BIM_FAMILYMANAGER_MSI_PATH = Join-Path $outputDir "BIM.FamilyManager_$env:PkgVersion.msi"
         Push-Location (Split-Path $exe -Parent)
         & $exe
         $code = $LASTEXITCODE
         Pop-Location
         if ($code -ne 0) { throw "Installer builder failed with exit code $code" }
-
-    - name: Rename MSI
-      shell: pwsh
-      run: |
-        $src = ".\Installation\Bim.FamilyManager.Installer\bin\Release\BIM.FamilyManager.msi"
-        if (!(Test-Path $src)) { throw "MSI not found: $src" }
-        $newName = "BIM.FamilyManager_${{ env.PkgVersion }}.msi"
-        $dst = Join-Path (Split-Path $src -Parent) $newName
-        Move-Item $src $dst -Force
-        "MSI_PATH=$dst" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        Write-Host "Renamed MSI to: $dst"
+        if (!(Test-Path $env:BIM_FAMILYMANAGER_MSI_PATH)) { throw "MSI not found: $env:BIM_FAMILYMANAGER_MSI_PATH" }
+        "MSI_PATH=$env:BIM_FAMILYMANAGER_MSI_PATH" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
     - name: Upload MSI as artifact
       uses: actions/upload-artifact@v4

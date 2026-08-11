@@ -31,7 +31,7 @@
                 <DataTemplate>
                     <CheckBox Margin="0,6,0,6"
                               IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                              IsEnabled="{Binding IsDetected}"
+                              IsEnabled="{Binding IsSelectable}"
                               Click="CheckBoxOnClick">
                         <StackPanel>
                             <TextBlock FontWeight="SemiBold"

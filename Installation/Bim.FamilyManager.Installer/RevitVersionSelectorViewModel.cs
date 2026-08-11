@@ -11,6 +11,7 @@ namespace Bim.FamilyManager.Installer
     /// </summary>
     public class RevitVersionEntry : INotifyPropertyChanged
     {
+        private bool _isSelectable;
         private bool _isSelected;
 
         /// <summary>The Revit year string, e.g. "2025".</summary>
@@ -18,6 +19,18 @@ namespace Bim.FamilyManager.Installer
 
         /// <summary>True if this Revit version is detected as installed on the machine.</summary>
         public bool IsDetected { get; set; }
+
+        /// <summary>True when this version may be selected in the current installer session.</summary>
+        public bool IsSelectable
+        {
+            get => _isSelectable;
+            set
+            {
+                if (_isSelectable == value) return;
+                _isSelectable = value;
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// True if the user has selected this version for installation.
@@ -63,6 +76,8 @@ namespace Bim.FamilyManager.Installer
             }
             catch
             {
+                InstallerDiagnostics.TryWriteErrorLog(new InvalidOperationException(
+                    "Revit version detection failed."));
                 installed = new HashSet<string>();
             }
 
@@ -73,12 +88,13 @@ namespace Bim.FamilyManager.Installer
                 {
                     Year = year,
                     IsDetected = detected,
+                    IsSelectable = detected,
                     IsSelected = detected
                 });
             }
         }
 
         /// <summary>True when at least one detected version is selected.</summary>
-        public bool IsSelectionValid => Versions.Any(v => v.IsDetected && v.IsSelected);
+        public bool IsSelectionValid => Versions.Any(v => v.IsSelectable && v.IsSelected);
     }
 }

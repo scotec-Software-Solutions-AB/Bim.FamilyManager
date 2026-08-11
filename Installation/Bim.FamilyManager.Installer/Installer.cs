@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using Microsoft.Win32;
 using WixSharp;
 using ExitDialog = WixSharp.UI.WPF.ExitDialog;
@@ -18,7 +18,7 @@ namespace Bim.FamilyManager.Installer
         public static void Main(string[] args)
         {
             List<Feature> features;
-            var dirs = BuildDirs(out features);
+            var dirs = BuildDirs(GetPublishRoot(), out features);
 
             var project = new ManagedProject("BIM.FamilyManager", dirs.ToArray<WixObject>())
             {
@@ -56,7 +56,7 @@ namespace Bim.FamilyManager.Installer
 
             project.Features = features.ToArray();
 
-            Compiler.BuildMsi(project);
+            Compiler.BuildMsi(project, GetMsiOutputPath());
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Bim.FamilyManager.Installer
         /// Features are returned via the out parameter so they can be registered
         /// on the project separately — the Project constructor does not accept Feature objects.
         /// </summary>
-        private static List<Dir> BuildDirs(out List<Feature> features)
+        private static List<Dir> BuildDirs(string publishRoot, out List<Feature> features)
         {
             features = new List<Feature>();
             var dirs = new List<Dir>();
@@ -79,14 +79,15 @@ namespace Bim.FamilyManager.Installer
                 // WixSharp maps %AppData% to the WiX AppDataFolder property.
                 // Using [AppDataFolder] literally in the path is treated as a directory name — not a property reference.
                 var revitAddinsPath = $@"%AppData%\Autodesk\Revit\Addins\{year}";
+                var versionPublishRoot = Path.Combine(publishRoot, year);
 
                 var dir = new Dir(new Id($"INSTALLDIR_{year}"), revitAddinsPath,
-                    new File(new Id($"AddinFile_{year}"), $@"..\..\..\..\Publish\{year}\Bim.FamilyManager.addin")
+                    new WixSharp.File(new Id($"AddinFile_{year}"), Path.Combine(versionPublishRoot, "Bim.FamilyManager.addin"))
                     {
                         Feature = feature
                     },
                     new Dir(new Id($"BinDir_{year}"), "Bim.FamilyManager",
-                        new Files($@"..\..\..\..\Publish\{year}\Bim.FamilyManager\*.*")
+                        new Files(Path.Combine(versionPublishRoot, @"Bim.FamilyManager\*.*"))
                         {
                             Feature = feature
                         }));
@@ -96,6 +97,40 @@ namespace Bim.FamilyManager.Installer
             }
 
             return dirs;
+        }
+
+        private static string GetPublishRoot()
+        {
+            var publishRoot = Environment.GetEnvironmentVariable("BIM_FAMILYMANAGER_PUBLISH_ROOT");
+            if (string.IsNullOrWhiteSpace(publishRoot))
+            {
+                throw new InvalidOperationException(
+                    "BIM_FAMILYMANAGER_PUBLISH_ROOT must point to the Publish directory before building the MSI.");
+            }
+
+            publishRoot = Path.GetFullPath(publishRoot);
+            if (!Directory.Exists(publishRoot))
+                throw new DirectoryNotFoundException($"Publish directory not found: {publishRoot}");
+
+            return publishRoot;
+        }
+
+        private static string GetMsiOutputPath()
+        {
+            var outputPath = Environment.GetEnvironmentVariable("BIM_FAMILYMANAGER_MSI_PATH");
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new InvalidOperationException(
+                    "BIM_FAMILYMANAGER_MSI_PATH must specify the output MSI path.");
+            }
+
+            outputPath = Path.GetFullPath(outputPath);
+            var outputDirectory = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDirectory))
+                throw new InvalidOperationException($"Invalid MSI output path: {outputPath}");
+
+            Directory.CreateDirectory(outputDirectory);
+            return outputPath;
         }
 
         private static ProductInfo GetProductInfo()
@@ -115,8 +150,9 @@ namespace Bim.FamilyManager.Installer
         {
             var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "0.1.0-local";
             var version = semver.Split('-', '+')[0];
+            var versionParts = version.Split('.');
 
-            if (!Version.TryParse(version, out var parsedVersion))
+            if (versionParts.Length != 3 || !Version.TryParse(version, out var parsedVersion))
             {
                 throw new InvalidOperationException(
                     "Invalid version format in PkgVersion environment variable. Expected format: Major.Minor.Build (e.g., 1.0.0)");
@@ -124,7 +160,14 @@ namespace Bim.FamilyManager.Installer
 
             // WIX1148: MSI major version must be < 256. If a year-based version like 2025.0.0 is used
             // the major component is reduced to its last two digits (e.g. 25.0.0).
-            return parsedVersion.Major > 256
+            if (parsedVersion.Minor < 0 || parsedVersion.Minor > 255 ||
+                parsedVersion.Build < 0 || parsedVersion.Build > 65535)
+            {
+                throw new InvalidOperationException(
+                    "Invalid MSI version in PkgVersion environment variable. Minor must be <= 255 and build must be <= 65535.");
+            }
+
+            return parsedVersion.Major >= 256
                 ? new Version(parsedVersion.Major % 100, parsedVersion.Minor, parsedVersion.Build)
                 : parsedVersion;
         }

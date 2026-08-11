@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using WixSharp;
 using WixSharp.UI.WPF;
+using WixToolset.Dtf.WindowsInstaller;
 
 namespace Bim.FamilyManager.Installer
 {
@@ -31,9 +32,9 @@ namespace Bim.FamilyManager.Installer
             }
             catch (System.Exception ex)
             {
-                WriteErrorLog(ex);
+                InstallerDiagnostics.TryWriteErrorLog(ex);
                 MessageBox.Show(
-                    "Failed to initialize version selector.\n\nDetails written to:\n" + ErrorLogPath(),
+                    "Failed to initialize version selector.\n\nDetails written to:\n" + InstallerDiagnostics.ErrorLogPath,
                     "BIM.FamilyManager Installer",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -48,9 +49,9 @@ namespace Bim.FamilyManager.Installer
                 ApplyCurrentFeatureState(_parentDialog.MsiRuntime());
                 UpdateNextButton();
             }
-            catch
+            catch (System.Exception ex)
             {
-                // Not critical on fresh install.
+                InstallerDiagnostics.TryWriteErrorLog(ex);
             }
         }
 
@@ -66,7 +67,7 @@ namespace Bim.FamilyManager.Installer
             var runtime = _parentDialog.MsiRuntime();
             if (runtime == null)
             {
-                WriteErrorLog(new System.InvalidOperationException("MsiRuntime is null in OnGoNext."));
+                InstallerDiagnostics.TryWriteErrorLog(new System.InvalidOperationException("MsiRuntime is null in OnGoNext."));
                 MessageBox.Show(
                     "Installer session is unavailable. Please restart the installer.",
                     "BIM.FamilyManager Installer",
@@ -84,7 +85,7 @@ namespace Bim.FamilyManager.Installer
                 // ADDLOCAL/REMOVE are the correct MSI properties for controlling feature install state
                 // from an embedded UI. FeatureInfo.RequestState uses MsiSetFeatureState which requires
                 // the Selection Manager and is unavailable in embedded UI context (causes error 2731).
-                if (entry.IsDetected && entry.IsSelected)
+                if (entry.IsSelectable && entry.IsSelected)
                     addLocal.Add(featureId);
                 else
                     remove.Add(featureId);
@@ -109,36 +110,25 @@ namespace Bim.FamilyManager.Installer
 
         private void ApplyCurrentFeatureState(MsiRuntime runtime)
         {
+            var isMaintenance = !string.IsNullOrEmpty(runtime.Session["Installed"]);
+            if (!isMaintenance)
+                return;
+
             foreach (var entry in _viewModel.Versions)
             {
                 var featureId = string.Format("Feature_Revit{0}", entry.Year);
                 try
                 {
-                    // Read current install state from session property set by ADDLOCAL/REMOVE.
-                    var stateStr = runtime.Session[featureId];
-                    entry.IsSelected = stateStr == "Local";
+                    var currentState = runtime.MsiSession.Features[featureId].CurrentState;
+                    var isInstalled = currentState == InstallState.Local || currentState == InstallState.Source;
+                    entry.IsSelectable = entry.IsDetected || isInstalled;
+                    entry.IsSelected = isInstalled;
                 }
-                catch
+                catch (System.Exception ex)
                 {
-                    // Leave at default on fresh install.
+                    InstallerDiagnostics.TryWriteErrorLog(ex);
                 }
             }
-        }
-
-        private static string ErrorLogPath()
-        {
-            return System.IO.Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop),
-                "BimFamilyManager_InstallError.txt");
-        }
-
-        private static void WriteErrorLog(System.Exception ex)
-        {
-            System.IO.File.WriteAllText(ErrorLogPath(),
-                ex.GetType().FullName + "\r\n"
-                + ex.Message + "\r\n\r\n"
-                + ex.StackTrace + "\r\n\r\n"
-                + (ex.InnerException != null ? ex.InnerException.ToString() : string.Empty));
         }
     }
 }
