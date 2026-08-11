@@ -3,6 +3,7 @@
   <PropertyGroup>
 	  <OutputType></OutputType>
 	  <TargetFramework>net4.7.2</TargetFramework>
+	  <Platforms>x64</Platforms>
 	  <UseWpf>true</UseWpf>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>

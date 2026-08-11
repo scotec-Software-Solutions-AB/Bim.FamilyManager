@@ -19,6 +19,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platform>x64</Platform>
+		<Platforms>x64</Platforms>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<IsPackable>false</IsPackable>
     	<LangVersion>14.0</LangVersion>
