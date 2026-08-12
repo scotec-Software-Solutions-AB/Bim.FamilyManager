@@ -21,12 +21,13 @@ namespace Bim.FamilyManager.Installer
             List<Feature> features;
             var dirs = BuildDirs(GetPublishRoot(), out features);
 
-            var project = new ManagedProject("BIM.FamilyManager", dirs.ToArray<WixObject>())
+            var version = GetProductVersion();
+            var project = new ManagedProject($"BIM.FamilyManager {version}", dirs.ToArray<WixObject>())
             {
                 GUID = Guid.NewGuid(),
                 Platform = Platform.x64,
                 UpgradeCode = new Guid("1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D"),
-                Version = GetProductVersion(),
+                Version = version,
                 ControlPanelInfo = GetProductInfo(),
                 MajorUpgrade = MajorUpgrade.Default,
                 BackgroundImage = @"Resources\Icons\BackgroundImage.png",
