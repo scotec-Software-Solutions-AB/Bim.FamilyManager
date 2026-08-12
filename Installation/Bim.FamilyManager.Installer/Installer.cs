@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.Win32;
 using WixSharp;
 using ExitDialog = WixSharp.UI.WPF.ExitDialog;
+using MaintenanceTypeDialog = WixSharp.UI.WPF.MaintenanceTypeDialog;
 using ProgressDialog = WixSharp.UI.WPF.ProgressDialog;
 using WelcomeDialog = WixSharp.UI.WPF.WelcomeDialog;
 
@@ -8,77 +13,150 @@ namespace Bim.FamilyManager.Installer
 {
     public class Script
     {
+        // Supported Revit versions bundled in this installer.
+        private static readonly string[] SupportedRevitVersions = { "2025", "2026", "2027" };
+
         public static void Main(string[] args)
         {
-            var project = new ManagedProject($"BIM.FamilyManager {GetRevitVersion()}", GetDirectories())
+            List<Feature> features;
+            var dirs = BuildDirs(GetPublishRoot(), out features);
+
+            var project = new ManagedProject("BIM.FamilyManager", dirs.ToArray<WixObject>())
             {
                 GUID = Guid.NewGuid(),
                 Platform = Platform.x64,
-                UpgradeCode = GetUpgradeCode(),
+                UpgradeCode = new Guid("1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D"),
                 Version = GetProductVersion(),
                 ControlPanelInfo = GetProductInfo(),
                 MajorUpgrade = MajorUpgrade.Default,
                 BackgroundImage = @"Resources\Icons\BackgroundImage.png",
                 BannerImage = @"Resources\Icons\BannerImage.png",
+            };
 
-                Properties = new[]
-                {
-                    new Property("REVIT_VERSION", GetRevitVersion())
-                }
+            // WixSharp's maintenance dialog records the Repair choice in MODIFY_ACTION.
+            // Translate it to the standard MSI property before costing so all installed
+            // features are actually reinstalled with the authored REINSTALLMODE.
+            project.Actions = new WixSharp.Action[]
+            {
+                new SetPropertyAction(
+                    "REINSTALL",
+                    "ALL",
+                    Return.check,
+                    When.Before,
+                    Step.CostInitialize,
+                    new Condition("Installed AND MODIFY_ACTION=\"Repair\""))
             };
 
             var ui = project.ManagedUI = new ManagedUI();
+
+            // WiX4: inject Package/@Scope="perUser" so the engine installs per-user.
+            // This sets MSIINSTALLPERUSER without it being treated as a restricted property.
+            // WixSharp.Project.InstallScope is obsolete and broken in WiX4.
+            project.WixSourceGenerated += doc =>
+            {
+                var ns = doc.Root.Name.Namespace;
+                var pkg = doc.Root.Descendants(ns + "Package").FirstOrDefault();
+                if (pkg != null)
+                    pkg.SetAttributeValue("Scope", "perUser");
+            };
             ui.InstallDialogs.Add<WelcomeDialog>()
-              //.Add<InstallDirDialog>()
-              .Add<CustomDialogWith<InstallScopeControl>>()
+              .Add<CustomDialogWith<RevitVersionSelectorControl>>()
               .Add<ProgressDialog>()
               .Add<ExitDialog>();
 
-            project.UIInitialized += e =>
+            ui.ModifyDialogs.Add<MaintenanceTypeDialog>()
+              .Add<CustomDialogWith<RevitVersionSelectorControl>>()
+              .Add<ProgressDialog>()
+              .Add<ExitDialog>();
+
+            project.Features = features.ToArray();
+
+            var msiPath = GetMsiOutputPath();
+            Compiler.BuildMsi(project, msiPath);
+        }
+
+        /// <summary>
+        /// Builds one Dir per Revit version, each with files tagged to their Feature.
+        /// Features are returned via the out parameter so they can be registered
+        /// on the project separately — the Project constructor does not accept Feature objects.
+        /// </summary>
+        private static List<Dir> BuildDirs(string publishRoot, out List<Feature> features)
+        {
+            features = new List<Feature>();
+            var dirs = new List<Dir>();
+
+            foreach (var year in SupportedRevitVersions)
             {
-                // Since the default MSI localization data has no entry for 'CustomDlgTitle' (and other custom labels) we
-                // need to add this new content dynamically. Alternatively, you can use WiX localization files (wxl).
+                var feature = new Feature($"Revit {year}", $"Install BIM.FamilyManager for Autodesk Revit {year}.")
+                {
+                    Id = new Id($"Feature_Revit{year}")
+                };
 
-                var runtime = e.ManagedUI.Shell.MsiRuntime();
+                // WixSharp maps %AppData% to the WiX AppDataFolder property.
+                // Using [AppDataFolder] literally in the path is treated as a directory name — not a property reference.
+                var revitAddinsPath = $@"%AppData%\Autodesk\Revit\Addins\{year}";
+                var versionPublishRoot = Path.Combine(publishRoot, year);
 
-                runtime.UIText["CustomDlgTitle"] = "Select Installation Scope";
-                runtime.UIText["CustomDlgTitleDescription"] = "Choose whether you want to install this application for all users on this computer or only for your current Windows account";
+                var dir = new Dir(new Id($"INSTALLDIR_{year}"), revitAddinsPath,
+                    new WixSharp.File(new Id($"AddinFile_{year}"), Path.Combine(versionPublishRoot, "Bim.FamilyManager.addin"))
+                    {
+                        Feature = feature
+                    },
+                    new Dir(new Id($"BinDir_{year}"), "Bim.FamilyManager",
+                        new Files(Path.Combine(versionPublishRoot, @"Bim.FamilyManager\*.*"))
+                        {
+                            Feature = feature
+                        }));
 
-            };
+                features.Add(feature);
+                dirs.Add(dir);
+            }
 
-            Compiler.BuildMsi(project);
+            return dirs;
         }
 
-        private static Dir GetDirectories()
+        private static string GetPublishRoot()
         {
-            return new Dir(new Id("INSTALLDIR"), @"%ProgramFiles%\Bim.FamilyManager",
-                // Special file in the root of INSTALLDIR
-                new File(@"..\..\..\..\Publish\Bim.FamilyManager.addin"),
-                // Subfolder for all other files
-                new Dir("Bim.FamilyManager",
-                    new Files(@"..\..\..\..\Publish\Bim.FamilyManager\*.*")));
+            var publishRoot = Environment.GetEnvironmentVariable("BIM_FAMILYMANAGER_PUBLISH_ROOT");
+            if (string.IsNullOrWhiteSpace(publishRoot))
+            {
+                throw new InvalidOperationException(
+                    "BIM_FAMILYMANAGER_PUBLISH_ROOT must point to the Publish directory before building the MSI.");
+            }
+
+            publishRoot = Path.GetFullPath(publishRoot);
+            if (!Directory.Exists(publishRoot))
+                throw new DirectoryNotFoundException($"Publish directory not found: {publishRoot}");
+
+            return publishRoot;
         }
 
-        private static Guid GetUpgradeCode()
+        private static string GetMsiOutputPath()
         {
-#if REVIT2027
-            return new Guid("{72DC508A-1091-40F8-9632-DCE3F0C8F64A}");
-#elif REVIT2026
-            return new Guid("40FC4669-353A-4610-8F95-505FC8EFFBD2");
-#else
-            return new Guid("6B4E2EEC-E9E3-4AC1-9A1F-83F605B543BE");
-#endif
+            var outputPath = Environment.GetEnvironmentVariable("BIM_FAMILYMANAGER_MSI_PATH");
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new InvalidOperationException(
+                    "BIM_FAMILYMANAGER_MSI_PATH must specify the output MSI path.");
+            }
+
+            outputPath = Path.GetFullPath(outputPath);
+            var outputDirectory = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDirectory))
+                throw new InvalidOperationException($"Invalid MSI output path: {outputPath}");
+
+            Directory.CreateDirectory(outputDirectory);
+            return outputPath;
         }
 
         private static ProductInfo GetProductInfo()
         {
-            return new ProductInfo()
+            return new ProductInfo
             {
                 Comments = "Revit add-in for managing and standardizing Revit families.",
                 HelpLink = "https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/issues",
                 UrlInfoAbout = "https://www.scotec.com/bimfamilymanager",
                 UrlUpdateInfo = "https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/releases",
-                InstallLocation = "[INSTALLDIR]", 
                 Manufacturer = "scotec",
                 ProductIcon = @"Resources\Icons\Logo.ico"
             };
@@ -86,28 +164,77 @@ namespace Bim.FamilyManager.Installer
 
         private static Version GetProductVersion()
         {
-            var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "0.1.0-local"; // fallback if not set
+            var semver = Environment.GetEnvironmentVariable("PkgVersion") ?? "0.1.0-local";
             var version = semver.Split('-', '+')[0];
-            
-            if (!Version.TryParse(version, out var parsedVersion))
+            var versionParts = version.Split('.');
+
+            if (versionParts.Length != 3 || !Version.TryParse(version, out var parsedVersion))
             {
-                throw new InvalidOperationException("Invalid version format in PkgVersion environment variable. Expected format: Major.Minor.Build (e.g., 2025.0.0)");
+                throw new InvalidOperationException(
+                    "Invalid version format in PkgVersion environment variable. Expected format: Major.Minor.Build (e.g., 1.0.0)");
             }
 
-            // When using versions like 2025.0.0, Wix generates the following warning while building the .msi file:
-            // WIX1148: Invalid MSI package version: '2025.0.0'. The Windows Installer SDK says that MSI package versions must have a
-            //    major version less than 256, a minor version less than 256, and a build version less than 65536. The revision value is
-            //    ignored but version labels and metadata are not allowed. Violating the MSI rules sometimes works as expected but
-            //    the behavior is unpredictable and undefined. Future versions of WiX might treat invalid package versions as an error.
-            // To avoid this warning, we use a version format that is compatible with MSI, such as 25.0.0.
-            
-            return parsedVersion.Major > 256 ? new Version(parsedVersion.Major % 100, parsedVersion.Minor, parsedVersion.Build) : parsedVersion;
+            // WIX1148: MSI major version must be < 256. If a year-based version like 2025.0.0 is used
+            // the major component is reduced to its last two digits (e.g. 25.0.0).
+            if (parsedVersion.Minor < 0 || parsedVersion.Minor > 255 ||
+                parsedVersion.Build < 0 || parsedVersion.Build > 65535)
+            {
+                throw new InvalidOperationException(
+                    "Invalid MSI version in PkgVersion environment variable. Minor must be <= 255 and build must be <= 65535.");
+            }
+
+            return parsedVersion.Major >= 256
+                ? new Version(parsedVersion.Major % 100, parsedVersion.Minor, parsedVersion.Build)
+                : parsedVersion;
         }
 
-        private static string GetRevitVersion()
+        /// <summary>
+        /// Returns the Revit versions from <see cref="SupportedRevitVersions"/> that are
+        /// detected as installed on the current machine via the Autodesk registry keys.
+        /// </summary>
+        public static IEnumerable<string> GetInstalledRevitVersions()
         {
-            var revitVersion = Environment.GetEnvironmentVariable("RevitVersion") ?? "2025"; // fallback if not set
-            return revitVersion;
+            // Autodesk registers installed Revit versions under this key.
+            const string revitRegistryBase = @"SOFTWARE\Autodesk\Revit";
+
+            using (var baseKey = Registry.LocalMachine.OpenSubKey(revitRegistryBase))
+            {
+                if (baseKey == null)
+                    yield break;
+
+                foreach (var year in SupportedRevitVersions)
+                {
+                    // Each year has a subkey named e.g. "Autodesk Revit 2025"
+                    var subKeyName = baseKey.GetSubKeyNames()
+                        .FirstOrDefault(k => k.Contains(year));
+
+                    if (subKeyName != null)
+                        yield return year;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the supported Revit versions for which the per-user
+        /// BIM.FamilyManager add-in manifest currently exists.
+        /// </summary>
+        public static IEnumerable<string> GetInstalledAddinVersions()
+        {
+            var applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            foreach (var year in SupportedRevitVersions)
+            {
+                var manifestPath = Path.Combine(
+                    applicationData,
+                    "Autodesk",
+                    "Revit",
+                    "Addins",
+                    year,
+                    "Bim.FamilyManager.addin");
+
+                if (System.IO.File.Exists(manifestPath))
+                    yield return year;
+            }
         }
     }
 }

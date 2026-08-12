@@ -3,7 +3,9 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/Installation/">
-    <Project Path="../Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj" />
+    <Project Path="../Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj">
+      <Platform Project="x64" />
+    </Project>
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="../.gitignore" />
