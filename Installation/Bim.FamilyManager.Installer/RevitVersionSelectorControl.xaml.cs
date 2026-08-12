@@ -28,6 +28,7 @@ namespace Bim.FamilyManager.Installer
                 DataContext = _viewModel;
                 UpdateNextButton();
                 parentDialog.GoNextButton.Click += OnGoNext;
+                parentDialog.Loaded += OnParentDialogLoaded;
                 // MsiRuntime is not available during Init. In registered-product
                 // maintenance, restore the authoritative MSI feature state once loaded.
                 Loaded += OnLoaded;
@@ -43,6 +44,53 @@ namespace Bim.FamilyManager.Installer
             }
         }
 
+        private void OnParentDialogLoaded(object sender, RoutedEventArgs e)
+        {
+            _parentDialog.Loaded -= OnParentDialogLoaded;
+
+            // CustomDialogBase applies its localized placeholder strings while loading.
+            // Defer this assignment until that initialization has completed.
+            _parentDialog.Dispatcher.BeginInvoke(
+                new System.Action(ApplyDialogHeader),
+                System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
+
+        private void ApplyDialogHeader()
+        {
+            _parentDialog.DialogTitle = "Select Revit Versions";
+            var title = FindTextBlock(_parentDialog, "CustomDlgTitle");
+            if (title != null)
+                title.Text = "Select Revit Versions";
+
+            var description = _parentDialog.FindName("DialogDescription") as TextBlock
+                ?? FindTextBlock(_parentDialog, "CustomDlgTitleDescription");
+            if (description != null)
+            {
+                description.Text =
+                    "Choose which Revit versions should receive the BIM.FamilyManager add-in.";
+            }
+        }
+
+        private static TextBlock FindTextBlock(DependencyObject parent, string text)
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(parent))
+            {
+                var textBlock = child as TextBlock;
+                if (textBlock != null && textBlock.Text.Contains(text))
+                    return textBlock;
+
+                var dependencyObject = child as DependencyObject;
+                if (dependencyObject != null)
+                {
+                    var result = FindTextBlock(dependencyObject, text);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
+        }
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnLoaded;
@@ -50,8 +98,11 @@ namespace Bim.FamilyManager.Installer
             try
             {
                 var runtime = _parentDialog.MsiRuntime();
-                if (runtime != null && !string.IsNullOrEmpty(runtime.Session["Installed"]))
-                    ApplyCurrentFeatureState(runtime);
+                if (runtime != null)
+                {
+                    if (!string.IsNullOrEmpty(runtime.Session["Installed"]))
+                        ApplyCurrentFeatureState(runtime);
+                }
 
                 UpdateNextButton();
             }

@@ -23,7 +23,7 @@
         <TextBlock Grid.Row="0"
                    Margin="0,0,0,16"
                    TextWrapping="Wrap"
-                   Text="Select the Revit versions for which BIM.FamilyManager should be installed. Versions detected on this machine and versions with an existing add-in installation can be selected."/>
+                   Text="Versions detected on this machine and versions with an existing add-in installation can be selected."/>
 
         <!-- Version list -->
         <ItemsControl Grid.Row="1" ItemsSource="{Binding Versions}">
