@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Security.Principal;
 using WixSharp;
 using WixSharp.UI.WPF;
 using WixToolset.Dtf.WindowsInstaller;
@@ -27,7 +28,8 @@ namespace Bim.FamilyManager.Installer
                 DataContext = _viewModel;
                 UpdateNextButton();
                 parentDialog.GoNextButton.Click += OnGoNext;
-                // MsiRuntime is not available during Init - defer feature state restore to Loaded.
+                // MsiRuntime is not available during Init. In registered-product
+                // maintenance, restore the authoritative MSI feature state once loaded.
                 Loaded += OnLoaded;
             }
             catch (System.Exception ex)
@@ -44,9 +46,13 @@ namespace Bim.FamilyManager.Installer
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnLoaded;
+
             try
             {
-                ApplyCurrentFeatureState(_parentDialog.MsiRuntime());
+                var runtime = _parentDialog.MsiRuntime();
+                if (runtime != null && !string.IsNullOrEmpty(runtime.Session["Installed"]))
+                    ApplyCurrentFeatureState(runtime);
+
                 UpdateNextButton();
             }
             catch (System.Exception ex)
@@ -78,6 +84,9 @@ namespace Bim.FamilyManager.Installer
 
             var addLocal = new System.Collections.Generic.List<string>();
             var remove = new System.Collections.Generic.List<string>();
+            var reinstall = new System.Collections.Generic.List<string>();
+            var isMaintenance = !string.IsNullOrEmpty(runtime.Session["Installed"]);
+            var installedProduct = isMaintenance ? GetInstalledProduct(runtime) : null;
 
             foreach (var entry in _viewModel.Versions)
             {
@@ -86,7 +95,16 @@ namespace Bim.FamilyManager.Installer
                 // from an embedded UI. FeatureInfo.RequestState uses MsiSetFeatureState which requires
                 // the Selection Manager and is unavailable in embedded UI context (causes error 2731).
                 if (entry.IsSelectable && entry.IsSelected)
+                {
                     addLocal.Add(featureId);
+                    // DTF cannot query a registered feature state during first-time install.
+                    if (isMaintenance)
+                    {
+                        var currentState = installedProduct.GetFeatureState(featureId);
+                        if (currentState == InstallState.Local || currentState == InstallState.Source)
+                            reinstall.Add(featureId);
+                    }
+                }
                 else
                     remove.Add(featureId);
             }
@@ -95,6 +113,10 @@ namespace Bim.FamilyManager.Installer
             // MsiSetProperty on the underlying Dtf Session — safe in embedded UI.
             runtime.Session["ADDLOCAL"] = addLocal.Count > 0 ? string.Join(",", addLocal) : string.Empty;
             runtime.Session["REMOVE"] = remove.Count > 0 ? string.Join(",", remove) : string.Empty;
+            // A selected feature may already be installed but have missing files. Its
+            // per-user component key paths are registry values, so ADDLOCAL alone does
+            // not detect that damage; REINSTALL explicitly repairs retained features.
+            runtime.Session["REINSTALL"] = reinstall.Count > 0 ? string.Join(",", reinstall) : string.Empty;
         }
 
         private void CheckBoxOnClick(object sender, RoutedEventArgs e)
@@ -110,25 +132,31 @@ namespace Bim.FamilyManager.Installer
 
         private void ApplyCurrentFeatureState(MsiRuntime runtime)
         {
-            var isMaintenance = !string.IsNullOrEmpty(runtime.Session["Installed"]);
-            if (!isMaintenance)
-                return;
+            var installedProduct = GetInstalledProduct(runtime);
 
             foreach (var entry in _viewModel.Versions)
             {
                 var featureId = string.Format("Feature_Revit{0}", entry.Year);
-                try
-                {
-                    var currentState = runtime.MsiSession.Features[featureId].CurrentState;
-                    var isInstalled = currentState == InstallState.Local || currentState == InstallState.Source;
-                    entry.IsSelectable = entry.IsDetected || isInstalled;
-                    entry.IsSelected = isInstalled;
-                }
-                catch (System.Exception ex)
-                {
-                    InstallerDiagnostics.TryWriteErrorLog(ex);
-                }
+                var currentState = installedProduct.GetFeatureState(featureId);
+                var isInstalled = currentState == InstallState.Local || currentState == InstallState.Source;
+
+                entry.IsSelectable = entry.IsDetected || isInstalled;
+                entry.IsSelected = isInstalled;
             }
         }
+
+        private static ProductInstallation GetInstalledProduct(MsiRuntime runtime)
+        {
+            var currentIdentity = WindowsIdentity.GetCurrent();
+            var userSid = currentIdentity.User?.Value;
+            if (string.IsNullOrEmpty(userSid))
+                throw new System.InvalidOperationException("Could not determine the current Windows user SID.");
+
+            return new ProductInstallation(
+                runtime.Session["ProductCode"],
+                userSid,
+                UserContexts.UserUnmanaged);
+        }
+
     }
 }

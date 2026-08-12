@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Win32;
 using WixSharp;
 using ExitDialog = WixSharp.UI.WPF.ExitDialog;
+using MaintenanceTypeDialog = WixSharp.UI.WPF.MaintenanceTypeDialog;
 using ProgressDialog = WixSharp.UI.WPF.ProgressDialog;
 using WelcomeDialog = WixSharp.UI.WPF.WelcomeDialog;
 
@@ -32,6 +33,20 @@ namespace Bim.FamilyManager.Installer
                 BannerImage = @"Resources\Icons\BannerImage.png",
             };
 
+            // WixSharp's maintenance dialog records the Repair choice in MODIFY_ACTION.
+            // Translate it to the standard MSI property before costing so all installed
+            // features are actually reinstalled with the authored REINSTALLMODE.
+            project.Actions = new WixSharp.Action[]
+            {
+                new SetPropertyAction(
+                    "REINSTALL",
+                    "ALL",
+                    Return.check,
+                    When.Before,
+                    Step.CostInitialize,
+                    new Condition("Installed AND MODIFY_ACTION=\"Repair\""))
+            };
+
             var ui = project.ManagedUI = new ManagedUI();
 
             // WiX4: inject Package/@Scope="perUser" so the engine installs per-user.
@@ -49,14 +64,15 @@ namespace Bim.FamilyManager.Installer
               .Add<ProgressDialog>()
               .Add<ExitDialog>();
 
-            ui.ModifyDialogs.Add<WelcomeDialog>()
+            ui.ModifyDialogs.Add<MaintenanceTypeDialog>()
               .Add<CustomDialogWith<RevitVersionSelectorControl>>()
               .Add<ProgressDialog>()
               .Add<ExitDialog>();
 
             project.Features = features.ToArray();
 
-            Compiler.BuildMsi(project, GetMsiOutputPath());
+            var msiPath = GetMsiOutputPath();
+            Compiler.BuildMsi(project, msiPath);
         }
 
         /// <summary>
@@ -195,6 +211,29 @@ namespace Bim.FamilyManager.Installer
                     if (subKeyName != null)
                         yield return year;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Returns the supported Revit versions for which the per-user
+        /// BIM.FamilyManager add-in manifest currently exists.
+        /// </summary>
+        public static IEnumerable<string> GetInstalledAddinVersions()
+        {
+            var applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            foreach (var year in SupportedRevitVersions)
+            {
+                var manifestPath = Path.Combine(
+                    applicationData,
+                    "Autodesk",
+                    "Revit",
+                    "Addins",
+                    year,
+                    "Bim.FamilyManager.addin");
+
+                if (System.IO.File.Exists(manifestPath))
+                    yield return year;
             }
         }
     }

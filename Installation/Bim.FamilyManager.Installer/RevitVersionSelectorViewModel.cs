@@ -69,27 +69,42 @@ namespace Bim.FamilyManager.Installer
         {
             // Registry detection is best-effort — if it fails for any reason
             // (permissions, missing key) all versions show as not detected.
-            HashSet<string> installed;
+            HashSet<string> installedRevitVersions;
+            HashSet<string> installedAddinVersions;
             try
             {
-                installed = new HashSet<string>(Script.GetInstalledRevitVersions());
+                installedRevitVersions = new HashSet<string>(Script.GetInstalledRevitVersions());
             }
-            catch
+            catch (Exception ex)
             {
                 InstallerDiagnostics.TryWriteErrorLog(new InvalidOperationException(
-                    "Revit version detection failed."));
-                installed = new HashSet<string>();
+                    "Revit version detection failed.", ex));
+                installedRevitVersions = new HashSet<string>();
             }
+
+            try
+            {
+                installedAddinVersions = new HashSet<string>(Script.GetInstalledAddinVersions());
+            }
+            catch (Exception ex)
+            {
+                InstallerDiagnostics.TryWriteErrorLog(new InvalidOperationException(
+                    "Installed add-in detection failed.", ex));
+                installedAddinVersions = new HashSet<string>();
+            }
+
+            var hasInstalledAddins = installedAddinVersions.Count > 0;
 
             foreach (var year in new[] { "2025", "2026", "2027" })
             {
-                var detected = installed.Contains(year);
+                var isRevitDetected = installedRevitVersions.Contains(year);
+                var isAddinInstalled = installedAddinVersions.Contains(year);
                 Versions.Add(new RevitVersionEntry
                 {
                     Year = year,
-                    IsDetected = detected,
-                    IsSelectable = detected,
-                    IsSelected = detected
+                    IsDetected = isRevitDetected,
+                    IsSelectable = isRevitDetected || isAddinInstalled,
+                    IsSelected = hasInstalledAddins ? isAddinInstalled : isRevitDetected
                 });
             }
         }

@@ -23,7 +23,7 @@
         <TextBlock Grid.Row="0"
                    Margin="0,0,0,16"
                    TextWrapping="Wrap"
-                   Text="Select the Revit versions for which BIM.FamilyManager should be installed. Only versions detected on this machine can be selected."/>
+                   Text="Select the Revit versions for which BIM.FamilyManager should be installed. Versions detected on this machine and versions with an existing add-in installation can be selected."/>
 
         <!-- Version list -->
         <ItemsControl Grid.Row="1" ItemsSource="{Binding Versions}">
@@ -39,7 +39,7 @@
                             <TextBlock Foreground="#FF555555"
                                        FontSize="11"
                                        Margin="0,2,0,0"
-                                       Text="Not installed on this machine."
+                                       Text="This Revit version is not installed on this machine."
                                        Visibility="{Binding IsDetected,
                                            Converter={StaticResource BoolToCollapsedConverter}}"/>
                         </StackPanel>
