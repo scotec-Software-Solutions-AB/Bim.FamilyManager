@@ -5,7 +5,7 @@
 
 It provides a modern interface for browsing and loading Revit family files (`.rfa`) from **multiple configurable sources**, including **local directories** and **Azure Blob Storage**. The goal is to make family libraries easier to manage while remaining fully integrated in the Revit workflow.
 
-> **Compatibility:** Autodesk® Revit® **2025** and **2026**
+> **Compatibility:** Autodesk® Revit® **2025**, **2026**, and **2027**
 
 ---
 
@@ -61,8 +61,8 @@ The documentation explains how to configure and manage family libraries stored l
 
 ## Prerequisites
 
-- Autodesk **Revit 2025 or newer**
-- **.NET 8 SDK**
+- Autodesk **Revit 2025**, **2026**, or **2027**
+- **.NET 8 SDK** (or **.NET 10 SDK** for Revit 2027)
 - Windows OS
 
 Download .NET:
@@ -93,6 +93,26 @@ Or open the solution in **Visual Studio** and build normally.
 ---
 
 # Installing the Add‑In
+
+## MSI Installer (recommended)
+
+A combined MSI installer is available on the [Releases](https://github.com/scotec-Software-Solutions-AB/Bim.FamilyManager/releases) page.
+
+The installer supports **Revit 2025, 2026, and 2027** in a single package. During installation you can select which Revit versions should receive the add-in. Only versions detected on your machine are selectable.
+
+The installer performs a **per-user installation** into:
+
+```
+%APPDATA%\Autodesk\Revit\Addins\<year>\
+```
+
+No administrator rights are required.
+
+To change which Revit versions are installed after the initial setup, run the MSI again and use **Modify** in Apps & Features.
+
+---
+
+## Manual Installation
 
 Copy the compiled DLLs and the `.addin` manifest file to one of the Revit Add‑In folders.
 

@@ -136,3 +136,11 @@ A change is complete only when all of the following are true:
 - Existing local patterns and compatibility constraints were respected.
 - Relevant tests or validation were updated and run when feasible, or the lack of validation was stated explicitly.
 - The final explanation includes important assumptions, risks, and any unverified areas.
+
+---
+
+## MSI Release Specific Rules
+
+For Bim.FamilyManager MSI releases:
+
+- Hide Modify in Apps & Features/ARP to prevent users from deleting the source MSI, while retaining MSI maintenance/Modify behavior when the user explicitly reruns the original MSI.
