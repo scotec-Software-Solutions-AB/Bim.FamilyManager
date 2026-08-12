@@ -150,6 +150,7 @@ jobs:
       run: |
         dotnet tool install --global wix --version 6.0.2
         wix --version
+        wix extension add -g WixToolset.UI.wixext/6.0.2
 
     - name: Run WixSharp .exe to produce the .msi
       shell: pwsh
