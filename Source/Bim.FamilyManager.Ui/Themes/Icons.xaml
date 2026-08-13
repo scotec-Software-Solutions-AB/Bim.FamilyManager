@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:icons="clr-namespace:Material.Icons;assembly=Material.Icons">
+
+
+    <icons:MaterialIconKind x:Key="IconCancel">CancelOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconOk">CheckOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconSave">FloppyDisc</icons:MaterialIconKind>
+
+    <icons:MaterialIconKind x:Key="IconFolder">FolderOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconFolderAdd">FolderAddOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconFolderEdit">FolderEditOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconFolderRemove">FolderRemoveOutline</icons:MaterialIconKind>
+
+
+    <icons:MaterialIconKind x:Key="IconCheckbox">CheckboxOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconCheckboxBlank">CheckboxBlankOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconSettings">SettingsOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconReload">Refresh</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconHome">HomeOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconStepBackward">StepBackward</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconAccount">Account</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconListBulleted">FormatListBulletedType</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconEdit">EditOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconDelete">DeleteOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconDownload">DownloadOutline</icons:MaterialIconKind>
+    <icons:MaterialIconKind x:Key="IconExpand">ChevronRightCircleOutline</icons:MaterialIconKind>
+
+</ResourceDictionary>

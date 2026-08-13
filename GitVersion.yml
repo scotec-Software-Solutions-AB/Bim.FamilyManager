@@ -1,0 +1,49 @@
+mode: ContinuousDelivery
+next-version: 0.9.0
+tag-prefix: '[vV]?'
+
+branches:
+  main:
+    increment: Patch
+    label: ''
+
+  develop:
+    mode: ContinuousDeployment
+    increment: Patch
+    label: dev
+
+  feature:
+    mode: ContinuousDelivery
+    label: '{BranchName}'
+    increment: Inherit
+    track-merge-message: true
+    regex: ^feature(s)?[\/-](?<BranchName>.+)$ 
+    source-branches:
+      - develop
+      - main
+      - release
+      - support
+      - hotfix
+    is-source-branch-for: []
+    is-main-branch: false
+    pre-release-weight: 30000
+
+  hotfix:
+    mode: ContinuousDelivery
+    label: beta
+    increment: Patch
+    prevent-increment:
+      when-current-commit-tagged: true
+    regex: ^hotfix(es)?[\/-].+$ 
+    source-branches:
+      - main
+      - support
+    is-source-branch-for: []
+    is-release-branch: false
+    is-main-branch: false
+    pre-release-weight: 30000
+
+ignore:
+  sha: []
+
+merge-message-formats: {}

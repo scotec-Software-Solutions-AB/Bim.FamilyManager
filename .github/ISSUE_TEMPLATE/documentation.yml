@@ -1,0 +1,61 @@
+name: "Documentation"
+description: "Report missing/incorrect docs or suggest improvements"
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to be changed?
+      description: Describe what is wrong, missing, or unclear.
+      placeholder: "The docs for ... are unclear because..."
+    validations:
+      required: true
+
+  - type: input
+    id: where
+    attributes:
+      label: Where is it?
+      description: Link to the page/file/section (URL or path)
+      placeholder: "e.g. https://... or docs/usage.md#section"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Type of doc change
+      options:
+        - "Fix incorrect information"
+        - "Add missing information"
+        - "Clarify / improve wording"
+        - "Add example / snippet"
+        - "Reorganize / navigation"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested text (optional)
+      description: If you have a concrete proposal, paste it here.
+      placeholder: "Proposed wording..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots (optional)
+      description: If it helps, add screenshots or a short screen recording link.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and didn’t find a duplicate
+          required: true

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Nice3point.Revit.Api.AdWindows" ExcludeAssets="runtime" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
+    <ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
+    <ProjectReference Include="..\Bim.FamilyManager.Ui.Abstractions\Bim.FamilyManager.Ui.Abstractions.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Resources\Images\*.png" />
+		<Resource Include="Resources\Images\*.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\StringResources.Designer.cs">
+	    <DependentUpon>StringResources.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\StringResources.resx">
+	    <LastGenOutput>StringResources.Designer.cs</LastGenOutput>
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+</Project>

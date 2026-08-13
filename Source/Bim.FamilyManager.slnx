@@ -1,0 +1,54 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Installation/">
+    <Project Path="../Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="../.gitignore" />
+    <File Path="../CONTRIBUTING.md" />
+    <File Path="../GitVersion.yml" />
+    <File Path="../license.txt" />
+    <File Path="../Logo.png" />
+    <File Path="../NuGet.config" />
+    <File Path="../README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflow/">
+    <File Path="../.github/workflows/Build.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/Source/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="Bim.FamilyManager.Core.Abstractions/Bim.FamilyManager.Core.Abstractions.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Core/Bim.FamilyManager.Core.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Source.AzureStorage/Bim.FamilyManager.Source.AzureStorage.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Source.Directory/Bim.FamilyManager.Source.Directory.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui.FamilyExplorer/Bim.FamilyManager.Ui.FamilyExplorer.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui.FamilyNavigator/Bim.FamilyManager.Ui.FamilyNavigator.csproj">
+    <Platform Project="x64" />
+  </Project>
+    <Project Path="Bim.FamilyManager.Ui.Abstractions/Bim.FamilyManager.Ui.Abstractions.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager.Ui/Bim.FamilyManager.Ui.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Bim.FamilyManager/Bim.FamilyManager.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>

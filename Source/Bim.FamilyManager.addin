@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<RevitAddIns>
+
+	<AddIn Type="Application">
+		<Name>BIM FamilyManager</Name>
+		<FullClassName> Bim.FamilyManager.RevitFamilyManagerAppFactory</FullClassName>
+		<Assembly>Bim.FamilyManager\Bim.FamilyManager.dll</Assembly>
+		<AddInId>767167BD-79B6-4B62-A8DE-D0C32E217B75</AddInId>
+		<VendorId>scotec</VendorId>
+		<VendorDescription>scotec Software Solutions AB</VendorDescription>
+	</AddIn>
+
+</RevitAddIns>

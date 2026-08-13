@@ -1,0 +1,119 @@
+<UserControl x:Class="Bim.FamilyManager.Source.AzureStorage.Views.Settings.AzureStorageSourceSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:resources="clr-namespace:Bim.FamilyManager.Source.AzureStorage.Resources"
+             xmlns:settings="clr-namespace:Bim.FamilyManager.Source.AzureStorage.ViewModels.Settings"
+             xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls;assembly=Bim.FamilyManager.Ui"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="600"
+             d:DataContext="{d:DesignInstance settings:AzureStorageSourceSettingsViewModel, IsDesignTimeCreatable=false}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary
+                    Source="pack://application:,,,/Bim.FamilyManager.Ui;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PrimaryBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <ResourceDictionary>
+
+                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Margin" Value="10,10,10,0" />
+                </Style>
+                <Style TargetType="controls:ExtendedTextBox" BasedOn="{StaticResource {x:Type controls:ExtendedTextBox}}">
+                    <Setter Property="Margin" Value="10,5,10,0" />
+                    <Setter Property="Width" Value="250" />
+                </Style>
+
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#e0f3e8" Padding="5">
+            <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Description}"
+                       TextWrapping="Wrap" Margin="0" />
+        </Border>
+
+        <TextBlock Grid.Row="1" Grid.Column="0"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Name}" />
+        <controls:ExtendedTextBox Grid.Row="2" Grid.Column="0"
+                                  Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                  HorizontalAlignment="Left"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Name_Watermark}" />
+
+        <TextBlock Grid.Row="3" Grid.Column="0"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_ClientId}" />
+        <controls:ExtendedTextBox Grid.Row="4" Grid.Column="0"
+                                  Text="{Binding ClientId, UpdateSourceTrigger=PropertyChanged}"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_ClientId_Watermark}" />
+
+        <TextBlock Grid.Row="5" Grid.Column="0"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_TenantId}" />
+        <controls:ExtendedTextBox Grid.Row="6" Grid.Column="0"
+                                  Text="{Binding TenantId, UpdateSourceTrigger=PropertyChanged}"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_TenantId_Watermark}" />
+
+        <TextBlock Grid.Row="1" Grid.Column="1"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Endpoint}" />
+        <controls:ExtendedTextBox Grid.Row="2" Grid.Column="1"
+                                  Text="{Binding EndPoint, UpdateSourceTrigger=PropertyChanged}"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Endpoint_Watermark}" />
+
+        <TextBlock Grid.Row="3" Grid.Column="1"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_ContainerName}" />
+        <controls:ExtendedTextBox Grid.Row="4" Grid.Column="1"
+                                  Text="{Binding ContainerName, UpdateSourceTrigger=PropertyChanged}"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_ContainerName_Watermark}" />
+
+        <TextBlock Grid.Row="5" Grid.Column="1"
+                   Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_RootPath}" />
+        <controls:ExtendedTextBox Grid.Row="6" Grid.Column="1"
+                                  Text="{Binding RootPath, UpdateSourceTrigger=PropertyChanged}"
+                                  Watermark="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_RootPath_Watermark}" />
+
+        <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Horizontal" Margin="10,10,0,0"
+                    VerticalAlignment="Top">
+            <CheckBox IsChecked="{Binding IsActive}" Margin="0" VerticalAlignment="Center" />
+            <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_Active}"
+                       Margin="5,0,0,0" VerticalAlignment="Center" />
+        </StackPanel>
+
+
+        <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="1" Margin="10,10,0,0">
+            <controls:MaterialIconButton Kind="{StaticResource IconAccount}"
+                                          IconSize="40" Padding="0" Margin="0"
+                                          HorizontalContentAlignment="Center"
+                                          HorizontalAlignment="Left"
+                                          Command="{Binding SignInCommand}" />
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                <TextBlock Text="{x:Static resources:StringResources.AzureStorageSourceSettings_Text_SignedInAs}"
+                           Margin="5,5,5,0" />
+                <TextBlock Text="{Binding SignedInAs}" Margin="5,5,0,0" />
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+
+
+</UserControl>

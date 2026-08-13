@@ -1,0 +1,84 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Bim.FamilyManager.Ui.Controls">
+
+    <Style TargetType="{x:Type controls:ExtendedTextBox}">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Gray" />
+        <Setter Property="WatermarkForeground" Value="Gray" />
+        <Setter Property="MinHeight" Value="20" />
+        <Setter Property="Height" Value="21" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:ExtendedTextBox}">
+                    <Border BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <!-- Image -->
+                            <Image Grid.Column="0" x:Name="PART_Image"
+                                   Margin=" 3,2,2,2"
+                                   Source="{TemplateBinding ImageSource}"
+                                   VerticalAlignment="Center"
+                                   Visibility="Visible" 
+                                   ToolTip="{TemplateBinding ImageTooltip}" />
+                            <!-- TextBox -->
+                            <ScrollViewer Grid.Column="1"
+                                          x:Name="PART_ContentHost" VerticalAlignment="Center" />
+                            <!-- Watermark -->
+                            <TextBlock Grid.Column="1" x:Name="PART_Watermark"
+                                       Text="{TemplateBinding Watermark}"
+                                       Foreground="{TemplateBinding WatermarkForeground}"
+                                       Background="Transparent"
+                                       IsHitTestVisible="False"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0" Padding="0"
+                                       Visibility="Collapsed" />
+                            <!-- Clear Button -->
+                            <Button Grid.Column="2" x:Name="PART_ClearButton"
+                                    Command="{TemplateBinding ClearCommand}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    BorderThickness="0"
+                                    Background="{TemplateBinding Background}"
+                                    Margin="2,2,3,2" Padding="0"
+                                    Visibility="Visible"
+                                    ToolTip="{TemplateBinding ButtonTooltip}">
+                                <Image Source="{TemplateBinding ButtonImageSource}"
+                                       Stretch="Uniform" />
+
+                            </Button>
+                        </Grid>
+
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=Text, RelativeSource={RelativeSource Self}}"
+                                     Value="{x:Null}">
+                            <Setter TargetName="PART_Watermark" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="PART_ClearButton" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Text, RelativeSource={RelativeSource Self}}" Value="">
+                            <Setter TargetName="PART_Watermark" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="PART_ClearButton" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=ButtonImageSource, RelativeSource={RelativeSource Self}}"
+                                     Value="{x:Null}">
+                            <Setter TargetName="PART_ClearButton" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=ImageSource, RelativeSource={RelativeSource Self}}"
+                                     Value="{x:Null}">
+                            <Setter TargetName="PART_Image" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

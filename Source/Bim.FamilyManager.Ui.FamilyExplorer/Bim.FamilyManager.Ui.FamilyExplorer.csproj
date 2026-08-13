@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.Abstractions\Bim.FamilyManager.Ui.Abstractions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\StringResources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>StringResources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\StringResources.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>StringResources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+</Project>

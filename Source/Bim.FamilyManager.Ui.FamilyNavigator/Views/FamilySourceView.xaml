@@ -1,0 +1,83 @@
+<UserControl x:Class="Bim.FamilyManager.Ui.FamilyNavigator.Views.FamilySourceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:converters="clr-namespace:Bim.FamilyManager.Ui.Views.Converters;assembly=Bim.FamilyManager.Ui"
+             xmlns:viewModels="clr-namespace:Bim.FamilyManager.Ui.Abstractions.ViewModels;assembly=Bim.FamilyManager.Ui.Abstractions"
+             xmlns:converter="clr-namespace:Bim.FamilyManager.Ui.Converter;assembly=Bim.FamilyManager.Ui"
+             d:DataContext="{d:DesignInstance viewModels:IFamilySourceViewModel, IsDesignTimeCreatable=false}"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary
+                    Source="pack://application:,,,/Bim.FamilyManager.Ui;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converter:BooleanToVisibilityConverter x:Key="TrueToVisibleConverterKey" FalseVisibility="Collapsed"
+                                                    TrueVisibility="Visible" />
+            <converters:RectConverter x:Key="RectConverter" />
+
+            <Style TargetType="wpf:MaterialIcon">
+                <Setter Property="ToolTipService.BetweenShowDelay" Value="0" />
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
+                <Setter Property="Background" Value="White" />
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid ClipToBounds="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Margin="10" ToolTip="{Binding Path=Name}" BorderThickness="1"
+                CornerRadius="4" x:Name="Border1" Padding="1" Background="#e0e8f3">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush" Value="DarkGray" />
+                    <Style.Triggers>
+                        <!-- Trigger to change BorderBrush when mouse is over the Border -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Clip>
+                <RectangleGeometry RadiusX="4" RadiusY="4">
+                    <RectangleGeometry.Rect>
+                        <MultiBinding Converter="{StaticResource RectConverter}">
+                            <Binding ElementName="Border1" Path="ActualWidth" />
+                            <Binding ElementName="Border1" Path="ActualHeight" />
+                        </MultiBinding>
+                    </RectangleGeometry.Rect>
+                </RectangleGeometry>
+            </Border.Clip>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0" Source="{Binding Preview}" Stretch="Uniform" Margin="3"
+                       Visibility="{Binding ShowPreviewImage, Converter={StaticResource TrueToVisibleConverterKey}}"
+                       Height="{Binding ContentHeight, FallbackValue=48}"
+                       Width="{Binding ContentHeight, FallbackValue=48}" />
+                <Border Grid.Column="1" Height="{Binding ContentHeight, FallbackValue=48}" BorderThickness="0"
+                        Margin="3">
+                    <TextBlock Text="{Binding Path=Name, FallbackValue='#Family Source'}"
+                               Height="Auto" Width="120" Margin="3"
+                               Visibility="{Binding ShowItemName, Converter={StaticResource TrueToVisibleConverterKey}}"
+                               TextTrimming="CharacterEllipsis" HorizontalAlignment="Left"
+                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+
+    <!--</Button>-->
+
+</UserControl>

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Scotec.Wpf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,84 @@
+name: "Feature request"
+description: "Suggest a new feature or enhancement"
+title: "[Feature]: "
+labels: ["enhancement", "feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please provide enough context so we can evaluate and prioritize it.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem are you trying to solve? Who is affected?
+      placeholder: "As a ..., I want ..., because ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What do you want to happen? Describe the desired behavior.
+      placeholder: "Add/Change ... so that ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true for this to be considered done?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / component
+      description: Where does this belong?
+      multiple: false
+      options:
+        - UI
+        - API
+        - CLI
+        - Docs
+        - Build/CI
+        - Other / not sure
+    validations:
+      required: false
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      description: How valuable is this for you/your team?
+      multiple: false
+      options:
+        - High (blocks work / major productivity gain)
+        - Medium
+        - Low (nice-to-have)
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches or workarounds?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, mockups, examples, screenshots, related issues/PRs.
+    validations:
+      required: false
+

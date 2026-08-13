@@ -1,0 +1,11 @@
+{
+  "Sources": [
+    {
+      "Type": "DirectorySource",
+      "Name": "My Family Source",
+      "Path": "X:\\Familysources",
+      "IsActive": false,
+      "IsEditable": false
+    }
+  ]
+}

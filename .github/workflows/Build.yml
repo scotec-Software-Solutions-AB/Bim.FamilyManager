@@ -1,0 +1,197 @@
+﻿name: Build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write   # required only for uploading assets to GitHub Releases
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Build and publish the add-in for each Revit version in parallel.
+  # Produces one artifact per version: publish-2025, publish-2026, publish-2027.
+  # ---------------------------------------------------------------------------
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        revitYear: [2025, 2026, 2027]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.5.x'
+
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v4
+      with:
+        configFilePath: GitVersion.yml
+
+    - name: Compute package version (incl prerelease)
+      shell: pwsh
+      run: |
+        $pkg = "$env:GitVersion_SemVer"
+        $revitConst = "REVIT${{ matrix.revitYear }}"
+        "PkgVersion=$pkg"                      | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "RevitVersion=${{ matrix.revitYear }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "REVIT_CONST=$revitConst"              | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        Write-Host "PkgVersion: $pkg"
+        Write-Host "RevitVersion: ${{ matrix.revitYear }}"
+        Write-Host "REVIT_CONST: $revitConst"
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup .NET 10.0
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore ./Source/Bim.FamilyManager.slnx
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$env:REVIT_CONST"
+        -p:Version="$env:PkgVersion"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
+
+    - name: Build
+      run: dotnet build --no-restore ./Source/Bim.FamilyManager.slnx -c Release
+        -p:CompanyName="scotec Software Solutions AB"
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$env:REVIT_CONST"
+        -p:Version="$env:PkgVersion"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
+
+    - name: Publish
+      run: dotnet publish ./Source/Bim.FamilyManager/Bim.FamilyManager.csproj --no-restore --no-build -c Release
+        -p:PublishProfile=Properties/PublishProfiles/FolderProfile.pubxml -p:Platform=x64
+        -p:RevitYear="${{ matrix.revitYear }}"
+        -p:DefineConstants="$env:REVIT_CONST"
+        -p:Version="$env:PkgVersion"
+        -p:PackageVersion="$env:PkgVersion"
+        -p:InformationalVersion="$env:GitVersion_InformationalVersion"
+
+    - name: Upload publish output as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: publish-${{ matrix.revitYear }}
+        path: Publish/${{ matrix.revitYear }}/
+        if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Download all three publish artifacts, build the single combined MSI.
+  # ---------------------------------------------------------------------------
+  build_installer:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.5.x'
+
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v4
+      with:
+        configFilePath: GitVersion.yml
+
+    - name: Set PkgVersion env var
+      shell: pwsh
+      run: |
+        $pkg = "$env:GitVersion_SemVer"
+        "PkgVersion=$pkg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        Write-Host "PkgVersion: $pkg"
+
+    - name: Download publish-2025
+      uses: actions/download-artifact@v4
+      with:
+        name: publish-2025
+        path: Publish/2025/
+
+    - name: Download publish-2026
+      uses: actions/download-artifact@v4
+      with:
+        name: publish-2026
+        path: Publish/2026/
+
+    - name: Download publish-2027
+      uses: actions/download-artifact@v4
+      with:
+        name: publish-2027
+        path: Publish/2027/
+
+    - name: Build installer project
+      run: dotnet build ./Installation/Bim.FamilyManager.Installer/Bim.FamilyManager.Installer.csproj
+        -c Release
+        -p:Platform=x64
+        -p:Version="$env:PkgVersion"
+
+    - name: Install WiX v4 tool (wix.exe)
+      shell: pwsh
+      run: |
+        dotnet tool install --global wix --version 6.0.2
+        wix --version
+        wix extension add -g WixToolset.UI.wixext/6.0.2
+
+    - name: Run WixSharp .exe to produce the .msi
+      shell: pwsh
+      run: |
+        $exe = Resolve-Path ".\Installation\Bim.FamilyManager.Installer\bin\x64\Release\Bim.FamilyManager.Installer.exe"
+        $env:BIM_FAMILYMANAGER_PUBLISH_ROOT = (Resolve-Path ".\Publish").Path
+        $outputDir = Split-Path $exe -Parent
+        $env:BIM_FAMILYMANAGER_MSI_PATH = Join-Path $outputDir "BIM.FamilyManager_$env:PkgVersion.msi"
+        Push-Location (Split-Path $exe -Parent)
+        & $exe
+        $code = $LASTEXITCODE
+        Pop-Location
+        if ($code -ne 0) { throw "Installer builder failed with exit code $code" }
+        if (!(Test-Path $env:BIM_FAMILYMANAGER_MSI_PATH)) { throw "MSI not found: $env:BIM_FAMILYMANAGER_MSI_PATH" }
+        "MSI_PATH=$env:BIM_FAMILYMANAGER_MSI_PATH" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+    - name: Upload MSI as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BIM.FamilyManager_${{ env.PkgVersion }}
+        path: ${{ env.MSI_PATH }}
+        if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Attach the single MSI to the GitHub Release (release events only).
+  # ---------------------------------------------------------------------------
+  publish_release_assets:
+    name: Attach MSI to Release
+    needs: build_installer
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Download MSI artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload MSI to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,7 @@
+/packages
+/Publish
+.vs
+obj
+bin
+/localPackages
+*.user

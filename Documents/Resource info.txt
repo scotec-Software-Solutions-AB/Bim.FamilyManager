@@ -1,0 +1,58 @@
+Family Manager colors:
+- Crimson Red (Primary color): #FF990000
+- Light red (Secondary color): #FFEE6666
+
+- Green: #FF009900
+
+- Blue: #FF000099
+- Light Blue (Secondary color): #FFEE6666
+
+- Dark Green (Primary color): #FF999900
+- Light Grren (Secondary color): #FFEE6666
+
+
+- LightGray: #FFD3D3D3
+- White (Background): #FFFAFAFA
+
+
+Colors Family Manager
+#c26666    #daa3a3    rot
+#b0c266    #d0daa3    gelb
+#66c28b    #85cea2    #a3dab9    #c2e7d1    #e0f3e8   grün
+#668bc2    #85a2ce    #a3b9da    #c2d1e7    e0e8f3    blau
+#b066c2    #d0a3da    violett
+    
+
+
+
+Calculate tints:
+r = color.R + (255 - color.R) * tintFactor);
+g = color.G + (255 - color.G) * tintFactor);
+b = color.B + (255 - color.B) * tintFactor);
+
+Used tint factors: 0.2, 0.4, 0.6, 0.8
+
+#00 > 0.2 = 33
+#99 > 0.2 = AD
+
+#00 > 0.4 = 66
+#99 > 0.4 = C2
+
+#00 > 0.6 = 99
+#99 > 0.6 = D6
+
+#00 > 0.8 = CC
+#99 > 0.8 = EA
+
+
+
+
+SVG graphics: https://www.svgrepo.com/
+	https://www.svgrepo.com/collection/simple-ui-line-icons/
+	https://www.svgrepo.com/collection/basicons-interface-line-icons/
+	https://www.svgrepo.com/collection/iconoir-icons/
+	
+	
+	https://www.colorabout.com/color/hex/990000
+	
++

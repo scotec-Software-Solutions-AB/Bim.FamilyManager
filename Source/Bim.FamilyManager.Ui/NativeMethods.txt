@@ -1,0 +1,2 @@
+﻿GetWindowRect
+GetCursorPos

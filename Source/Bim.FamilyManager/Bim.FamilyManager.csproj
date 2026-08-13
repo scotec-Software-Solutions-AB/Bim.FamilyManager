@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <UseWPF>true</UseWPF>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!--<CompilerGeneratedFilesOutputPath>obj\gen</CompilerGeneratedFilesOutputPath>-->
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="DefaultFamilySources.json" />
+		<None Remove="logo_scotec.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Assets\Images\logo.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DefaultFamilySources.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Scotec.Revit.Ui" />
+		<PackageReference Include="Scotec.Revit" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Material.Icons.WPF" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Bim.FamilyManager.Core.Abstractions\Bim.FamilyManager.Core.Abstractions.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Core\Bim.FamilyManager.Core.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Source.AzureStorage\Bim.FamilyManager.Source.AzureStorage.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Source.Directory\Bim.FamilyManager.Source.Directory.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyExplorer\Bim.FamilyManager.Ui.FamilyExplorer.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui.FamilyNavigator\Bim.FamilyManager.Ui.FamilyNavigator.csproj" />
+		<ProjectReference Include="..\Bim.FamilyManager.Ui\Bim.FamilyManager.Ui.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="log4net.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Resources\StringResources.Designer.cs">
+			<DependentUpon>StringResources.resx</DependentUpon>
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Resources\StringResources.resx">
+			<LastGenOutput>StringResources.Designer.cs</LastGenOutput>
+			<Generator>PublicResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ExtraPublishFiles Include="Bim.FamilyManager.addin" />
+	</ItemGroup>
+
+	<!--<Target Name="CopyExtraFilesToPublishOutput" AfterTargets="Publish">
+		<Message Importance="high" Text="Copying extra files to publish output: $(PublishUrl)" />
+		<Copy
+			SourceFiles="@(ExtraPublishFiles)"
+			DestinationFolder="$(PublishUrl)%(RecursiveDir)"
+			SkipUnchangedFiles="true" />
+	</Target>-->
+
+	<!-- Copy into ../../Publish (parent of Bim.FamilyManager) -->
+	<Target Name="CopyExtraFilesToPublishRoot" AfterTargets="Publish">
+		<!-- PublishUrl usually ends with a trailing slash -->
+		<PropertyGroup>
+    <UseWPF>true</UseWPF>
+			<_PublishRoot>$([System.IO.Path]::GetFullPath('$(PublishDir)..\'))</_PublishRoot>
+		</PropertyGroup>
+
+		<Message Importance="high" Text="Copying extra files to publish root: $(_PublishRoot)" />
+		<Copy SourceFiles="@(ExtraPublishFiles)" DestinationFolder="$(_PublishRoot)%(RecursiveDir)" SkipUnchangedFiles="true" />
+	</Target>
+</Project>

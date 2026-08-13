@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" ExcludeAssets="runtime" />
+		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" ExcludeAssets="runtime" />
+		<PackageReference Include="Scotec.Revit" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" />
+		<PackageReference Include="Scotec.Wpf" />
+	</ItemGroup>
+
+</Project>
