@@ -48,6 +48,9 @@
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Bim.FamilyManager.addin">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
 		<None Update="log4net.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -68,27 +71,29 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<ItemGroup>
-		<ExtraPublishFiles Include="Bim.FamilyManager.addin" />
-	</ItemGroup>
-
-	<!--<Target Name="CopyExtraFilesToPublishOutput" AfterTargets="Publish">
-		<Message Importance="high" Text="Copying extra files to publish output: $(PublishUrl)" />
-		<Copy
-			SourceFiles="@(ExtraPublishFiles)"
-			DestinationFolder="$(PublishUrl)%(RecursiveDir)"
-			SkipUnchangedFiles="true" />
-	</Target>-->
-
 	<!-- Copy into ../../Publish (parent of Bim.FamilyManager) -->
 	<Target Name="CopyExtraFilesToPublishRoot" AfterTargets="Publish">
 		<!-- PublishUrl usually ends with a trailing slash -->
 		<PropertyGroup>
-    <UseWPF>true</UseWPF>
 			<_PublishRoot>$([System.IO.Path]::GetFullPath('$(PublishDir)..\'))</_PublishRoot>
+			<InputFile>$(MSBuildProjectDirectory)\Bim.FamilyManager.addin</InputFile>
+			<OutputFile>$(_PublishRoot)Bim.FamilyManager.addin</OutputFile>
 		</PropertyGroup>
 
 		<Message Importance="high" Text="Copying extra files to publish root: $(_PublishRoot)" />
-		<Copy SourceFiles="@(ExtraPublishFiles)" DestinationFolder="$(_PublishRoot)%(RecursiveDir)" SkipUnchangedFiles="true" />
+		<WriteLinesToFile File="$(OutputFile)" Lines="$([System.IO.File]::ReadAllText($(InputFile)).Replace('#{assemblyPath}#','$(AssemblyName)\$(AssemblyName).dll'))" Overwrite="true" Encoding="utf-8" />
+
 	</Target>
+
+	<Target Name="CopyAddin" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+
+		<PropertyGroup>
+			<InputFile>$(MSBuildProjectDirectory)\Bim.FamilyManager.addin</InputFile>
+			<OutputFile>$(ALLUSERSPROFILE)\Autodesk\Revit\Addins\$(RevitYear)\Bim.FamilyManager.addin</OutputFile>
+		</PropertyGroup>
+
+		<Message Text="Copying .addin file to Autodesk Revit directory: $(OutDir)" Importance="High" />
+		<WriteLinesToFile File="$(OutputFile)" Lines="$([System.IO.File]::ReadAllText($(InputFile)).Replace('#{assemblyPath}#','$(MSBuildProjectDirectory)\$(OutDir)$(AssemblyName).dll'))" Overwrite="true" Encoding="utf-8" />
+	</Target>
+
 </Project>
