@@ -1,62 +1,11 @@
 ---
-description: xUnit testing rules, unit and integration testing strategy, and naming conventions.
-applyTo: "**/*"
+description: Test and validation conventions for Bim.FamilyManager.
+applyTo: "**/*Tests*/**/*.cs"
 ---
+# Testing
 
-
-# Testing Instructions
-
-## General Rules
-
-- Use xUnit.
-- Follow Arrange / Act / Assert.
-- Test behavior, not implementation details.
-- Add regression tests for bug fixes.
-- Prefer descriptive test names.
-- Keep tests independent and repeatable.
-
-## Naming
-
-Use:
-
-```text
-MethodName_StateUnderTest_ExpectedBehavior
-```
-
-Examples:
-
-```text
-GetObjectAsync_ObjectExists_ReturnsObject
-GetObjectAsync_ObjectDoesNotExist_ThrowsObjectNotFoundException
-ExportFamiliesAsync_PartialFailure_ReturnsUnexportedElements
-```
-
-## Unit Tests
-
-Use unit tests for:
-
-- Business rules
-- Validation
-- Mapping logic
-- Error handling
-- Protocol-specific decisions
-
-## Integration Tests
-
-Use integration tests for:
-
-- EF Core query behavior
-- Transactions
-- Concurrency
-- Database mappings
-- Repository behavior
-- Revit API adapter behavior
-- BIM data export workflows
-
-## Test Data
-
-Prefer builders or fixtures.
-
-Avoid large duplicated setup blocks.
-
-Each test should make relevant data obvious.
+- Follow existing test framework, naming, and project patterns; do not assume a specific framework without checking.
+- Test source enumeration, filtering, settings changes, and error paths with deterministic temporary directory fixtures where possible.
+- Mock external Azure and Revit boundaries where appropriate; separate tests requiring a running Revit host or cloud resources.
+- Verify cancellation, missing directories, network faults and any regression scenario tied to a fix.
+- Do not claim cross-version compatibility without building/running the relevant variants.

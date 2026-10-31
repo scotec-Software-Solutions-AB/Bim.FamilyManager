@@ -1,69 +1,11 @@
 ---
-description: Architecture, layering, service boundaries, and public API stability for Tigev.RevitTools.
-applyTo: "**/*"
+description: Bim.FamilyManager layering and compatibility rules.
+applyTo: "**/*.cs"
 ---
+# Architecture
 
-
-# Architecture Instructions
-
-## Purpose
-
-Use these instructions when making architectural decisions or changing cross-cutting project structure.
-
-## Solution Principles
-
-- Keep HTTP/API concerns separated from business logic.
-- Keep persistence concerns separated from protocol semantics.
-- Keep content storage abstractions independent from database implementation details.
-- Prefer explicit dependencies over hidden global state.
-- Prefer existing service abstractions over new patterns.
-- Prefer incremental changes over large rewrites.
-
-## Layering
-
-Recommended dependency direction:
-
-```text
-Revit Host / External Commands
-    ↓
-Application / BIM Services
-    ↓
-Domain and Repository Logic
-    ↓
-EF Core Data Model / Storage Abstractions
-```
-
-External commands and loaders should remain thin. Business logic belongs in services.
-
-## Service Hierarchy
-
-Follow the existing service hierarchy.
-
-Services should:
-
-- Use constructor injection.
-- Receive scoped dependencies through DI.
-- Use base-class helpers where available.
-- Keep transaction handling consistent with existing services.
-- Keep protocol-specific logic explicit and testable.
-
-## Public API Stability
-
-Do not change public APIs, DTOs, service contracts, or protocol models unless explicitly requested.
-
-When changes are necessary:
-
-- Preserve backward compatibility where possible.
-- Document breaking changes.
-- Add tests covering the changed behavior.
-
-## Architectural Changes
-
-Before making architectural changes:
-
-1. Identify existing patterns.
-2. Identify affected projects.
-3. Identify public API impact.
-4. Identify database and migration impact.
-5. Identify Revit API compliance impact.
-6. Identify testing requirements.
+- Check actual project boundaries before adding dependencies: add-in host, abstractions, base/core, WPF views and view models, directory and Azure Storage source providers.
+- Keep source enumeration, loading and settings independent of presentation when possible. Do not couple reusable source contracts to WPF or Revit API types unnecessarily.
+- Keep host commands thin and execute Revit operations only in supported contexts. Preserve transactions and document validity.
+- Prefer existing DI and extension points; avoid introducing new layers for a single-use change.
+- Preserve public contracts, settings formats and compatibility with configured Revit versions. Explain and test breaking changes.

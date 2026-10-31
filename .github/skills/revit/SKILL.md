@@ -1,85 +1,14 @@
 ---
-name: Skill: Revit Add-In Expert
-description: Use when implementing or modifying Revit Add-In behavior, external commands, external events, transactions, family handling, and BIM data workflows.
+name: revit
+description: Revit API context, family discovery/loading and compatibility in Bim.FamilyManager.
 ---
+# Revit family management
 
+Read relevant existing add-in integrations and source contracts before implementing.
 
-# Skill: Revit Add-In Expert
-
-## Purpose
-
-Use this skill when implementing or modifying Autodesk Revit Add-In functionality.
-
-## Primary Goal
-
-Maintain Revit API compliance above implementation convenience.
-
-## Revit API
-
-Always follow:
-
-- Revit API threading and transaction model
-- External command and external event lifecycle
-- Document and application event handling
-- Host-managed object lifetimes
-
-Reference Revit API documentation sections in comments for non-obvious behavior.
-
-Example:
-
-```csharp
-// Revit API: Element modifications require an open transaction
-```
-
-## Transactions
-
-Respect:
-
-- Transaction boundaries — never modify elements outside an open transaction
-- Transaction names — use descriptive, user-visible names
-- Sub-transactions where nested rollback is needed
-- Transaction groups for multi-transaction undo grouping
-
-Never simplify transaction handling if doing so changes Revit API semantics.
-
-## Elements and Families
-
-- Access elements through the active document only.
-- Use filtered element collectors with explicit filters.
-- Prefer built-in parameter access over string-based lookups.
-- Respect family and family instance distinctions.
-- Handle missing or null elements explicitly.
-
-## External Commands
-
-- Implement `IExternalCommand` correctly.
-- Return `Result.Succeeded`, `Result.Failed`, or `Result.Cancelled` appropriately.
-- Keep commands thin — delegate logic to services.
-- Avoid long-running operations on the Revit API thread.
-
-## External Events
-
-- Use `IExternalEventHandler` for modeless dialog interactions.
-- Raise events through `ExternalEvent.Raise()`.
-- Handle event execution failures explicitly.
-- Keep event handlers short and focused.
-
-## BIM Data
-
-- Preserve element and parameter data integrity.
-- Validate data before writing to the model.
-- Avoid unnecessary model modifications.
-- Treat model data as sensitive to host constraints.
-
-## Error Handling
-
-Map errors to clear, user-facing messages where appropriate.
-
-Avoid generic exceptions for Revit API-level behavior.
-
-## Interoperability
-
-Generated code must remain compatible with:
-
-- Supported Revit versions as defined by the project target
-- Existing loader and module registration conventions
+- Revit API calls must occur only in supported contexts; external events and commands have different lifecycle constraints. Never run host API calls in arbitrary `Task.Run` work.
+- Keep transaction boundaries explicit for model changes; identify the target document, handle closure/invalid documents, and avoid holding Revit elements across unsupported contexts.
+- Account for family loading semantics, name collisions and types where the existing code provides such behavior.
+- Keep disk/Azure enumeration and previews away from Revit API logic; marshal resulting requests back through existing host mechanisms.
+- Respect configured Revit 2025/2026/2027 API/runtime differences rather than assuming one build works everywhere.
+- Test host-independent logic separately; note when manual Revit validation is needed.

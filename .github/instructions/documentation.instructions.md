@@ -1,46 +1,11 @@
 ---
-description: Developer documentation, XML documentation, and user-facing documentation rules.
-applyTo: "**/*"
+description: XML docs and Markdown documentation conventions.
+applyTo: "**/*.{cs,md}"
 ---
+# Documentation
 
-
-# Documentation Instructions
-
-## General Rules
-
-- Keep documentation accurate and concise.
-- Describe actual behavior, not intended behavior.
-- Do not generate empty or repetitive comments.
-- Use consistent terminology.
-- Prefer concrete examples over vague descriptions.
-
-## XML Documentation
-
-Public APIs should have meaningful XML documentation when the project requires it.
-
-Document:
-
-- Public classes
-- Public interfaces
-- Public methods
-- Public properties
-- Public records
-- Public enums
-
-Include:
-
-- `summary`
-- `param`
-- `returns`
-- `exception`
-- `remarks` where useful
-
-## User Documentation
-
-When writing user-facing documentation:
-
-- Start with the purpose.
-- Explain the workflow.
-- Include examples.
-- Avoid implementation details unless relevant.
-- Keep wording clear and professional.
+- Document relevant public contracts and non-obvious behavior, not mere restatements of names.
+- Use correct `summary`, `param`, `returns`, `exception`, and `remarks` tags as applicable. Mention Revit API context, transactions, resource ownership and cancellation where material.
+- Keep README and `Documentation/` content accurate for configured Revit versions and family source types.
+- Ensure Markdown examples use real methods, option names and paths from this repository; never invent APIs.
+- Preserve existing tone, formatting, and headings unless reorganizing is requested.

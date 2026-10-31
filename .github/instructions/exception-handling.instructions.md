@@ -1,42 +1,11 @@
 ---
-description: Domain exception hierarchy, wrapping, logging, and Try-method rules.
-applyTo: "**/*"
+description: Error handling for Revit, filesystem, Azure, and UI operations.
+applyTo: "**/*.cs"
 ---
+# Exception handling
 
-
-# Exception Handling Instructions
-
-## General Rules
-
-- Use the project domain exception hierarchy.
-- Catch known domain exceptions first and rethrow them.
-- Wrap unexpected exceptions in the project runtime exception type.
-- Never swallow exceptions silently.
-- Log before rethrowing where existing patterns require it.
-
-## Domain Exceptions
-
-Prefer specific domain exceptions for expected protocol and business failures.
-
-Examples:
-
-- Object not found
-- Invalid argument
-- Constraint violation
-- Content already exists
-- Runtime failure
-
-Do not use generic exceptions for protocol-level behavior.
-
-## Logging Exceptions
-
-When logging exceptions:
-
-- Pass the exception as the first argument.
-- Use structured logging placeholders.
-- Include repository and object identifiers where available.
-- Do not log secrets or sensitive payload data.
-
-## Try Methods
-
-Only suppress exceptions inside clearly named `TryXxx` methods when the behavior is documented and expected.
+- Keep failures actionable; preserve original exceptions when wrapping and never silently swallow failures.
+- Handle inaccessible/missing paths, invalid family files, unavailable networks and Azure errors at suitable boundaries; avoid crashing unrelated sources.
+- Respect cancellation without treating user cancellation as an unexpected failure.
+- Avoid leaving incomplete downloads or configuration writes; maintain Revit document/transaction integrity.
+- Do not mandate an exception hierarchy unless it exists in the affected code.
